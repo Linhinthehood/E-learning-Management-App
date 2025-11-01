@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/colors.dart';
+import '../styles/colors.dart';
 
 class LeftSidebar extends StatefulWidget {
   const LeftSidebar({super.key});

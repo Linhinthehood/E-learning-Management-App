@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../constants/colors.dart';
-import '../widgets/left_sidebar.dart';
-import '../widgets/right_sidebar.dart';
-import '../widgets/course_list_item.dart';
+import '../../common/styles/colors.dart';
+import '../../common/widgets/left_sidebar.dart';
+import '../../common/widgets/right_sidebar.dart';
+import '../../common/widgets/course_list_item.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
