@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/dashboard_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -14,10 +14,10 @@ class MainApp extends StatelessWidget {
       title: 'E-Learning Management',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1976D2)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF000000)),
         useMaterial3: true,
       ),
-      home: const DashboardScreen(),
+      home: const LoginScreen(),
     );
   }
 }

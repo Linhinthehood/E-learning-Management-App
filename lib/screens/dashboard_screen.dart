@@ -1,410 +1,307 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/colors.dart';
-import '../widgets/course_card.dart';
+import '../widgets/left_sidebar.dart';
+import '../widgets/right_sidebar.dart';
+import '../widgets/course_list_item.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int _selectedTab = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-        title: Text(
-          'E-Learning Management',
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: CircleAvatar(
-              backgroundColor: AppColors.primaryLight,
-              child: Text(
-                'JD',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+      body: Row(
+        children: [
+          // Left Sidebar
+          const LeftSidebar(),
+          // Main Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildGreeting(),
+                    const SizedBox(height: 30),
+                    _buildFeaturedCourse(),
+                    const SizedBox(height: 40),
+                    _buildCoursesSection(),
+                  ],
                 ),
               ),
             ),
           ),
+          // Right Sidebar
+          const RightSidebar(),
         ],
-      ),
-      drawer: _buildDrawer(context),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            _buildSemesterSelector(context),
-            _buildCoursesSection(context),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        onPressed: () {},
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
+  Widget _buildGreeting() {
+    return Row(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Hello Josh!',
+              style: GoogleFonts.inter(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
+            const SizedBox(height: 5),
+            Text(
+              "It's good to see you again.",
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 30),
+        // Illustration placeholder
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            color: AppColors.borderLight,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: const Center(
+            child: Text(
+              '👋',
+              style: TextStyle(fontSize: 60),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeaturedCourse() {
+    return Container(
+      padding: const EdgeInsets.all(25),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight, width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEE2E2),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: const Center(
+              child: Text(
+                '🇪🇸',
+                style: TextStyle(fontSize: 30),
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 40, color: AppColors.primary),
-                ),
-                const SizedBox(height: 10),
                 Text(
-                  'John Doe',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
+                  'Spanish B2',
+                  style: GoogleFonts.inter(
                     fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
+                const SizedBox(height: 5),
                 Text(
-                  'student@example.com',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white70,
-                    fontSize: 14,
+                  'by Alejandro Velazquez',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.dashboard),
-            title: const Text('Dashboard'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.book),
-            title: const Text('My Courses'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.assignment),
-            title: const Text('Assignments'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.quiz),
-            title: const Text('Quizzes'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.forum),
-            title: const Text('Forums'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.message),
-            title: const Text('Messages'),
-            onTap: () {},
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
-        ),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Welcome back!',
-            style: GoogleFonts.poppins(
-              color: Colors.white70,
-              fontSize: 16,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.borderLight,
+              shape: BoxShape.circle,
             ),
+            child: const Icon(Icons.access_time, size: 20),
           ),
-          const SizedBox(height: 5),
-          Text(
-            'John Doe',
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard('8', 'Courses', Icons.book),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: _buildStatCard('12', 'Assignments', Icons.assignment),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: _buildStatCard('5', 'Upcoming', Icons.schedule),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String value, String label, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: Colors.white, size: 28),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSemesterSelector(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              decoration: BoxDecoration(
-                color: Colors.white,
+          const SizedBox(width: 15),
+          ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.buttonPrimary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
               ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: 'Semester 1 - 2024',
-                  isExpanded: true,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  items: [
-                    'Semester 1 - 2024',
-                    'Semester 2 - 2023',
-                    'Semester 1 - 2023',
-                  ].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {},
-                ),
+              elevation: 0,
+            ),
+            child: Text(
+              'Continue',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
+          ),
+          const SizedBox(width: 15),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.borderLight,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.arrow_back, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.borderLight,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.arrow_forward, size: 20),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCoursesSection(BuildContext context) {
+  Widget _buildCoursesSection() {
     final courses = [
       {
-        'title': 'Mobile App Development',
-        'instructor': 'Dr. Sarah Johnson',
-        'code': 'CS401',
-        'color': const Color(0xFF6366F1),
-        'students': 45,
-        'assignments': 3,
+        'title': 'Learn Figma',
+        'instructor': 'Christopher Morgan',
+        'duration': '6h 30min',
+        'rating': 4.0,
+        'icon': Icons.design_services,
+        'color': const Color(0xFFFF6B6B),
       },
       {
-        'title': 'Database Management Systems',
-        'instructor': 'Prof. Michael Chen',
-        'code': 'CS302',
-        'color': const Color(0xFFEC4899),
-        'students': 38,
-        'assignments': 5,
+        'title': 'Analog photography',
+        'instructor': 'Gordon Norman',
+        'duration': '3h 15min',
+        'rating': 4.7,
+        'icon': Icons.camera_alt,
+        'color': const Color(0xFF4ECDC4),
       },
       {
-        'title': 'Artificial Intelligence',
-        'instructor': 'Dr. Emily Watson',
-        'code': 'CS501',
-        'color': const Color(0xFF10B981),
-        'students': 52,
-        'assignments': 2,
+        'title': 'Master Instagram',
+        'instructor': 'Sophie Gill',
+        'duration': '7h 40min',
+        'rating': 4.6,
+        'icon': Icons.photo_camera,
+        'color': const Color(0xFFE056FD),
       },
       {
-        'title': 'Web Development',
-        'instructor': 'Prof. David Martinez',
-        'code': 'CS305',
-        'color': const Color(0xFFF59E0B),
-        'students': 41,
-        'assignments': 4,
+        'title': 'Basics of drawing',
+        'instructor': 'Jean Tate',
+        'duration': '11h 30min',
+        'rating': 4.8,
+        'icon': Icons.brush,
+        'color': const Color(0xFFFFA726),
       },
       {
-        'title': 'Data Structures & Algorithms',
-        'instructor': 'Dr. Lisa Anderson',
-        'code': 'CS201',
-        'color': const Color(0xFF8B5CF6),
-        'students': 56,
-        'assignments': 6,
-      },
-      {
-        'title': 'Machine Learning',
-        'instructor': 'Prof. James Wilson',
-        'code': 'CS502',
-        'color': const Color(0xFF06B6D4),
-        'students': 34,
-        'assignments': 3,
+        'title': 'Photoshop - Essence',
+        'instructor': 'David Green',
+        'duration': '5h 35min',
+        'rating': 4.7,
+        'icon': Icons.photo,
+        'color': const Color(0xFF42A5F5),
       },
     ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Courses',
+          style: GoogleFonts.inter(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 20),
+        // Tabs
+        Row(
+          children: [
+            _buildTab('All Courses', 0),
+            const SizedBox(width: 30),
+            _buildTab('Courses This Semester', 1),
+            const SizedBox(width: 30),
+            _buildTab('Need Homework Courses', 2),
+            const SizedBox(width: 30),
+            _buildTab('Course With Upcoming Test', 3),
+          ],
+        ),
+        const SizedBox(height: 25),
+        // Course list
+        ...courses.map((course) => CourseListItem(
+              title: course['title'] as String,
+              instructor: course['instructor'] as String,
+              duration: course['duration'] as String,
+              rating: course['rating'] as double,
+              icon: course['icon'] as IconData,
+              iconColor: course['color'] as Color,
+            )),
+      ],
+    );
+  }
+
+  Widget _buildTab(String label, int index) {
+    final isSelected = _selectedTab == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedTab = index;
+        });
+      },
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'My Courses',
-            style: GoogleFonts.poppins(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 15),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth > 1200) {
-                // Desktop: 3 columns
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 1.4,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                  ),
-                  itemCount: courses.length,
-                  itemBuilder: (context, index) => CourseCard(
-                    title: courses[index]['title'] as String,
-                    instructor: courses[index]['instructor'] as String,
-                    courseCode: courses[index]['code'] as String,
-                    color: courses[index]['color'] as Color,
-                    students: courses[index]['students'] as int,
-                    assignments: courses[index]['assignments'] as int,
-                  ),
-                );
-              } else if (constraints.maxWidth > 600) {
-                // Tablet: 2 columns
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1.3,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15,
-                  ),
-                  itemCount: courses.length,
-                  itemBuilder: (context, index) => CourseCard(
-                    title: courses[index]['title'] as String,
-                    instructor: courses[index]['instructor'] as String,
-                    courseCode: courses[index]['code'] as String,
-                    color: courses[index]['color'] as Color,
-                    students: courses[index]['students'] as int,
-                    assignments: courses[index]['assignments'] as int,
-                  ),
-                );
-              } else {
-                // Mobile: 1 column
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: courses.length,
-                  itemBuilder: (context, index) => Padding(
-                    padding: const EdgeInsets.only(bottom: 15),
-                    child: CourseCard(
-                      title: courses[index]['title'] as String,
-                      instructor: courses[index]['instructor'] as String,
-                      courseCode: courses[index]['code'] as String,
-                      color: courses[index]['color'] as Color,
-                      students: courses[index]['students'] as int,
-                      assignments: courses[index]['assignments'] as int,
-                    ),
-                  ),
-                );
-              }
-            },
-          ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
+          if (isSelected)
+            Container(
+              height: 3,
+              width: 30,
+              decoration: BoxDecoration(
+                color: AppColors.textPrimary,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
         ],
       ),
     );
