@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../common/styles/colors.dart';
-import '../../common/widgets/left_sidebar.dart';
 import '../../common/widgets/right_sidebar.dart';
 import '../../common/widgets/course_list_item.dart';
 
@@ -17,35 +16,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Row(
-        children: [
-          // Left Sidebar
-          const LeftSidebar(),
-          // Main Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 800),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildGreeting(),
-                    const SizedBox(height: 30),
-                    _buildFeaturedCourse(),
-                    const SizedBox(height: 40),
-                    _buildCoursesSection(),
-                  ],
-                ),
+    return Row(
+      children: [
+        // Main Content
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildGreeting(),
+                  const SizedBox(height: 30),
+                  _buildFeaturedCourse(),
+                  const SizedBox(height: 40),
+                  _buildCoursesSection(),
+                ],
               ),
             ),
           ),
-          // Right Sidebar
-          const RightSidebar(),
-        ],
-      ),
+        ),
+        // Right Sidebar
+        const RightSidebar(),
+      ],
     );
   }
 

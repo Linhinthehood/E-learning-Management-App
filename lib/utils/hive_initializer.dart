@@ -13,11 +13,13 @@ class HiveInitializer {
     // Open boxes
     await Hive.openBox('userBox');
     await Hive.openBox('settingsBox');
+    await Hive.openBox('semesterBox');
   }
 
   /// Clear all Hive data (useful for logout)
   static Future<void> clearAll() async {
     await Hive.box('userBox').clear();
     await Hive.box('settingsBox').clear();
+    await Hive.box('semesterBox').clear();
   }
 }

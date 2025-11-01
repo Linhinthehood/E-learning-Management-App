@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'presentation/features/auth/login_screen.dart';
+import 'presentation/app_router.dart';
 import 'utils/firebase_initializer.dart';
 import 'utils/hive_initializer.dart';
 
@@ -45,7 +45,7 @@ class MainApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF000000)),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: const AppRouter(),
     );
   }
 }

@@ -5,6 +5,7 @@ class SemesterEntity {
   final String code;
   final DateTime startDate;
   final DateTime endDate;
+  final DateTime createdAt;
 
   const SemesterEntity({
     required this.id,
@@ -12,11 +13,17 @@ class SemesterEntity {
     required this.code,
     required this.startDate,
     required this.endDate,
+    required this.createdAt,
   });
 
   /// Check if this semester is currently active
   bool get isActive {
     final now = DateTime.now();
     return now.isAfter(startDate) && now.isBefore(endDate);
+  }
+
+  /// Get semester duration in days
+  int get durationInDays {
+    return endDate.difference(startDate).inDays;
   }
 }
