@@ -1,0 +1,99 @@
+Overview
+Cross-platform Flutter application (inspired by Google Classroom) for academic course management at the Faculty of Information Technology.
+Key System Rules (Mandatory - Purple Highlighted)
+
+Two roles only: Instructor (single user, credentials: admin/admin) and Students (multiple users)
+Content scope: Only IT-related topics (programming, databases, AI) - irrelevant content = 0 points
+Mandatory deployments: Android APK (arm64), Windows/macOS executable, and public web version
+
+Core Features (10 points total)
+1. Interface Structure (3 layers)
+
+Homepage: Role-based (student: course cards; instructor: dashboard with metrics)
+Course Space: 3 tabs (Stream, Classwork, People)
+User Profile: Avatar and basic info (real names required)
+Semester switcher: Default to current; past semesters read-only for students
+
+2. Data Management (2.0 pts)
+
+Hierarchy: Semester → Course → Group → Student
+CSV import with preview/validation (handle duplicates intelligently)
+Students can belong to only one group per course
+
+3. Content Distribution (2.0 pts)
+Four content types with distinct behaviors:
+
+Announcements: Group-scoped, commentable, view tracking
+Assignments: Deadline management, late submissions, attempt limits, grade tracking
+Quizzes: Question bank with difficulty levels, randomization, timed attempts
+Materials: Course-wide visibility, download tracking
+
+4. Interaction & Notifications (2.0 pts)
+
+Forum: Course-level discussions (no student-to-student direct messaging)
+Private messaging: Student ↔ Instructor only
+Notifications: In-app (students) + email for key events
+
+5. Analytics & Reports (2.0 pts)
+
+Instructor dashboard with progress charts
+CSV export for assignments/quizzes (individual or bulk)
+Search/filter/sort on all list views
+
+6. Student Features (2.0 pts)
+
+Personal dashboard (progress tracking, deadlines)
+Past semesters: read-only access
+
+Technical Requirements
+Mandatory (or receive 0 points)
+
+Offline capability: SQLite/Hive for local data sync
+Responsive design: Mobile, tablet, desktop
+Team collaboration: GitHub Insights showing ≥2 commits/week/member for ≥1 month (0.5 pt deduction if solo/no evidence)
+Performance: Caching, search/filter/sort optimization
+
+Deployment (1.0 pt)
+
+Web deployment: 0.5 pts (must handle cold starts)
+APK + Windows/macOS: Mandatory but not scored
+
+UI/UX (1.0 pt)
+
+0.5 pt each for UI and UX (only above-average work earns points)
+
+Bonus Features (max 4 features, 0.25-0.5 pts each)
+
+Self-built backend (no Firebase)
+Microservices architecture
+AI chatbot/question generation
+App store publishing
+
+Submission Requirements
+Folder structure: id1_fullname1_id2_fullname2.zip containing:
+
+source/: Complete source code (cleaned)
+bin/: APK + Windows EXE
+demo.mp4: ≥1080p video demonstrating all features (features not shown = not graded)
+git/: GitHub Insights screenshots only
+Readme.txt: Build instructions, URLs, login credentials
+Bonus/: Evidence of extra features
+Rubrik.docx: Self-assessment checklist
+
+Critical Penalties (Receive 0 points if)
+
+Irrelevant content (non-IT topics)
+No source code submitted
+No rubric.docx submitted
+No deployments (web + APK/EXE)
+Cannot run project despite instructor effort
+Code plagiarism detected
+
+Other Deductions
+
+Late (1 day): -1.0 pt
+Missing build instructions: -2.0 pts
+Unclean project: -0.5 pt
+Missing login info: -1.0 pt
+
+Total Score: 10 points + up to 2 bonus points

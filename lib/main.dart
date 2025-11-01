@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/dashboard_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -9,12 +10,14 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
+    return MaterialApp(
+      title: 'E-Learning Management',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1976D2)),
+        useMaterial3: true,
       ),
+      home: const DashboardScreen(),
     );
   }
 }
