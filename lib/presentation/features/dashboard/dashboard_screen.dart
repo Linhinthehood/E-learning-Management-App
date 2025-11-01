@@ -249,16 +249,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         const SizedBox(height: 20),
         // Tabs
-        Row(
-          children: [
-            _buildTab('All Courses', 0),
-            const SizedBox(width: 30),
-            _buildTab('Courses This Semester', 1),
-            const SizedBox(width: 30),
-            _buildTab('Need Homework Courses', 2),
-            const SizedBox(width: 30),
-            _buildTab('Course With Upcoming Test', 3),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _buildTab('All Courses', 0),
+              const SizedBox(width: 30),
+              _buildTab('Courses This Semester', 1),
+              const SizedBox(width: 30),
+              _buildTab('Need Homework Courses', 2),
+              const SizedBox(width: 30),
+              _buildTab('Course With Upcoming Test', 3),
+            ],
+          ),
         ),
         const SizedBox(height: 25),
         // Course list

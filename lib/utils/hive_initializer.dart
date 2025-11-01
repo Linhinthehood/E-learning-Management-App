@@ -1,0 +1,23 @@
+import 'package:hive_flutter/hive_flutter.dart';
+
+/// Initialize Hive for offline storage
+class HiveInitializer {
+  static Future<void> initialize() async {
+    // Initialize Hive
+    await Hive.initFlutter();
+
+    // Register adapters (will add more as we create models)
+    // TODO: Register Hive adapters here
+    // Example: Hive.registerAdapter(UserModelAdapter());
+
+    // Open boxes
+    await Hive.openBox('userBox');
+    await Hive.openBox('settingsBox');
+  }
+
+  /// Clear all Hive data (useful for logout)
+  static Future<void> clearAll() async {
+    await Hive.box('userBox').clear();
+    await Hive.box('settingsBox').clear();
+  }
+}

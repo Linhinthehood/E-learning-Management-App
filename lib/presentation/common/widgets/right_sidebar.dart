@@ -71,15 +71,10 @@ class RightSidebar extends StatelessWidget {
                   color: AppColors.textSecondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/profile.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.person, color: Colors.white);
-                    },
-                  ),
+                child: const Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: 28,
                 ),
               ),
             ],

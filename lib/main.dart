@@ -1,8 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'presentation/features/auth/login_screen.dart';
+import 'utils/firebase_initializer.dart';
+import 'utils/hive_initializer.dart';
 
-void main() {
-  runApp(const MainApp());
+void main() async {
+  // Ensure Flutter is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  try {
+    await FirebaseInitializer.initialize();
+    print('✅ Firebase initialized successfully');
+  } catch (e) {
+    print('⚠️ Firebase initialization failed: $e');
+    print('💡 Make sure you have set up Firebase configuration');
+  }
+
+  // Initialize Hive for offline storage
+  try {
+    await HiveInitializer.initialize();
+    print('✅ Hive initialized successfully');
+  } catch (e) {
+    print('⚠️ Hive initialization failed: $e');
+  }
+
+  // Run app with Riverpod
+  runApp(
+    const ProviderScope(
+      child: MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
