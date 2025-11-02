@@ -6,8 +6,10 @@ import '../models/user_model.dart';
 /// Handles Firebase Auth and Firestore calls
 abstract class AuthRemoteDataSource {
   Future<UserModel?> login(String email, String password);
+  Future<UserModel?> register(String email, String password, String displayName, String role);
   Future<void> logout();
   Future<UserModel?> getCurrentUser();
+  Future<UserModel> updateUserProfile(String userId, String? avatarUrl);
 }
 
 /// Implementation of AuthRemoteDataSource using Firebase
@@ -65,6 +67,40 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<UserModel?> register(String email, String password, String displayName, String role) async {
+    try {
+      // Create user in Firebase Auth
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential.user != null) {
+        // Create user document in Firestore
+        final userData = {
+          'uid': userCredential.user!.uid,
+          'email': userCredential.user!.email ?? email,
+          'displayName': displayName,
+          'role': role, // 'student' or 'instructor'
+          'avatarUrl': null,
+          'createdAt': DateTime.now().toIso8601String(),
+        };
+
+        await _firestore
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set(userData);
+
+        return UserModel.fromJson(userData);
+      }
+
+      return null;
+    } catch (e) {
+      throw Exception('Registration failed: ${e.toString()}');
+    }
+  }
+
+  @override
   Future<void> logout() async {
     await _auth.signOut();
   }
@@ -90,6 +126,34 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  @override
+  Future<UserModel> updateUserProfile(String userId, String? avatarUrl) async {
+    try {
+      final userDocRef = _firestore.collection('users').doc(userId);
+      
+      // Update only avatarUrl, keep other fields unchanged
+      await userDocRef.update({
+        'avatarUrl': avatarUrl,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+
+      // Get updated user data
+      final updatedDoc = await userDocRef.get();
+      if (updatedDoc.exists) {
+        final currentUser = _auth.currentUser;
+        return UserModel.fromJson({
+          'uid': userId,
+          'email': currentUser?.email ?? '',
+          ...updatedDoc.data()!,
+        });
+      }
+      
+      throw Exception('User document not found');
+    } catch (e) {
+      throw Exception('Failed to update user profile: ${e.toString()}');
     }
   }
 }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/entities/user_entity.dart';
 import 'features/auth/login_screen.dart';
-import 'features/dashboard/dashboard_screen.dart';
 import 'features/instructor/instructor_dashboard.dart';
+import 'features/student/student_dashboard.dart';
 import 'providers/auth_provider.dart';
 
 /// App router that handles role-based navigation
@@ -27,9 +27,7 @@ class AppRouter extends ConsumerWidget {
           return const InstructorDashboard();
         } else {
           // Navigate to Student Dashboard
-          // For now, using the existing DashboardScreen
-          // TODO: Create separate StudentDashboard
-          return const DashboardScreen();
+          return const StudentDashboard();
         }
       },
       loading: () =>

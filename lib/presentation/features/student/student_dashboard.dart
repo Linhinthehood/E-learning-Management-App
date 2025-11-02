@@ -1,35 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../common/styles/colors.dart';
-import '../../common/widgets/left_sidebar.dart';
+import '../../common/widgets/student_sidebar.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
-import '../dashboard/dashboard_screen.dart';
-import '../semester/semester_management_screen.dart';
-import '../course/course_management_screen.dart';
+import 'student_homepage.dart';
+import 'student_profile_screen.dart';
 
-class InstructorDashboard extends ConsumerStatefulWidget {
-  const InstructorDashboard({super.key});
+/// Student Dashboard with sidebar navigation
+class StudentDashboard extends ConsumerStatefulWidget {
+  const StudentDashboard({super.key});
 
   @override
-  ConsumerState<InstructorDashboard> createState() =>
-      _InstructorDashboardState();
+  ConsumerState<StudentDashboard> createState() => _StudentDashboardState();
 }
 
-class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
+class _StudentDashboardState extends ConsumerState<StudentDashboard> {
   int _selectedIndex = 0;
 
   // List of screens for each navigation item
   final List<Widget> _screens = [
-    const DashboardScreen(), // 0: Home/Dashboard
-    const SemesterManagementScreen(), // 1: Semesters
-    const CourseManagementScreen(), // 2: Courses
-    const Placeholder(), // 3: Students (TODO)
-    const Placeholder(), // 4: Settings (TODO)
+    const StudentHomepage(), // 0: Homepage
+    const StudentProfileScreen(), // 1: Profile
   ];
 
   void _onItemTapped(int index) async {
-    if (index == 5) {
+    if (index == 2) {
       // Logout
       await _handleLogout();
     } else {
@@ -86,7 +82,7 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
       body: Row(
         children: [
           // Left Sidebar
-          LeftSidebar(
+          StudentSidebar(
             selectedIndex: _selectedIndex,
             onItemTapped: _onItemTapped,
           ),
@@ -97,3 +93,4 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
     );
   }
 }
+

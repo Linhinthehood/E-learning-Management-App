@@ -3,90 +3,77 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../common/styles/colors.dart';
 import '../../providers/auth_provider.dart';
-import 'register_screen.dart';
+import '../../../domain/entities/user_entity.dart';
+import 'login_screen.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _rememberMe = false;
+  final _confirmPasswordController = TextEditingController();
+  final _displayNameController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   String? _errorMessage;
+  UserRole _selectedRole = UserRole.student;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _displayNameController.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _register() async {
+    // Validate fields
+    if (_emailController.text.trim().isEmpty ||
+        _passwordController.text.isEmpty ||
+        _confirmPasswordController.text.isEmpty ||
+        _displayNameController.text.trim().isEmpty) {
+      setState(() {
+        _errorMessage = 'Please fill in all fields';
+      });
+      return;
+    }
+
+    // Validate password match
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        _errorMessage = 'Passwords do not match';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      await ref
-          .read(authProvider.notifier)
-          .login(_emailController.text.trim(), _passwordController.text);
-      
-      // Check auth state after login
-      await Future.delayed(const Duration(milliseconds: 200));
-      final authState = ref.read(authProvider);
-      
-      authState.when(
-        data: (user) {
-          // Login successful
-          if (mounted && user != null) {
-            setState(() {
-              _isLoading = false;
-            });
-          } else if (mounted) {
-            // Login failed - user is null
-            setState(() {
-              _isLoading = false;
-              _errorMessage = 'Login failed. Please try again.';
-            });
-          }
-        },
-        loading: () {
-          // Still loading - wait a bit more
-          if (mounted) {
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                setState(() {
-                  _isLoading = false;
-                  _errorMessage = 'Login timeout. Please try again.';
-                });
-              }
-            });
-          }
-        },
-        error: (error, stack) {
-          // Login failed with error
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-              _errorMessage = error.toString().replaceAll('Exception: ', '');
-            });
-          }
-        },
-      );
-    } catch (e) {
+      await ref.read(authProvider.notifier).register(
+            _emailController.text.trim(),
+            _passwordController.text,
+            _displayNameController.text.trim(),
+            _selectedRole,
+          );
+      // Navigation will be handled by main.dart based on auth state
       if (mounted) {
-        setState(() {
-          _errorMessage = e.toString().replaceAll('Exception: ', '');
-          _isLoading = false;
-        });
+        Navigator.of(context).pop(); // Go back to login screen if needed
       }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
+        _isLoading = false;
+      });
     }
   }
 
@@ -136,7 +123,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Learn, Grow, Succeed',
+                      'Join Us Today',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         color: Colors.white70,
@@ -150,7 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-          // Right side - Login form
+          // Right side - Register form
           Expanded(
             child: Center(
               child: SingleChildScrollView(
@@ -162,7 +149,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Welcome back!',
+                        'Create Account',
                         style: GoogleFonts.inter(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
@@ -171,13 +158,65 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Please login to your account',
+                        'Sign up to get started',
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 50),
+                      // Display Name field
+                      Text(
+                        'Display Name',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _displayNameController,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your name',
+                          hintStyle: GoogleFonts.inter(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.cardBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                              width: 1,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.textPrimary,
+                              width: 2,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.person_outline,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 25),
                       // Email field
                       Text(
                         'Email',
@@ -190,6 +229,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: 'Enter your email',
                           hintStyle: GoogleFonts.inter(
@@ -228,6 +268,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             color: AppColors.textSecondary,
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 25),
+                      // Role selection
+                      Text(
+                        'I am a',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: RadioListTile<UserRole>(
+                              title: Text(
+                                'Student',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              value: UserRole.student,
+                              groupValue: _selectedRole,
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedRole = value!;
+                                });
+                              },
+                              activeColor: AppColors.buttonPrimary,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                          Expanded(
+                            child: RadioListTile<UserRole>(
+                              title: Text(
+                                'Instructor',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              value: UserRole.instructor,
+                              groupValue: _selectedRole,
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedRole = value!;
+                                });
+                              },
+                              activeColor: AppColors.buttonPrimary,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 25),
                       // Password field
@@ -295,51 +390,72 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      // Remember me and forgot password
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: Checkbox(
-                                  value: _rememberMe,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _rememberMe = value ?? false;
-                                    });
-                                  },
-                                  activeColor: AppColors.buttonPrimary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Remember me',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ],
+                      const SizedBox(height: 25),
+                      // Confirm Password field
+                      Text(
+                        'Confirm Password',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        decoration: InputDecoration(
+                          hintText: 'Confirm your password',
+                          hintStyle: GoogleFonts.inter(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
                           ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'Forgot password?',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          filled: true,
+                          fillColor: AppColors.cardBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                              width: 1,
                             ),
                           ),
-                        ],
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.textPrimary,
+                              width: 2,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.lock_outline,
+                            color: AppColors.textSecondary,
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: AppColors.textSecondary,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
+                              });
+                            },
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 30),
                       // Error message
@@ -375,11 +491,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         const SizedBox(height: 16),
                       ],
-                      // Login button
+                      // Register button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _login,
+                          onPressed: _isLoading ? null : _register,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.buttonPrimary,
                             foregroundColor: Colors.white,
@@ -399,7 +515,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 )
                               : Text(
-                                  'Login',
+                                  'Sign Up',
                                   style: GoogleFonts.inter(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -408,13 +524,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      // Sign up link
+                      // Login link
                       Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Don't have an account? ",
+                              'Already have an account? ',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 color: AppColors.textSecondary,
@@ -424,17 +540,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               onPressed: () {
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
-                                    builder: (context) => const RegisterScreen(),
+                                    builder: (context) => const LoginScreen(),
                                   ),
                                 );
                               },
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                tapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: Text(
-                                'Sign up',
+                                'Sign in',
                                 style: GoogleFonts.inter(
                                   fontSize: 14,
                                   color: AppColors.textPrimary,
@@ -456,3 +573,4 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
+

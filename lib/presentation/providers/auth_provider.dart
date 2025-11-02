@@ -6,6 +6,7 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/register_usecase.dart';
 
 /// Provider for remote data source
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
@@ -30,6 +31,11 @@ final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
   return LoginUseCase(ref.read(authRepositoryProvider));
 });
 
+/// Provider for register use case
+final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
+  return RegisterUseCase(ref.read(authRepositoryProvider));
+});
+
 /// Provider for logout use case
 final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
   return LogoutUseCase(ref.read(authRepositoryProvider));
@@ -43,11 +49,13 @@ final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
 /// Auth state notifier - manages authentication state
 class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
   final LoginUseCase _loginUseCase;
+  final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
 
   AuthNotifier(
     this._loginUseCase,
+    this._registerUseCase,
     this._logoutUseCase,
     this._getCurrentUserUseCase,
   ) : super(const AsyncValue.loading()) {
@@ -76,13 +84,31 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
     }
   }
 
+  /// Register new user with email, password, display name and role
+  Future<void> register(
+    String email,
+    String password,
+    String displayName,
+    UserRole role,
+  ) async {
+    state = const AsyncValue.loading();
+    try {
+      final user = await _registerUseCase.execute(email, password, displayName, role);
+      state = AsyncValue.data(user);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
   /// Logout current user
   Future<void> logout() async {
     try {
+      state = const AsyncValue.loading();
       await _logoutUseCase.execute();
       state = const AsyncValue.data(null);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+    } catch (e, _) {
+      // Even if logout fails, set state to null
+      state = const AsyncValue.data(null);
     }
   }
 
@@ -97,6 +123,7 @@ final authProvider =
     StateNotifierProvider<AuthNotifier, AsyncValue<UserEntity?>>((ref) {
       return AuthNotifier(
         ref.read(loginUseCaseProvider),
+        ref.read(registerUseCaseProvider),
         ref.read(logoutUseCaseProvider),
         ref.read(getCurrentUserUseCaseProvider),
       );

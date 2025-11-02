@@ -35,6 +35,35 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   @override
+  Future<UserEntity?> register(
+    String email,
+    String password,
+    String displayName,
+    UserRole role,
+  ) async {
+    try {
+      // Register via remote (Firebase)
+      final roleString = role == UserRole.instructor ? 'instructor' : 'student';
+      final userModel = await remoteDataSource.register(
+        email,
+        password,
+        displayName,
+        roleString,
+      );
+
+      if (userModel != null) {
+        // Cache user data for offline access
+        await localDataSource.cacheUser(userModel);
+        return userModel.toEntity();
+      }
+
+      return null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> logout() async {
     await remoteDataSource.logout();
     await localDataSource.clearCache();
@@ -43,13 +72,20 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<UserEntity?> getCurrentUser() async {
     try {
-      // Try to get from cache first (faster)
-      final cachedUser = await localDataSource.getCachedUser();
-      if (cachedUser != null) {
-        return cachedUser.toEntity();
+      // Check Firebase Auth first
+      final currentUser = await remoteDataSource.getCurrentUser();
+      if (currentUser != null) {
+        // Cache for offline access
+        await localDataSource.cacheUser(currentUser);
+        return currentUser.toEntity();
       }
+      
+      // If Firebase Auth has no user, clear cache
+      await localDataSource.clearCache();
       return null;
     } catch (e) {
+      // On error, clear cache and return null
+      await localDataSource.clearCache();
       return null;
     }
   }

@@ -145,7 +145,7 @@ class _SemesterFormDialogState extends ConsumerState<SemesterFormDialog> {
       }
 
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true); // Return true to indicate success
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
