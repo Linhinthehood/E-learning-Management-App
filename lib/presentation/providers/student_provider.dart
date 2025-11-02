@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/datasources/remote/auth_remote_datasource.dart';
 import '../../data/repositories/user_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/i_user_repository.dart';

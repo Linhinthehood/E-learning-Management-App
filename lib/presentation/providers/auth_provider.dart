@@ -87,7 +87,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
         // No cached credentials, user needs to login
         state = const AsyncValue.data(null);
       }
-    } catch (e, stack) {
+    } catch (e) {
       // If auto-login fails, clear cached credentials and show login screen
       await _localDataSource.clearCredentials();
       state = const AsyncValue.data(null);
