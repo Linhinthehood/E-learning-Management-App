@@ -28,7 +28,9 @@ class SemesterLocalDataSourceImpl implements SemesterLocalDataSource {
 
       if (cachedData != null && cachedData is List) {
         return cachedData
-            .map((item) => SemesterModel.fromJson(Map<String, dynamic>.from(item)))
+            .map(
+              (item) => SemesterModel.fromJson(Map<String, dynamic>.from(item)),
+            )
             .toList();
       }
 

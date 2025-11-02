@@ -23,9 +23,7 @@ class CourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         onTap: () {},
         borderRadius: BorderRadius.circular(15),
@@ -35,10 +33,7 @@ class CourseCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                color,
-                color.withOpacity(0.7),
-              ],
+              colors: [color, color.withValues(alpha: 0.7)],
             ),
           ),
           child: Padding(
@@ -55,7 +50,7 @@ class CourseCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -67,10 +62,7 @@ class CourseCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Icon(
-                      Icons.more_vert,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
+                    Icon(Icons.more_vert, color: Colors.white.withValues(alpha: 0.8)),
                   ],
                 ),
                 const Spacer(),
@@ -125,17 +117,13 @@ class CourseCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: Colors.white,
-            size: 14,
-          ),
+          Icon(icon, color: Colors.white, size: 14),
           const SizedBox(width: 5),
           Text(
             label,

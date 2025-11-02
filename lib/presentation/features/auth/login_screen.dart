@@ -33,10 +33,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authProvider.notifier).login(
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+      await ref
+          .read(authProvider.notifier)
+          .login(_emailController.text.trim(), _passwordController.text);
       // Navigation will be handled by main.dart based on auth state
     } catch (e) {
       setState(() {
@@ -100,10 +99,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 60),
                     // Illustration placeholder
-                    const Text(
-                      '📚',
-                      style: TextStyle(fontSize: 80),
-                    ),
+                    const Text('📚', style: TextStyle(fontSize: 80)),
                   ],
                 ),
               ),
@@ -308,11 +304,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           decoration: BoxDecoration(
                             color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: Colors.red.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                              const Icon(
+                                Icons.error_outline,
+                                color: Colors.red,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(

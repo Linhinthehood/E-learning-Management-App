@@ -11,7 +11,8 @@ class InstructorDashboard extends ConsumerStatefulWidget {
   const InstructorDashboard({super.key});
 
   @override
-  ConsumerState<InstructorDashboard> createState() => _InstructorDashboardState();
+  ConsumerState<InstructorDashboard> createState() =>
+      _InstructorDashboardState();
 }
 
 class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
@@ -60,9 +61,7 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Logout'),
           ),
         ],
@@ -91,9 +90,7 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
             onItemTapped: _onItemTapped,
           ),
           // Main Content
-          Expanded(
-            child: _screens[_selectedIndex],
-          ),
+          Expanded(child: _screens[_selectedIndex]),
         ],
       ),
     );

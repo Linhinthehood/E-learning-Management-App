@@ -26,11 +26,7 @@ void main() async {
   }
 
   // Run app with Riverpod
-  runApp(
-    const ProviderScope(
-      child: MainApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MainApp()));
 }
 
 class MainApp extends StatelessWidget {

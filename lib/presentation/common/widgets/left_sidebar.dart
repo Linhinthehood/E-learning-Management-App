@@ -78,7 +78,9 @@ class _LeftSidebarState extends State<LeftSidebar> {
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(

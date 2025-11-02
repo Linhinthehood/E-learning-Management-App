@@ -128,7 +128,9 @@ class _SemesterFormDialogState extends ConsumerState<SemesterFormDialog> {
 
     try {
       final semester = SemesterEntity(
-        id: widget.semester?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id:
+            widget.semester?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
         code: _codeController.text.trim().toUpperCase(),
         startDate: _startDate!,
@@ -169,9 +171,7 @@ class _SemesterFormDialogState extends ConsumerState<SemesterFormDialog> {
 
     return Dialog(
       backgroundColor: AppColors.cardBackground,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
         padding: const EdgeInsets.all(32),
@@ -374,11 +374,17 @@ class _SemesterFormDialogState extends ConsumerState<SemesterFormDialog> {
                     decoration: BoxDecoration(
                       color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.red.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -399,7 +405,9 @@ class _SemesterFormDialogState extends ConsumerState<SemesterFormDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                      onPressed: _isLoading
+                          ? null
+                          : () => Navigator.of(context).pop(),
                       child: Text(
                         'Cancel',
                         style: GoogleFonts.inter(

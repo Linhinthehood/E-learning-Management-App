@@ -82,9 +82,7 @@ class SemesterManagementScreen extends ConsumerWidget {
                   }
                   return _buildSemesterList(context, ref, semesters);
                 },
-                loading: () => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => _buildErrorState(context, ref, error),
               ),
             ),
@@ -135,10 +133,7 @@ class SemesterManagementScreen extends ConsumerWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.buttonPrimary,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -179,7 +174,8 @@ class SemesterManagementScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
           ElevatedButton.icon(
-            onPressed: () => ref.read(semesterProvider.notifier).loadSemesters(),
+            onPressed: () =>
+                ref.read(semesterProvider.notifier).loadSemesters(),
             icon: const Icon(Icons.refresh),
             label: Text(
               'Retry',
@@ -191,10 +187,7 @@ class SemesterManagementScreen extends ConsumerWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.buttonPrimary,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -234,9 +227,7 @@ class SemesterManagementScreen extends ConsumerWidget {
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isActive
-              ? AppColors.buttonPrimary
-              : AppColors.border,
+          color: isActive ? AppColors.buttonPrimary : AppColors.border,
           width: isActive ? 2 : 1,
         ),
       ),
@@ -334,7 +325,8 @@ class SemesterManagementScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               IconButton(
-                onPressed: () => _showDeleteConfirmation(context, ref, semester),
+                onPressed: () =>
+                    _showDeleteConfirmation(context, ref, semester),
                 icon: const Icon(Icons.delete_outline),
                 color: Colors.red,
                 tooltip: 'Delete',
@@ -375,9 +367,7 @@ class SemesterManagementScreen extends ConsumerWidget {
         ),
         content: Text(
           'Are you sure you want to delete "${semester.name}"? This action cannot be undone.',
-          style: GoogleFonts.inter(
-            color: AppColors.textSecondary,
-          ),
+          style: GoogleFonts.inter(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
@@ -394,7 +384,9 @@ class SemesterManagementScreen extends ConsumerWidget {
             onPressed: () async {
               Navigator.of(context).pop();
               try {
-                await ref.read(semesterProvider.notifier).deleteSemester(semester.id);
+                await ref
+                    .read(semesterProvider.notifier)
+                    .deleteSemester(semester.id);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

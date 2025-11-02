@@ -25,10 +25,7 @@ class SemesterRemoteDataSourceImpl implements SemesterRemoteDataSource {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => SemesterModel.fromJson({
-                'id': doc.id,
-                ...doc.data(),
-              }))
+          .map((doc) => SemesterModel.fromJson({'id': doc.id, ...doc.data()}))
           .toList();
     } catch (e) {
       throw Exception('Failed to get semesters: ${e.toString()}');
@@ -38,7 +35,10 @@ class SemesterRemoteDataSourceImpl implements SemesterRemoteDataSource {
   @override
   Future<SemesterModel?> getSemesterById(String id) async {
     try {
-      final docSnapshot = await _firestore.collection(_collection).doc(id).get();
+      final docSnapshot = await _firestore
+          .collection(_collection)
+          .doc(id)
+          .get();
 
       if (docSnapshot.exists) {
         return SemesterModel.fromJson({
@@ -56,9 +56,10 @@ class SemesterRemoteDataSourceImpl implements SemesterRemoteDataSource {
   @override
   Future<void> createSemester(SemesterModel semester) async {
     try {
-      await _firestore.collection(_collection).doc(semester.id).set(
-            semester.toJson()..remove('id'),
-          );
+      await _firestore
+          .collection(_collection)
+          .doc(semester.id)
+          .set(semester.toJson()..remove('id'));
     } catch (e) {
       throw Exception('Failed to create semester: ${e.toString()}');
     }
@@ -67,9 +68,10 @@ class SemesterRemoteDataSourceImpl implements SemesterRemoteDataSource {
   @override
   Future<void> updateSemester(SemesterModel semester) async {
     try {
-      await _firestore.collection(_collection).doc(semester.id).update(
-            semester.toJson()..remove('id'),
-          );
+      await _firestore
+          .collection(_collection)
+          .doc(semester.id)
+          .update(semester.toJson()..remove('id'));
     } catch (e) {
       throw Exception('Failed to update semester: ${e.toString()}');
     }

@@ -37,14 +37,10 @@ class CourseListItem extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 28,
-            ),
+            child: Icon(icon, color: iconColor, size: 28),
           ),
           const SizedBox(width: 15),
           // Course info
@@ -109,11 +105,7 @@ class CourseListItem extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.bolt,
-                  size: 16,
-                  color: Colors.black,
-                ),
+                const Icon(Icons.bolt, size: 16, color: Colors.black),
                 const SizedBox(width: 5),
                 Text(
                   rating.toString(),

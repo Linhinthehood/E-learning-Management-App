@@ -15,7 +15,4 @@ class UserEntity {
   });
 }
 
-enum UserRole {
-  instructor,
-  student,
-}
+enum UserRole { instructor, student }

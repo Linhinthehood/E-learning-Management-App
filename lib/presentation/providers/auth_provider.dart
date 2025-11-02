@@ -93,10 +93,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
 }
 
 /// Provider for auth state notifier
-final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserEntity?>>((ref) {
-  return AuthNotifier(
-    ref.read(loginUseCaseProvider),
-    ref.read(logoutUseCaseProvider),
-    ref.read(getCurrentUserUseCaseProvider),
-  );
-});
+final authProvider =
+    StateNotifierProvider<AuthNotifier, AsyncValue<UserEntity?>>((ref) {
+      return AuthNotifier(
+        ref.read(loginUseCaseProvider),
+        ref.read(logoutUseCaseProvider),
+        ref.read(getCurrentUserUseCaseProvider),
+      );
+    });

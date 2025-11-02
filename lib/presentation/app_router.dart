@@ -32,11 +32,8 @@ class AppRouter extends ConsumerWidget {
           return const DashboardScreen();
         }
       },
-      loading: () => const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (error, stack) => const LoginScreen(),
     );
   }

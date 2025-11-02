@@ -77,10 +77,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             borderRadius: BorderRadius.circular(15),
           ),
           child: const Center(
-            child: Text(
-              '👋',
-              style: TextStyle(fontSize: 60),
-            ),
+            child: Text('👋', style: TextStyle(fontSize: 60)),
           ),
         ),
       ],
@@ -105,10 +102,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               borderRadius: BorderRadius.circular(15),
             ),
             child: const Center(
-              child: Text(
-                '🇪🇸',
-                style: TextStyle(fontSize: 30),
-              ),
+              child: Text('🇪🇸', style: TextStyle(fontSize: 30)),
             ),
           ),
           const SizedBox(width: 20),
@@ -259,14 +253,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         const SizedBox(height: 25),
         // Course list
-        ...courses.map((course) => CourseListItem(
-              title: course['title'] as String,
-              instructor: course['instructor'] as String,
-              duration: course['duration'] as String,
-              rating: course['rating'] as double,
-              icon: course['icon'] as IconData,
-              iconColor: course['color'] as Color,
-            )),
+        ...courses.map(
+          (course) => CourseListItem(
+            title: course['title'] as String,
+            instructor: course['instructor'] as String,
+            duration: course['duration'] as String,
+            rating: course['rating'] as double,
+            icon: course['icon'] as IconData,
+            iconColor: course['color'] as Color,
+          ),
+        ),
       ],
     );
   }
@@ -286,7 +282,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+              color: isSelected
+                  ? AppColors.textPrimary
+                  : AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),

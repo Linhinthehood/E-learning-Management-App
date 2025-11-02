@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../styles/colors.dart';
 
-
 class RightSidebar extends StatelessWidget {
   const RightSidebar({super.key});
 
@@ -27,7 +26,11 @@ class RightSidebar extends StatelessWidget {
                   child: Row(
                     children: [
                       const SizedBox(width: 18),
-                      const Icon(Icons.search, color: AppColors.textSecondary, size: 22),
+                      const Icon(
+                        Icons.search,
+                        color: AppColors.textSecondary,
+                        size: 22,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
@@ -71,11 +74,7 @@ class RightSidebar extends StatelessWidget {
                   color: AppColors.textSecondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.person,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                child: const Icon(Icons.person, color: Colors.white, size: 28),
               ),
             ],
           ),
@@ -114,9 +113,7 @@ class RightSidebar extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           // Course Progress List
-          Expanded(
-            child: _buildCourseProgressList(),
-          ),
+          Expanded(child: _buildCourseProgressList()),
           const SizedBox(height: 30),
           // Premium banner
           Container(
@@ -156,10 +153,7 @@ class RightSidebar extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 15),
-                    const Text(
-                      '📚',
-                      style: TextStyle(fontSize: 50),
-                    ),
+                    const Text('📚', style: TextStyle(fontSize: 50)),
                   ],
                 ),
                 const SizedBox(height: 18),

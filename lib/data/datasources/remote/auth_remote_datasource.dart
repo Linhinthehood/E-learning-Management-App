@@ -42,7 +42,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           final userData = {
             'uid': userCredential.user!.uid,
             'email': userCredential.user!.email ?? email,
-            'displayName': email == 'admin@example.com' ? 'Administrator' : 'Student',
+            'displayName': email == 'admin@example.com'
+                ? 'Administrator'
+                : 'Student',
             'role': email == 'admin@example.com' ? 'instructor' : 'student',
             'avatarUrl': null,
           };

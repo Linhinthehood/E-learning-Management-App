@@ -9,12 +9,16 @@ import '../../domain/usecases/semester/get_all_semesters_usecase.dart';
 import '../../domain/usecases/semester/update_semester_usecase.dart';
 
 /// Provider for remote data source
-final semesterRemoteDataSourceProvider = Provider<SemesterRemoteDataSource>((ref) {
+final semesterRemoteDataSourceProvider = Provider<SemesterRemoteDataSource>((
+  ref,
+) {
   return SemesterRemoteDataSourceImpl();
 });
 
 /// Provider for local data source
-final semesterLocalDataSourceProvider = Provider<SemesterLocalDataSource>((ref) {
+final semesterLocalDataSourceProvider = Provider<SemesterLocalDataSource>((
+  ref,
+) {
   return SemesterLocalDataSourceImpl();
 });
 
@@ -106,11 +110,13 @@ class SemesterNotifier extends StateNotifier<AsyncValue<List<SemesterEntity>>> {
 
 /// Provider for semester state notifier
 final semesterProvider =
-    StateNotifierProvider<SemesterNotifier, AsyncValue<List<SemesterEntity>>>((ref) {
-  return SemesterNotifier(
-    ref.read(getAllSemestersUseCaseProvider),
-    ref.read(createSemesterUseCaseProvider),
-    ref.read(updateSemesterUseCaseProvider),
-    ref.read(deleteSemesterUseCaseProvider),
-  );
-});
+    StateNotifierProvider<SemesterNotifier, AsyncValue<List<SemesterEntity>>>((
+      ref,
+    ) {
+      return SemesterNotifier(
+        ref.read(getAllSemestersUseCaseProvider),
+        ref.read(createSemesterUseCaseProvider),
+        ref.read(updateSemesterUseCaseProvider),
+        ref.read(deleteSemesterUseCaseProvider),
+      );
+    });

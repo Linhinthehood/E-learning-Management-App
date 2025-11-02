@@ -107,7 +107,10 @@ class SemesterRepositoryImpl implements ISemesterRepository {
   @override
   Future<bool> semesterCodeExists(String code, {String? excludeId}) async {
     try {
-      return await remoteDataSource.semesterCodeExists(code, excludeId: excludeId);
+      return await remoteDataSource.semesterCodeExists(
+        code,
+        excludeId: excludeId,
+      );
     } catch (e) {
       rethrow;
     }
