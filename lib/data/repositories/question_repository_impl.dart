@@ -1,18 +1,18 @@
-import '../../domain/entities/question_bank_entity.dart';
 import '../../domain/entities/question_entity.dart';
+import '../../domain/entities/question_bank_entity.dart';
 import '../../domain/repositories/i_question_repository.dart';
 import '../datasources/remote/question_remote_datasource.dart';
-import '../datasources/models/question_bank_model.dart';
 import '../datasources/models/question_model.dart';
+import '../datasources/models/question_bank_model.dart';
 
 /// Implementation of IQuestionRepository
-/// Handles conversion between models and entities for both question banks and questions
+/// Handles conversion between models and entities
 class QuestionRepositoryImpl implements IQuestionRepository {
   final QuestionRemoteDataSource remoteDataSource;
 
   QuestionRepositoryImpl({required this.remoteDataSource});
 
-  // ==================== Question Bank Methods ====================
+  // Question Bank operations
 
   @override
   Future<List<QuestionBankEntity>> getQuestionBanksByCourse(
@@ -78,7 +78,7 @@ class QuestionRepositoryImpl implements IQuestionRepository {
     }
   }
 
-  // ==================== Question Methods ====================
+  // Question operations
 
   @override
   Future<List<QuestionEntity>> getQuestionsByBank(String questionBankId) async {

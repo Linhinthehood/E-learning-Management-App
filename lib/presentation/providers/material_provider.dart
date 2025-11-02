@@ -18,7 +18,7 @@ final materialRepositoryProvider = Provider<IMaterialRepository>((ref) {
   );
 });
 
-/// Material state notifier - manages course materials
+/// Material state notifier - manages materials for a course
 class MaterialNotifier extends StateNotifier<AsyncValue<List<MaterialEntity>>> {
   final IMaterialRepository _repository;
   String? _currentCourseId;

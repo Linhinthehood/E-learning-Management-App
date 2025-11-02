@@ -41,15 +41,21 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
     String courseId,
   ) async {
     try {
+      // Get all announcements for the course (without orderBy to avoid index requirement)
       final querySnapshot = await _firestore
           .collection('announcements')
           .where('courseId', isEqualTo: courseId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      // Sort by createdAt in memory
+      final announcements = querySnapshot.docs
           .map((doc) => AnnouncementModel.fromJson(doc.data(), doc.id))
           .toList();
+
+      // Sort by createdAt descending
+      announcements.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return announcements;
     } catch (e) {
       throw Exception('Failed to get announcements: ${e.toString()}');
     }
@@ -61,16 +67,22 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
     String groupId,
   ) async {
     try {
+      // Get announcements for the course (without orderBy to avoid index requirement)
       final querySnapshot = await _firestore
           .collection('announcements')
           .where('courseId', isEqualTo: courseId)
           .where('scopedGroupIds', arrayContains: groupId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      // Sort by createdAt in memory
+      final announcements = querySnapshot.docs
           .map((doc) => AnnouncementModel.fromJson(doc.data(), doc.id))
           .toList();
+
+      // Sort by createdAt descending
+      announcements.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return announcements;
     } catch (e) {
       throw Exception('Failed to get group announcements: ${e.toString()}');
     }
@@ -102,16 +114,22 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
     try {
       final cutoffDate = DateTime.now().subtract(Duration(days: days));
 
+      // Get all announcements for the course
       final querySnapshot = await _firestore
           .collection('announcements')
           .where('courseId', isEqualTo: courseId)
-          .where('createdAt', isGreaterThan: Timestamp.fromDate(cutoffDate))
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      // Filter and sort in memory to avoid index requirement
+      final announcements = querySnapshot.docs
           .map((doc) => AnnouncementModel.fromJson(doc.data(), doc.id))
+          .where((announcement) => announcement.createdAt.isAfter(cutoffDate))
           .toList();
+
+      // Sort by createdAt descending
+      announcements.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return announcements;
     } catch (e) {
       throw Exception('Failed to get recent announcements: ${e.toString()}');
     }

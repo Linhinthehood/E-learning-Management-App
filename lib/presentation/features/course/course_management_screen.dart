@@ -8,6 +8,7 @@ import '../../providers/course_provider.dart';
 import '../../providers/semester_provider.dart';
 import 'widgets/course_form_dialog.dart';
 import 'widgets/enrollment_management_dialog.dart';
+import 'course_detail_screen.dart';
 
 /// Course Management Screen for instructors
 class CourseManagementScreen extends ConsumerStatefulWidget {
@@ -434,6 +435,36 @@ class _CourseManagementScreenState
                     ),
                   ),
                   const Spacer(),
+                  // View Course button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CourseDetailScreen(course: course),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.buttonPrimary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'View Course',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

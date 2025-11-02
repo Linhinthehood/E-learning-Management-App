@@ -47,7 +47,7 @@ class QuizNotifier extends StateNotifier<AsyncValue<List<QuizEntity>>> {
     }
   }
 
-  /// Load currently open quizzes
+  /// Load open quizzes (currently available)
   Future<void> loadOpenQuizzes(String courseId) async {
     _currentCourseId = courseId;
     state = const AsyncValue.loading();
@@ -59,7 +59,7 @@ class QuizNotifier extends StateNotifier<AsyncValue<List<QuizEntity>>> {
     }
   }
 
-  /// Load upcoming quizzes (within N days)
+  /// Load upcoming quizzes
   Future<void> loadUpcomingQuizzes(String courseId, int daysAhead) async {
     _currentCourseId = courseId;
     state = const AsyncValue.loading();

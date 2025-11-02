@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/remote/question_remote_datasource.dart';
 import '../../data/repositories/question_repository_impl.dart';
-import '../../domain/entities/question_bank_entity.dart';
 import '../../domain/entities/question_entity.dart';
+import '../../domain/entities/question_bank_entity.dart';
 import '../../domain/repositories/i_question_repository.dart';
 
 /// Provider for question remote data source
@@ -18,8 +18,6 @@ final questionRepositoryProvider = Provider<IQuestionRepository>((ref) {
     remoteDataSource: ref.read(questionRemoteDataSourceProvider),
   );
 });
-
-// ==================== Question Bank Providers ====================
 
 /// Question Bank state notifier - manages question banks for a course
 class QuestionBankNotifier
@@ -105,8 +103,6 @@ final questionBankByIdProvider =
       final repository = ref.read(questionRepositoryProvider);
       return await repository.getQuestionBankById(questionBankId);
     });
-
-// ==================== Question Providers ====================
 
 /// Question state notifier - manages questions for a question bank
 class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionEntity>>> {

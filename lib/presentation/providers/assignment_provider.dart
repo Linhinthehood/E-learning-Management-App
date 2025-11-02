@@ -53,7 +53,7 @@ class AssignmentNotifier
     }
   }
 
-  /// Load currently open assignments
+  /// Load open assignments (currently accepting submissions)
   Future<void> loadOpenAssignments(String courseId) async {
     _currentCourseId = courseId;
     state = const AsyncValue.loading();
@@ -65,7 +65,7 @@ class AssignmentNotifier
     }
   }
 
-  /// Load upcoming assignments (within N days)
+  /// Load upcoming assignments
   Future<void> loadUpcomingAssignments(String courseId, int daysAhead) async {
     _currentCourseId = courseId;
     state = const AsyncValue.loading();

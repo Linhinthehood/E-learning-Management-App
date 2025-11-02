@@ -28,15 +28,20 @@ class MaterialRemoteDataSourceImpl implements MaterialRemoteDataSource {
   @override
   Future<List<MaterialModel>> getMaterialsByCourse(String courseId) async {
     try {
+      // Get all materials for the course (without orderBy to avoid index requirement)
       final querySnapshot = await _firestore
           .collection('materials')
           .where('courseId', isEqualTo: courseId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      final materials = querySnapshot.docs
           .map((doc) => MaterialModel.fromJson(doc.data(), doc.id))
           .toList();
+
+      // Sort in memory by createdAt (descending)
+      materials.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return materials;
     } catch (e) {
       throw Exception('Failed to get materials: ${e.toString()}');
     }
@@ -48,16 +53,21 @@ class MaterialRemoteDataSourceImpl implements MaterialRemoteDataSource {
     String groupId,
   ) async {
     try {
+      // Get materials for the course and group (without orderBy to avoid index requirement)
       final querySnapshot = await _firestore
           .collection('materials')
           .where('courseId', isEqualTo: courseId)
           .where('scopedGroupIds', arrayContains: groupId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      final materials = querySnapshot.docs
           .map((doc) => MaterialModel.fromJson(doc.data(), doc.id))
           .toList();
+
+      // Sort in memory by createdAt (descending)
+      materials.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return materials;
     } catch (e) {
       throw Exception('Failed to get group materials: ${e.toString()}');
     }
@@ -84,16 +94,21 @@ class MaterialRemoteDataSourceImpl implements MaterialRemoteDataSource {
     MaterialType type,
   ) async {
     try {
+      // Get materials and filter in memory (without complex orderBy to avoid index requirement)
       final querySnapshot = await _firestore
           .collection('materials')
           .where('courseId', isEqualTo: courseId)
           .where('type', isEqualTo: type.name)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      final materials = querySnapshot.docs
           .map((doc) => MaterialModel.fromJson(doc.data(), doc.id))
           .toList();
+
+      // Sort in memory by createdAt (descending)
+      materials.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return materials;
     } catch (e) {
       throw Exception('Failed to get materials by type: ${e.toString()}');
     }

@@ -593,22 +593,27 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
 
   IconData _getCourseIcon(String courseName) {
     final name = courseName.toLowerCase();
-    if (name.contains('math') || name.contains('calculus'))
+    if (name.contains('math') || name.contains('calculus')) {
       return Icons.calculate;
+    }
     if (name.contains('physics')) return Icons.science;
     if (name.contains('chemistry')) return Icons.science;
     if (name.contains('biology')) return Icons.biotech;
-    if (name.contains('computer') || name.contains('programming'))
+    if (name.contains('computer') || name.contains('programming')) {
       return Icons.computer;
-    if (name.contains('english') || name.contains('literature'))
+    }
+    if (name.contains('english') || name.contains('literature')) {
       return Icons.book;
+    }
     if (name.contains('history')) return Icons.history_edu;
     if (name.contains('art')) return Icons.brush;
     if (name.contains('music')) return Icons.music_note;
-    if (name.contains('spanish') || name.contains('french'))
+    if (name.contains('spanish') || name.contains('french')) {
       return Icons.language;
-    if (name.contains('design') || name.contains('figma'))
+    }
+    if (name.contains('design') || name.contains('figma')) {
       return Icons.design_services;
+    }
     if (name.contains('photo')) return Icons.camera_alt;
     return Icons.school;
   }
