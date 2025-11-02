@@ -13,4 +13,3 @@ class GetAllStudentsUseCase {
     return await _enrollmentRepository.getAllStudents();
   }
 }
-

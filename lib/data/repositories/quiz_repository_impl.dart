@@ -8,9 +8,7 @@ import '../datasources/models/quiz_model.dart';
 class QuizRepositoryImpl implements IQuizRepository {
   final QuizRemoteDataSource remoteDataSource;
 
-  QuizRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  QuizRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<List<QuizEntity>> getQuizzesByCourse(String courseId) async {
@@ -23,9 +21,15 @@ class QuizRepositoryImpl implements IQuizRepository {
   }
 
   @override
-  Future<List<QuizEntity>> getQuizzesByGroup(String courseId, String groupId) async {
+  Future<List<QuizEntity>> getQuizzesByGroup(
+    String courseId,
+    String groupId,
+  ) async {
     try {
-      final quizModels = await remoteDataSource.getQuizzesByGroup(courseId, groupId);
+      final quizModels = await remoteDataSource.getQuizzesByGroup(
+        courseId,
+        groupId,
+      );
       return quizModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -53,9 +57,15 @@ class QuizRepositoryImpl implements IQuizRepository {
   }
 
   @override
-  Future<List<QuizEntity>> getUpcomingQuizzes(String courseId, int daysAhead) async {
+  Future<List<QuizEntity>> getUpcomingQuizzes(
+    String courseId,
+    int daysAhead,
+  ) async {
     try {
-      final quizModels = await remoteDataSource.getUpcomingQuizzes(courseId, daysAhead);
+      final quizModels = await remoteDataSource.getUpcomingQuizzes(
+        courseId,
+        daysAhead,
+      );
       return quizModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;

@@ -33,4 +33,3 @@ class UpdateCourseUseCase {
     return await _courseRepository.updateCourse(course);
   }
 }
-

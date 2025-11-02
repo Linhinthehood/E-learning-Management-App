@@ -10,16 +10,17 @@ import '../datasources/models/question_model.dart';
 class QuestionRepositoryImpl implements IQuestionRepository {
   final QuestionRemoteDataSource remoteDataSource;
 
-  QuestionRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  QuestionRepositoryImpl({required this.remoteDataSource});
 
   // ==================== Question Bank Methods ====================
 
   @override
-  Future<List<QuestionBankEntity>> getQuestionBanksByCourse(String courseId) async {
+  Future<List<QuestionBankEntity>> getQuestionBanksByCourse(
+    String courseId,
+  ) async {
     try {
-      final questionBankModels = await remoteDataSource.getQuestionBanksByCourse(courseId);
+      final questionBankModels = await remoteDataSource
+          .getQuestionBanksByCourse(courseId);
       return questionBankModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -29,7 +30,9 @@ class QuestionRepositoryImpl implements IQuestionRepository {
   @override
   Future<QuestionBankEntity?> getQuestionBankById(String questionBankId) async {
     try {
-      final questionBankModel = await remoteDataSource.getQuestionBankById(questionBankId);
+      final questionBankModel = await remoteDataSource.getQuestionBankById(
+        questionBankId,
+      );
       return questionBankModel?.toEntity();
     } catch (e) {
       rethrow;
@@ -37,10 +40,14 @@ class QuestionRepositoryImpl implements IQuestionRepository {
   }
 
   @override
-  Future<QuestionBankEntity> createQuestionBank(QuestionBankEntity questionBank) async {
+  Future<QuestionBankEntity> createQuestionBank(
+    QuestionBankEntity questionBank,
+  ) async {
     try {
       final questionBankModel = QuestionBankModel.fromEntity(questionBank);
-      final createdModel = await remoteDataSource.createQuestionBank(questionBankModel);
+      final createdModel = await remoteDataSource.createQuestionBank(
+        questionBankModel,
+      );
       return createdModel.toEntity();
     } catch (e) {
       rethrow;
@@ -48,10 +55,14 @@ class QuestionRepositoryImpl implements IQuestionRepository {
   }
 
   @override
-  Future<QuestionBankEntity> updateQuestionBank(QuestionBankEntity questionBank) async {
+  Future<QuestionBankEntity> updateQuestionBank(
+    QuestionBankEntity questionBank,
+  ) async {
     try {
       final questionBankModel = QuestionBankModel.fromEntity(questionBank);
-      final updatedModel = await remoteDataSource.updateQuestionBank(questionBankModel);
+      final updatedModel = await remoteDataSource.updateQuestionBank(
+        questionBankModel,
+      );
       return updatedModel.toEntity();
     } catch (e) {
       rethrow;
@@ -72,7 +83,9 @@ class QuestionRepositoryImpl implements IQuestionRepository {
   @override
   Future<List<QuestionEntity>> getQuestionsByBank(String questionBankId) async {
     try {
-      final questionModels = await remoteDataSource.getQuestionsByBank(questionBankId);
+      final questionModels = await remoteDataSource.getQuestionsByBank(
+        questionBankId,
+      );
       return questionModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -95,7 +108,10 @@ class QuestionRepositoryImpl implements IQuestionRepository {
     QuestionDifficulty difficulty,
   ) async {
     try {
-      final questionModels = await remoteDataSource.getQuestionsByDifficulty(questionBankId, difficulty);
+      final questionModels = await remoteDataSource.getQuestionsByDifficulty(
+        questionBankId,
+        difficulty,
+      );
       return questionModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -108,7 +124,10 @@ class QuestionRepositoryImpl implements IQuestionRepository {
     QuestionType type,
   ) async {
     try {
-      final questionModels = await remoteDataSource.getQuestionsByType(questionBankId, type);
+      final questionModels = await remoteDataSource.getQuestionsByType(
+        questionBankId,
+        type,
+      );
       return questionModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -116,9 +135,15 @@ class QuestionRepositoryImpl implements IQuestionRepository {
   }
 
   @override
-  Future<List<QuestionEntity>> getRandomQuestions(String questionBankId, int count) async {
+  Future<List<QuestionEntity>> getRandomQuestions(
+    String questionBankId,
+    int count,
+  ) async {
     try {
-      final questionModels = await remoteDataSource.getRandomQuestions(questionBankId, count);
+      final questionModels = await remoteDataSource.getRandomQuestions(
+        questionBankId,
+        count,
+      );
       return questionModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;

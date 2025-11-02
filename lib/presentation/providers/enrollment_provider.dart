@@ -9,9 +9,11 @@ import '../../domain/usecases/enrollment/get_enrollments_by_course_usecase.dart'
 import '../../domain/usecases/enrollment/get_all_students_usecase.dart';
 
 /// Provider for enrollment remote data source
-final enrollmentRemoteDataSourceProvider = Provider<EnrollmentRemoteDataSource>((ref) {
-  return EnrollmentRemoteDataSourceImpl();
-});
+final enrollmentRemoteDataSourceProvider = Provider<EnrollmentRemoteDataSource>(
+  (ref) {
+    return EnrollmentRemoteDataSourceImpl();
+  },
+);
 
 /// Provider for enrollment repository
 final enrollmentRepositoryProvider = Provider<EnrollmentRepositoryImpl>((ref) {
@@ -21,19 +23,26 @@ final enrollmentRepositoryProvider = Provider<EnrollmentRepositoryImpl>((ref) {
 });
 
 /// Provider for create enrollment use case
-final createEnrollmentUseCaseProvider = Provider<CreateEnrollmentUseCase>((ref) {
+final createEnrollmentUseCaseProvider = Provider<CreateEnrollmentUseCase>((
+  ref,
+) {
   return CreateEnrollmentUseCase(ref.read(enrollmentRepositoryProvider));
 });
 
 /// Provider for delete enrollment use case
-final deleteEnrollmentUseCaseProvider = Provider<DeleteEnrollmentUseCase>((ref) {
+final deleteEnrollmentUseCaseProvider = Provider<DeleteEnrollmentUseCase>((
+  ref,
+) {
   return DeleteEnrollmentUseCase(ref.read(enrollmentRepositoryProvider));
 });
 
 /// Provider for get enrollments by course use case
-final getEnrollmentsByCourseUseCaseProvider = Provider<GetEnrollmentsByCourseUseCase>((ref) {
-  return GetEnrollmentsByCourseUseCase(ref.read(enrollmentRepositoryProvider));
-});
+final getEnrollmentsByCourseUseCaseProvider =
+    Provider<GetEnrollmentsByCourseUseCase>((ref) {
+      return GetEnrollmentsByCourseUseCase(
+        ref.read(enrollmentRepositoryProvider),
+      );
+    });
 
 /// Provider for get all students use case
 final getAllStudentsUseCaseProvider = Provider<GetAllStudentsUseCase>((ref) {
@@ -41,7 +50,8 @@ final getAllStudentsUseCaseProvider = Provider<GetAllStudentsUseCase>((ref) {
 });
 
 /// Enrollment state notifier - manages enrollments for a course
-class EnrollmentNotifier extends StateNotifier<AsyncValue<List<EnrollmentEntity>>> {
+class EnrollmentNotifier
+    extends StateNotifier<AsyncValue<List<EnrollmentEntity>>> {
   final GetEnrollmentsByCourseUseCase _getEnrollmentsByCourseUseCase;
   final CreateEnrollmentUseCase _createEnrollmentUseCase;
   final DeleteEnrollmentUseCase _deleteEnrollmentUseCase;
@@ -56,7 +66,9 @@ class EnrollmentNotifier extends StateNotifier<AsyncValue<List<EnrollmentEntity>
   Future<void> loadEnrollments(String courseId) async {
     state = const AsyncValue.loading();
     try {
-      final enrollments = await _getEnrollmentsByCourseUseCase.execute(courseId);
+      final enrollments = await _getEnrollmentsByCourseUseCase.execute(
+        courseId,
+      );
       state = AsyncValue.data(enrollments);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -85,19 +97,24 @@ class EnrollmentNotifier extends StateNotifier<AsyncValue<List<EnrollmentEntity>
 }
 
 /// Provider for enrollment state notifier
-final enrollmentProvider = StateNotifierProvider<EnrollmentNotifier, AsyncValue<List<EnrollmentEntity>>>((ref) {
-  return EnrollmentNotifier(
-    ref.read(getEnrollmentsByCourseUseCaseProvider),
-    ref.read(createEnrollmentUseCaseProvider),
-    ref.read(deleteEnrollmentUseCaseProvider),
-  );
-});
+final enrollmentProvider =
+    StateNotifierProvider<
+      EnrollmentNotifier,
+      AsyncValue<List<EnrollmentEntity>>
+    >((ref) {
+      return EnrollmentNotifier(
+        ref.read(getEnrollmentsByCourseUseCaseProvider),
+        ref.read(createEnrollmentUseCaseProvider),
+        ref.read(deleteEnrollmentUseCaseProvider),
+      );
+    });
 
 /// Students state notifier - manages list of all students
 class StudentsNotifier extends StateNotifier<AsyncValue<List<UserEntity>>> {
   final GetAllStudentsUseCase _getAllStudentsUseCase;
 
-  StudentsNotifier(this._getAllStudentsUseCase) : super(const AsyncValue.loading()) {
+  StudentsNotifier(this._getAllStudentsUseCase)
+    : super(const AsyncValue.loading()) {
     loadStudents();
   }
 
@@ -119,7 +136,9 @@ class StudentsNotifier extends StateNotifier<AsyncValue<List<UserEntity>>> {
 }
 
 /// Provider for students state notifier
-final studentsProvider = StateNotifierProvider<StudentsNotifier, AsyncValue<List<UserEntity>>>((ref) {
-  return StudentsNotifier(ref.read(getAllStudentsUseCaseProvider));
-});
-
+final studentsProvider =
+    StateNotifierProvider<StudentsNotifier, AsyncValue<List<UserEntity>>>((
+      ref,
+    ) {
+      return StudentsNotifier(ref.read(getAllStudentsUseCaseProvider));
+    });

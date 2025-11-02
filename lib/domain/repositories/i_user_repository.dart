@@ -27,4 +27,3 @@ abstract class IUserRepository {
   /// Delete a student account
   Future<void> deleteStudent(String userId);
 }
-

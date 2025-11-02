@@ -12,7 +12,8 @@ class StudentProfileScreen extends ConsumerStatefulWidget {
   const StudentProfileScreen({super.key});
 
   @override
-  ConsumerState<StudentProfileScreen> createState() => _StudentProfileScreenState();
+  ConsumerState<StudentProfileScreen> createState() =>
+      _StudentProfileScreenState();
 }
 
 class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
@@ -68,10 +69,9 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
           ? null
           : _avatarUrlController.text.trim();
 
-      await ref.read(userProfileProvider.notifier).updateProfile(
-            user.uid,
-            avatarUrl,
-          );
+      await ref
+          .read(userProfileProvider.notifier)
+          .updateProfile(user.uid, avatarUrl);
 
       // Refresh auth provider to update current user
       await ref.read(authProvider.notifier).refreshUser();
@@ -158,9 +158,13 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                               decoration: BoxDecoration(
                                 color: AppColors.background,
                                 borderRadius: BorderRadius.circular(60),
-                                border: Border.all(color: AppColors.border, width: 2),
+                                border: Border.all(
+                                  color: AppColors.border,
+                                  width: 2,
+                                ),
                               ),
-                              child: user.avatarUrl != null &&
+                              child:
+                                  user.avatarUrl != null &&
                                       user.avatarUrl!.isNotEmpty
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.circular(58),
@@ -215,8 +219,11 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.error_outline,
-                                    color: Colors.red, size: 20),
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
@@ -275,8 +282,11 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            Icon(Icons.info_outline,
-                                size: 16, color: AppColors.textSecondary),
+                            Icon(
+                              Icons.info_outline,
+                              size: 16,
+                              color: AppColors.textSecondary,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'Display name cannot be changed. Please contact administrator if you need to update it.',
@@ -349,31 +359,37 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                             fillColor: AppColors.background,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide:
-                                  const BorderSide(color: AppColors.border),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide:
-                                  const BorderSide(color: AppColors.border),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                  color: AppColors.buttonPrimary, width: 2),
+                                color: AppColors.buttonPrimary,
+                                width: 2,
+                              ),
                             ),
                             errorBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(color: Colors.red),
                             ),
                           ),
-                          style: GoogleFonts.inter(color: AppColors.textPrimary),
+                          style: GoogleFonts.inter(
+                            color: AppColors.textPrimary,
+                          ),
                           validator: (value) {
                             if (value != null && value.trim().isNotEmpty) {
                               final url = value.trim();
                               final uri = Uri.tryParse(url);
-                              if (uri == null || 
-                                  !uri.hasScheme || 
+                              if (uri == null ||
+                                  !uri.hasScheme ||
                                   (!uri.scheme.startsWith('http'))) {
                                 return 'Please enter a valid URL (must start with http:// or https://)';
                               }
@@ -384,8 +400,11 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            Icon(Icons.info_outline,
-                                size: 16, color: AppColors.textSecondary),
+                            Icon(
+                              Icons.info_outline,
+                              size: 16,
+                              color: AppColors.textSecondary,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'Leave empty to remove avatar',
@@ -421,8 +440,10 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                                       height: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                            Colors.white),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
                                       ),
                                     )
                                   : Text(
@@ -458,4 +479,3 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
     );
   }
 }
-

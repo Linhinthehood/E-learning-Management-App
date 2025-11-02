@@ -116,12 +116,16 @@ class QuizNotifier extends StateNotifier<AsyncValue<List<QuizEntity>>> {
 }
 
 /// Provider for quiz state notifier
-final quizProvider = StateNotifierProvider<QuizNotifier, AsyncValue<List<QuizEntity>>>((ref) {
-  return QuizNotifier(ref.read(quizRepositoryProvider));
-});
+final quizProvider =
+    StateNotifierProvider<QuizNotifier, AsyncValue<List<QuizEntity>>>((ref) {
+      return QuizNotifier(ref.read(quizRepositoryProvider));
+    });
 
 /// Provider for fetching a single quiz by ID
-final quizByIdProvider = FutureProvider.family<QuizEntity?, String>((ref, quizId) async {
+final quizByIdProvider = FutureProvider.family<QuizEntity?, String>((
+  ref,
+  quizId,
+) async {
   final repository = ref.read(quizRepositoryProvider);
   return await repository.getQuizById(quizId);
 });

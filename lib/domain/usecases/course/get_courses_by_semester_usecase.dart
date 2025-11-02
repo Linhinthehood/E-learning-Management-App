@@ -17,4 +17,3 @@ class GetCoursesBySemesterUseCase {
     return await _courseRepository.getCoursesBySemester(semesterId);
   }
 }
-

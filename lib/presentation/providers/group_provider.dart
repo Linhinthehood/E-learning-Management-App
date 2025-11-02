@@ -8,7 +8,9 @@ import '../../domain/usecases/group/get_groups_by_course_usecase.dart';
 import 'enrollment_provider.dart';
 
 /// Provider for enrollment remote data source (used for groups)
-final groupRemoteDataSourceProvider = Provider<EnrollmentRemoteDataSource>((ref) {
+final groupRemoteDataSourceProvider = Provider<EnrollmentRemoteDataSource>((
+  ref,
+) {
   return ref.read(enrollmentRemoteDataSourceProvider);
 });
 
@@ -30,7 +32,9 @@ final deleteGroupUseCaseProvider = Provider<DeleteGroupUseCase>((ref) {
 });
 
 /// Provider for get groups by course use case
-final getGroupsByCourseUseCaseProvider = Provider<GetGroupsByCourseUseCase>((ref) {
+final getGroupsByCourseUseCaseProvider = Provider<GetGroupsByCourseUseCase>((
+  ref,
+) {
   return GetGroupsByCourseUseCase(ref.read(groupRepositoryProvider));
 });
 
@@ -79,11 +83,11 @@ class GroupNotifier extends StateNotifier<AsyncValue<List<GroupEntity>>> {
 }
 
 /// Provider for group state notifier
-final groupProvider = StateNotifierProvider<GroupNotifier, AsyncValue<List<GroupEntity>>>((ref) {
-  return GroupNotifier(
-    ref.read(getGroupsByCourseUseCaseProvider),
-    ref.read(createGroupUseCaseProvider),
-    ref.read(deleteGroupUseCaseProvider),
-  );
-});
-
+final groupProvider =
+    StateNotifierProvider<GroupNotifier, AsyncValue<List<GroupEntity>>>((ref) {
+      return GroupNotifier(
+        ref.read(getGroupsByCourseUseCaseProvider),
+        ref.read(createGroupUseCaseProvider),
+        ref.read(deleteGroupUseCaseProvider),
+      );
+    });

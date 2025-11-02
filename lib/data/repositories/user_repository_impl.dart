@@ -6,14 +6,15 @@ import '../datasources/remote/auth_remote_datasource.dart';
 class UserRepositoryImpl implements IUserRepository {
   final AuthRemoteDataSource remoteDataSource;
 
-  UserRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  UserRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<UserEntity> updateUserProfile(String userId, String? avatarUrl) async {
     try {
-      final userModel = await remoteDataSource.updateUserProfile(userId, avatarUrl);
+      final userModel = await remoteDataSource.updateUserProfile(
+        userId,
+        avatarUrl,
+      );
       return userModel.toEntity();
     } catch (e) {
       rethrow;
@@ -37,7 +38,11 @@ class UserRepositoryImpl implements IUserRepository {
     required String displayName,
   }) async {
     try {
-      final userModel = await remoteDataSource.createStudent(email, password, displayName);
+      final userModel = await remoteDataSource.createStudent(
+        email,
+        password,
+        displayName,
+      );
       return userModel.toEntity();
     } catch (e) {
       rethrow;
@@ -51,7 +56,11 @@ class UserRepositoryImpl implements IUserRepository {
     required String email,
   }) async {
     try {
-      final userModel = await remoteDataSource.updateStudent(userId, displayName, email);
+      final userModel = await remoteDataSource.updateStudent(
+        userId,
+        displayName,
+        email,
+      );
       return userModel.toEntity();
     } catch (e) {
       rethrow;
@@ -67,4 +76,3 @@ class UserRepositoryImpl implements IUserRepository {
     }
   }
 }
-

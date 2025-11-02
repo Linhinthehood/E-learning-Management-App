@@ -17,4 +17,3 @@ class UpdateUserProfileUseCase {
     return await _userRepository.updateUserProfile(userId, avatarUrl);
   }
 }
-

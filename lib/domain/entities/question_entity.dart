@@ -70,8 +70,4 @@ enum QuestionType {
 }
 
 /// Difficulty level
-enum QuestionDifficulty {
-  easy,
-  medium,
-  hard,
-}
+enum QuestionDifficulty { easy, medium, hard }

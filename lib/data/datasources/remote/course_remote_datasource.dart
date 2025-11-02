@@ -11,7 +11,10 @@ abstract class CourseRemoteDataSource {
   Future<CourseModel?> getCourseById(String courseId);
 
   /// Get courses that a student is enrolled in for a semester
-  Future<List<CourseModel>> getStudentCourses(String studentId, String semesterId);
+  Future<List<CourseModel>> getStudentCourses(
+    String studentId,
+    String semesterId,
+  );
 
   /// Get instructor information for a course
   Future<Map<String, String>?> getInstructorInfo(String instructorId);
@@ -60,7 +63,10 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   }
 
   @override
-  Future<List<CourseModel>> getStudentCourses(String studentId, String semesterId) async {
+  Future<List<CourseModel>> getStudentCourses(
+    String studentId,
+    String semesterId,
+  ) async {
     try {
       // Get all enrollments for this student in this semester
       final enrollmentSnapshot = await _firestore
@@ -119,7 +125,9 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   @override
   Future<CourseModel> createCourse(CourseModel course) async {
     try {
-      final docRef = await _firestore.collection('courses').add(course.toJson());
+      final docRef = await _firestore
+          .collection('courses')
+          .add(course.toJson());
       final createdDoc = await docRef.get();
       return CourseModel.fromJson(createdDoc.data()!, createdDoc.id);
     } catch (e) {
@@ -149,4 +157,3 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
     }
   }
 }
-

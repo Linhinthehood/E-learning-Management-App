@@ -79,7 +79,7 @@ class AuthRepositoryImpl implements IAuthRepository {
         await localDataSource.cacheUser(currentUser);
         return currentUser.toEntity();
       }
-      
+
       // If Firebase Auth has no user, clear cache
       await localDataSource.clearCache();
       return null;

@@ -18,7 +18,9 @@ final userRepositoryProvider = Provider<UserRepositoryImpl>((ref) {
 });
 
 /// Provider for update user profile use case
-final updateUserProfileUseCaseProvider = Provider<UpdateUserProfileUseCase>((ref) {
+final updateUserProfileUseCaseProvider = Provider<UpdateUserProfileUseCase>((
+  ref,
+) {
   return UpdateUserProfileUseCase(ref.read(userRepositoryProvider));
 });
 
@@ -27,13 +29,16 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserEntity>> {
   final UpdateUserProfileUseCase _updateUserProfileUseCase;
 
   UserProfileNotifier(this._updateUserProfileUseCase)
-      : super(const AsyncValue.loading());
+    : super(const AsyncValue.loading());
 
   /// Update user profile (avatar URL)
   Future<void> updateProfile(String userId, String? avatarUrl) async {
     state = const AsyncValue.loading();
     try {
-      final updatedUser = await _updateUserProfileUseCase.execute(userId, avatarUrl);
+      final updatedUser = await _updateUserProfileUseCase.execute(
+        userId,
+        avatarUrl,
+      );
       state = AsyncValue.data(updatedUser);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -44,6 +49,5 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserEntity>> {
 /// Provider for user profile state notifier
 final userProfileProvider =
     StateNotifierProvider<UserProfileNotifier, AsyncValue<UserEntity>>((ref) {
-  return UserProfileNotifier(ref.read(updateUserProfileUseCaseProvider));
-});
-
+      return UserProfileNotifier(ref.read(updateUserProfileUseCaseProvider));
+    });

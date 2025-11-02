@@ -12,10 +12,7 @@ import '../../../providers/auth_provider.dart';
 class CourseFormDialog extends ConsumerStatefulWidget {
   final CourseEntity? course;
 
-  const CourseFormDialog({
-    super.key,
-    this.course,
-  });
+  const CourseFormDialog({super.key, this.course});
 
   @override
   ConsumerState<CourseFormDialog> createState() => _CourseFormDialogState();
@@ -35,8 +32,9 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
     super.initState();
     _nameController = TextEditingController(text: widget.course?.name ?? '');
     _codeController = TextEditingController(text: widget.course?.code ?? '');
-    _coverImageUrlController =
-        TextEditingController(text: widget.course?.coverImageUrl ?? '');
+    _coverImageUrlController = TextEditingController(
+      text: widget.course?.coverImageUrl ?? '',
+    );
     _selectedSessions = widget.course?.sessions ?? 10;
   }
 
@@ -166,9 +164,7 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
 
     return Dialog(
       backgroundColor: AppColors.cardBackground,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         width: 600,
         padding: const EdgeInsets.all(32),
@@ -308,6 +304,7 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
                       );
                     }
                     return DropdownButtonFormField<SemesterEntity>(
+                      // ignore: deprecated_member_use
                       value: _selectedSemester,
                       decoration: InputDecoration(
                         filled: true,
@@ -372,35 +369,21 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: RadioListTile<int>(
-                        title: const Text('10 Sessions'),
-                        value: 10,
-                        groupValue: _selectedSessions,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedSessions = value!;
-                          });
-                        },
-                        activeColor: AppColors.buttonPrimary,
-                      ),
-                    ),
-                    Expanded(
-                      child: RadioListTile<int>(
-                        title: const Text('15 Sessions'),
-                        value: 15,
-                        groupValue: _selectedSessions,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedSessions = value!;
-                          });
-                        },
-                        activeColor: AppColors.buttonPrimary,
-                      ),
-                    ),
+                SegmentedButton<int>(
+                  segments: const [
+                    ButtonSegment<int>(value: 10, label: Text('10 Sessions')),
+                    ButtonSegment<int>(value: 15, label: Text('15 Sessions')),
                   ],
+                  selected: {_selectedSessions},
+                  onSelectionChanged: (Set<int> newSelection) {
+                    setState(() {
+                      _selectedSessions = newSelection.first;
+                    });
+                  },
+                  style: SegmentedButton.styleFrom(
+                    selectedBackgroundColor: AppColors.buttonPrimary,
+                    selectedForegroundColor: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 // Cover Image URL (optional)
@@ -493,4 +476,3 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
     );
   }
 }
-

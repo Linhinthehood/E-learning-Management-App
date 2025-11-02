@@ -5,9 +5,11 @@ import '../../domain/entities/assignment_entity.dart';
 import '../../domain/repositories/i_assignment_repository.dart';
 
 /// Provider for assignment remote data source
-final assignmentRemoteDataSourceProvider = Provider<AssignmentRemoteDataSource>((ref) {
-  return AssignmentRemoteDataSourceImpl();
-});
+final assignmentRemoteDataSourceProvider = Provider<AssignmentRemoteDataSource>(
+  (ref) {
+    return AssignmentRemoteDataSourceImpl();
+  },
+);
 
 /// Provider for assignment repository
 final assignmentRepositoryProvider = Provider<IAssignmentRepository>((ref) {
@@ -17,7 +19,8 @@ final assignmentRepositoryProvider = Provider<IAssignmentRepository>((ref) {
 });
 
 /// Assignment state notifier - manages assignments for a course
-class AssignmentNotifier extends StateNotifier<AsyncValue<List<AssignmentEntity>>> {
+class AssignmentNotifier
+    extends StateNotifier<AsyncValue<List<AssignmentEntity>>> {
   final IAssignmentRepository _repository;
   String? _currentCourseId;
 
@@ -40,7 +43,10 @@ class AssignmentNotifier extends StateNotifier<AsyncValue<List<AssignmentEntity>
     _currentCourseId = courseId;
     state = const AsyncValue.loading();
     try {
-      final assignments = await _repository.getAssignmentsByGroup(courseId, groupId);
+      final assignments = await _repository.getAssignmentsByGroup(
+        courseId,
+        groupId,
+      );
       state = AsyncValue.data(assignments);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -64,7 +70,10 @@ class AssignmentNotifier extends StateNotifier<AsyncValue<List<AssignmentEntity>
     _currentCourseId = courseId;
     state = const AsyncValue.loading();
     try {
-      final assignments = await _repository.getUpcomingAssignments(courseId, daysAhead);
+      final assignments = await _repository.getUpcomingAssignments(
+        courseId,
+        daysAhead,
+      );
       state = AsyncValue.data(assignments);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -116,12 +125,18 @@ class AssignmentNotifier extends StateNotifier<AsyncValue<List<AssignmentEntity>
 }
 
 /// Provider for assignment state notifier
-final assignmentProvider = StateNotifierProvider<AssignmentNotifier, AsyncValue<List<AssignmentEntity>>>((ref) {
-  return AssignmentNotifier(ref.read(assignmentRepositoryProvider));
-});
+final assignmentProvider =
+    StateNotifierProvider<
+      AssignmentNotifier,
+      AsyncValue<List<AssignmentEntity>>
+    >((ref) {
+      return AssignmentNotifier(ref.read(assignmentRepositoryProvider));
+    });
 
 /// Provider for fetching a single assignment by ID
-final assignmentByIdProvider = FutureProvider.family<AssignmentEntity?, String>((ref, assignmentId) async {
-  final repository = ref.read(assignmentRepositoryProvider);
-  return await repository.getAssignmentById(assignmentId);
-});
+final assignmentByIdProvider = FutureProvider.family<AssignmentEntity?, String>(
+  (ref, assignmentId) async {
+    final repository = ref.read(assignmentRepositoryProvider);
+    return await repository.getAssignmentById(assignmentId);
+  },
+);

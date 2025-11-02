@@ -32,9 +32,7 @@ class _GroupFormDialogState extends ConsumerState<GroupFormDialog> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.group?.name ?? '',
-    );
+    _nameController = TextEditingController(text: widget.group?.name ?? '');
   }
 
   @override
@@ -104,9 +102,7 @@ class _GroupFormDialogState extends ConsumerState<GroupFormDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: AppColors.cardBackground,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         width: 500,
         padding: const EdgeInsets.all(32),
@@ -151,11 +147,17 @@ class _GroupFormDialogState extends ConsumerState<GroupFormDialog> {
                   decoration: BoxDecoration(
                     color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: Colors.red.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -190,7 +192,10 @@ class _GroupFormDialogState extends ConsumerState<GroupFormDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.buttonPrimary, width: 2),
+                    borderSide: const BorderSide(
+                      color: AppColors.buttonPrimary,
+                      width: 2,
+                    ),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -214,7 +219,9 @@ class _GroupFormDialogState extends ConsumerState<GroupFormDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                    onPressed: _isLoading
+                        ? null
+                        : () => Navigator.of(context).pop(),
                     child: Text(
                       'Cancel',
                       style: GoogleFonts.inter(
@@ -229,7 +236,10 @@ class _GroupFormDialogState extends ConsumerState<GroupFormDialog> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.buttonPrimary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -240,7 +250,9 @@ class _GroupFormDialogState extends ConsumerState<GroupFormDialog> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : Text(
@@ -259,4 +271,3 @@ class _GroupFormDialogState extends ConsumerState<GroupFormDialog> {
     );
   }
 }
-

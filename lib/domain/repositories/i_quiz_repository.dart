@@ -7,10 +7,7 @@ abstract class IQuizRepository {
   Future<List<QuizEntity>> getQuizzesByCourse(String courseId);
 
   /// Get quizzes for a specific group
-  Future<List<QuizEntity>> getQuizzesByGroup(
-    String courseId,
-    String groupId,
-  );
+  Future<List<QuizEntity>> getQuizzesByGroup(String courseId, String groupId);
 
   /// Get a single quiz by ID
   Future<QuizEntity?> getQuizById(String quizId);
@@ -19,10 +16,7 @@ abstract class IQuizRepository {
   Future<List<QuizEntity>> getOpenQuizzes(String courseId);
 
   /// Get upcoming quizzes
-  Future<List<QuizEntity>> getUpcomingQuizzes(
-    String courseId,
-    int daysAhead,
-  );
+  Future<List<QuizEntity>> getUpcomingQuizzes(String courseId, int daysAhead);
 
   /// Create a new quiz
   Future<QuizEntity> createQuiz(QuizEntity quiz);

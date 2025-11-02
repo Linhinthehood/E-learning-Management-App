@@ -15,4 +15,3 @@ abstract class IGroupRepository {
   /// Delete a group
   Future<void> deleteGroup(String groupId);
 }
-

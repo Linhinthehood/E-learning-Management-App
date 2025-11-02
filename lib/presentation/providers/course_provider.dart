@@ -21,14 +21,17 @@ final courseRepositoryProvider = Provider<CourseRepositoryImpl>((ref) {
 });
 
 /// Provider for get student courses use case
-final getStudentCoursesUseCaseProvider = Provider<GetStudentCoursesUseCase>((ref) {
+final getStudentCoursesUseCaseProvider = Provider<GetStudentCoursesUseCase>((
+  ref,
+) {
   return GetStudentCoursesUseCase(ref.read(courseRepositoryProvider));
 });
 
 /// Provider for get courses by semester use case
-final getCoursesBySemesterUseCaseProvider = Provider<GetCoursesBySemesterUseCase>((ref) {
-  return GetCoursesBySemesterUseCase(ref.read(courseRepositoryProvider));
-});
+final getCoursesBySemesterUseCaseProvider =
+    Provider<GetCoursesBySemesterUseCase>((ref) {
+      return GetCoursesBySemesterUseCase(ref.read(courseRepositoryProvider));
+    });
 
 /// Provider for create course use case
 final createCourseUseCaseProvider = Provider<CreateCourseUseCase>((ref) {
@@ -102,23 +105,27 @@ class CourseNotifier extends StateNotifier<AsyncValue<List<CourseEntity>>> {
 }
 
 /// Provider for course state notifier (for instructor)
-final courseProvider = StateNotifierProvider<CourseNotifier, AsyncValue<List<CourseEntity>>>((ref) {
-  return CourseNotifier(
-    ref.read(getCoursesBySemesterUseCaseProvider),
-    ref.read(createCourseUseCaseProvider),
-    ref.read(updateCourseUseCaseProvider),
-    ref.read(deleteCourseUseCaseProvider),
-  );
-});
+final courseProvider =
+    StateNotifierProvider<CourseNotifier, AsyncValue<List<CourseEntity>>>((
+      ref,
+    ) {
+      return CourseNotifier(
+        ref.read(getCoursesBySemesterUseCaseProvider),
+        ref.read(createCourseUseCaseProvider),
+        ref.read(updateCourseUseCaseProvider),
+        ref.read(deleteCourseUseCaseProvider),
+      );
+    });
 
 /// Course state notifier - manages student courses for a semester
-class StudentCoursesNotifier extends StateNotifier<AsyncValue<List<CourseEntity>>> {
+class StudentCoursesNotifier
+    extends StateNotifier<AsyncValue<List<CourseEntity>>> {
   final GetStudentCoursesUseCase _getStudentCoursesUseCase;
   String? _currentStudentId;
   String? _currentSemesterId;
 
   StudentCoursesNotifier(this._getStudentCoursesUseCase)
-      : super(const AsyncValue.loading());
+    : super(const AsyncValue.loading());
 
   /// Load courses for a student in a specific semester
   Future<void> loadCourses(String studentId, String semesterId) async {
@@ -132,7 +139,10 @@ class StudentCoursesNotifier extends StateNotifier<AsyncValue<List<CourseEntity>
 
     state = const AsyncValue.loading();
     try {
-      final courses = await _getStudentCoursesUseCase.execute(studentId, semesterId);
+      final courses = await _getStudentCoursesUseCase.execute(
+        studentId,
+        semesterId,
+      );
       state = AsyncValue.data(courses);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -150,8 +160,10 @@ class StudentCoursesNotifier extends StateNotifier<AsyncValue<List<CourseEntity>
 }
 
 /// Provider for student courses state notifier
-final studentCoursesProvider = StateNotifierProvider<
-    StudentCoursesNotifier, AsyncValue<List<CourseEntity>>>((ref) {
-  return StudentCoursesNotifier(ref.read(getStudentCoursesUseCaseProvider));
-});
-
+final studentCoursesProvider =
+    StateNotifierProvider<
+      StudentCoursesNotifier,
+      AsyncValue<List<CourseEntity>>
+    >((ref) {
+      return StudentCoursesNotifier(ref.read(getStudentCoursesUseCaseProvider));
+    });

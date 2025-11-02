@@ -42,10 +42,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _manualErrorMessage = null;
     });
 
-    print('🔐 Login attempt with email: $email');
+    debugPrint('🔐 Login attempt with email: $email');
 
     // Attempt login with remember me option
-    await ref.read(authProvider.notifier).login(email, password, rememberMe: _rememberMe);
+    await ref
+        .read(authProvider.notifier)
+        .login(email, password, rememberMe: _rememberMe);
   }
 
   /// Extract clean error message from exception string
@@ -83,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         isLoading = false;
         if (errorToShow == null) {
           errorToShow = _extractErrorMessage(error.toString());
-          print('🔴 Displaying error from auth state: $errorToShow');
+          debugPrint('🔴 Displaying error from auth state: $errorToShow');
         }
       },
     );

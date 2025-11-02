@@ -7,9 +7,7 @@ import '../datasources/models/group_model.dart';
 class GroupRepositoryImpl implements IGroupRepository {
   final EnrollmentRemoteDataSource remoteDataSource;
 
-  GroupRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  GroupRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<List<GroupEntity>> getGroupsByCourse(String courseId) async {
@@ -51,4 +49,3 @@ class GroupRepositoryImpl implements IGroupRepository {
     }
   }
 }
-

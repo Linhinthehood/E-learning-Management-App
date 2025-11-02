@@ -6,7 +6,9 @@ import '../../domain/entities/question_entity.dart';
 import '../../domain/repositories/i_question_repository.dart';
 
 /// Provider for question remote data source
-final questionRemoteDataSourceProvider = Provider<QuestionRemoteDataSource>((ref) {
+final questionRemoteDataSourceProvider = Provider<QuestionRemoteDataSource>((
+  ref,
+) {
   return QuestionRemoteDataSourceImpl();
 });
 
@@ -20,7 +22,8 @@ final questionRepositoryProvider = Provider<IQuestionRepository>((ref) {
 // ==================== Question Bank Providers ====================
 
 /// Question Bank state notifier - manages question banks for a course
-class QuestionBankNotifier extends StateNotifier<AsyncValue<List<QuestionBankEntity>>> {
+class QuestionBankNotifier
+    extends StateNotifier<AsyncValue<List<QuestionBankEntity>>> {
   final IQuestionRepository _repository;
   String? _currentCourseId;
 
@@ -31,7 +34,9 @@ class QuestionBankNotifier extends StateNotifier<AsyncValue<List<QuestionBankEnt
     _currentCourseId = courseId;
     state = const AsyncValue.loading();
     try {
-      final questionBanks = await _repository.getQuestionBanksByCourse(courseId);
+      final questionBanks = await _repository.getQuestionBanksByCourse(
+        courseId,
+      );
       state = AsyncValue.data(questionBanks);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -83,15 +88,23 @@ class QuestionBankNotifier extends StateNotifier<AsyncValue<List<QuestionBankEnt
 }
 
 /// Provider for question bank state notifier
-final questionBankProvider = StateNotifierProvider<QuestionBankNotifier, AsyncValue<List<QuestionBankEntity>>>((ref) {
-  return QuestionBankNotifier(ref.read(questionRepositoryProvider));
-});
+final questionBankProvider =
+    StateNotifierProvider<
+      QuestionBankNotifier,
+      AsyncValue<List<QuestionBankEntity>>
+    >((ref) {
+      return QuestionBankNotifier(ref.read(questionRepositoryProvider));
+    });
 
 /// Provider for fetching a single question bank by ID
-final questionBankByIdProvider = FutureProvider.family<QuestionBankEntity?, String>((ref, questionBankId) async {
-  final repository = ref.read(questionRepositoryProvider);
-  return await repository.getQuestionBankById(questionBankId);
-});
+final questionBankByIdProvider =
+    FutureProvider.family<QuestionBankEntity?, String>((
+      ref,
+      questionBankId,
+    ) async {
+      final repository = ref.read(questionRepositoryProvider);
+      return await repository.getQuestionBankById(questionBankId);
+    });
 
 // ==================== Question Providers ====================
 
@@ -115,11 +128,17 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionEntity>>> {
   }
 
   /// Load questions by difficulty
-  Future<void> loadQuestionsByDifficulty(String questionBankId, QuestionDifficulty difficulty) async {
+  Future<void> loadQuestionsByDifficulty(
+    String questionBankId,
+    QuestionDifficulty difficulty,
+  ) async {
     _currentQuestionBankId = questionBankId;
     state = const AsyncValue.loading();
     try {
-      final questions = await _repository.getQuestionsByDifficulty(questionBankId, difficulty);
+      final questions = await _repository.getQuestionsByDifficulty(
+        questionBankId,
+        difficulty,
+      );
       state = AsyncValue.data(questions);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -127,11 +146,17 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionEntity>>> {
   }
 
   /// Load questions by type
-  Future<void> loadQuestionsByType(String questionBankId, QuestionType type) async {
+  Future<void> loadQuestionsByType(
+    String questionBankId,
+    QuestionType type,
+  ) async {
     _currentQuestionBankId = questionBankId;
     state = const AsyncValue.loading();
     try {
-      final questions = await _repository.getQuestionsByType(questionBankId, type);
+      final questions = await _repository.getQuestionsByType(
+        questionBankId,
+        type,
+      );
       state = AsyncValue.data(questions);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -143,7 +168,10 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionEntity>>> {
     _currentQuestionBankId = questionBankId;
     state = const AsyncValue.loading();
     try {
-      final questions = await _repository.getRandomQuestions(questionBankId, count);
+      final questions = await _repository.getRandomQuestions(
+        questionBankId,
+        count,
+      );
       state = AsyncValue.data(questions);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -195,12 +223,18 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionEntity>>> {
 }
 
 /// Provider for question state notifier
-final questionProvider = StateNotifierProvider<QuestionNotifier, AsyncValue<List<QuestionEntity>>>((ref) {
-  return QuestionNotifier(ref.read(questionRepositoryProvider));
-});
+final questionProvider =
+    StateNotifierProvider<QuestionNotifier, AsyncValue<List<QuestionEntity>>>((
+      ref,
+    ) {
+      return QuestionNotifier(ref.read(questionRepositoryProvider));
+    });
 
 /// Provider for fetching a single question by ID
-final questionByIdProvider = FutureProvider.family<QuestionEntity?, String>((ref, questionId) async {
+final questionByIdProvider = FutureProvider.family<QuestionEntity?, String>((
+  ref,
+  questionId,
+) async {
   final repository = ref.read(questionRepositoryProvider);
   return await repository.getQuestionById(questionId);
 });

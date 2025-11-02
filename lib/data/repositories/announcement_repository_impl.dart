@@ -8,14 +8,15 @@ import '../datasources/models/announcement_model.dart';
 class AnnouncementRepositoryImpl implements IAnnouncementRepository {
   final AnnouncementRemoteDataSource remoteDataSource;
 
-  AnnouncementRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  AnnouncementRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<AnnouncementEntity>> getAnnouncementsByCourse(String courseId) async {
+  Future<List<AnnouncementEntity>> getAnnouncementsByCourse(
+    String courseId,
+  ) async {
     try {
-      final announcementModels = await remoteDataSource.getAnnouncementsByCourse(courseId);
+      final announcementModels = await remoteDataSource
+          .getAnnouncementsByCourse(courseId);
       return announcementModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -23,9 +24,15 @@ class AnnouncementRepositoryImpl implements IAnnouncementRepository {
   }
 
   @override
-  Future<List<AnnouncementEntity>> getAnnouncementsByGroup(String courseId, String groupId) async {
+  Future<List<AnnouncementEntity>> getAnnouncementsByGroup(
+    String courseId,
+    String groupId,
+  ) async {
     try {
-      final announcementModels = await remoteDataSource.getAnnouncementsByGroup(courseId, groupId);
+      final announcementModels = await remoteDataSource.getAnnouncementsByGroup(
+        courseId,
+        groupId,
+      );
       return announcementModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -35,7 +42,9 @@ class AnnouncementRepositoryImpl implements IAnnouncementRepository {
   @override
   Future<AnnouncementEntity?> getAnnouncementById(String announcementId) async {
     try {
-      final announcementModel = await remoteDataSource.getAnnouncementById(announcementId);
+      final announcementModel = await remoteDataSource.getAnnouncementById(
+        announcementId,
+      );
       return announcementModel?.toEntity();
     } catch (e) {
       rethrow;
@@ -43,10 +52,14 @@ class AnnouncementRepositoryImpl implements IAnnouncementRepository {
   }
 
   @override
-  Future<AnnouncementEntity> createAnnouncement(AnnouncementEntity announcement) async {
+  Future<AnnouncementEntity> createAnnouncement(
+    AnnouncementEntity announcement,
+  ) async {
     try {
       final announcementModel = AnnouncementModel.fromEntity(announcement);
-      final createdModel = await remoteDataSource.createAnnouncement(announcementModel);
+      final createdModel = await remoteDataSource.createAnnouncement(
+        announcementModel,
+      );
       return createdModel.toEntity();
     } catch (e) {
       rethrow;
@@ -54,10 +67,14 @@ class AnnouncementRepositoryImpl implements IAnnouncementRepository {
   }
 
   @override
-  Future<AnnouncementEntity> updateAnnouncement(AnnouncementEntity announcement) async {
+  Future<AnnouncementEntity> updateAnnouncement(
+    AnnouncementEntity announcement,
+  ) async {
     try {
       final announcementModel = AnnouncementModel.fromEntity(announcement);
-      final updatedModel = await remoteDataSource.updateAnnouncement(announcementModel);
+      final updatedModel = await remoteDataSource.updateAnnouncement(
+        announcementModel,
+      );
       return updatedModel.toEntity();
     } catch (e) {
       rethrow;
@@ -74,9 +91,15 @@ class AnnouncementRepositoryImpl implements IAnnouncementRepository {
   }
 
   @override
-  Future<List<AnnouncementEntity>> getRecentAnnouncements(String courseId, int days) async {
+  Future<List<AnnouncementEntity>> getRecentAnnouncements(
+    String courseId,
+    int days,
+  ) async {
     try {
-      final announcementModels = await remoteDataSource.getRecentAnnouncements(courseId, days);
+      final announcementModels = await remoteDataSource.getRecentAnnouncements(
+        courseId,
+        days,
+      );
       return announcementModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;

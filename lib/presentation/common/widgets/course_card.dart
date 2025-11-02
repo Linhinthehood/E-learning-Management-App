@@ -62,7 +62,10 @@ class CourseCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Icon(Icons.more_vert, color: Colors.white.withValues(alpha: 0.8)),
+                    Icon(
+                      Icons.more_vert,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
                   ],
                 ),
                 const Spacer(),

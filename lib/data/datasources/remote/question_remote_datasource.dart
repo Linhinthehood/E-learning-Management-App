@@ -16,9 +16,18 @@ abstract class QuestionRemoteDataSource {
   // Question operations
   Future<List<QuestionModel>> getQuestionsByBank(String questionBankId);
   Future<QuestionModel?> getQuestionById(String questionId);
-  Future<List<QuestionModel>> getQuestionsByDifficulty(String questionBankId, QuestionDifficulty difficulty);
-  Future<List<QuestionModel>> getQuestionsByType(String questionBankId, QuestionType type);
-  Future<List<QuestionModel>> getRandomQuestions(String questionBankId, int count);
+  Future<List<QuestionModel>> getQuestionsByDifficulty(
+    String questionBankId,
+    QuestionDifficulty difficulty,
+  );
+  Future<List<QuestionModel>> getQuestionsByType(
+    String questionBankId,
+    QuestionType type,
+  );
+  Future<List<QuestionModel>> getRandomQuestions(
+    String questionBankId,
+    int count,
+  );
   Future<QuestionModel> createQuestion(QuestionModel question);
   Future<QuestionModel> updateQuestion(QuestionModel question);
   Future<void> deleteQuestion(String questionId);
@@ -31,7 +40,9 @@ class QuestionRemoteDataSourceImpl implements QuestionRemoteDataSource {
   // ==================== Question Bank Operations ====================
 
   @override
-  Future<List<QuestionBankModel>> getQuestionBanksByCourse(String courseId) async {
+  Future<List<QuestionBankModel>> getQuestionBanksByCourse(
+    String courseId,
+  ) async {
     try {
       final querySnapshot = await _firestore
           .collection('questionBanks')
@@ -63,7 +74,9 @@ class QuestionRemoteDataSourceImpl implements QuestionRemoteDataSource {
   }
 
   @override
-  Future<QuestionBankModel> createQuestionBank(QuestionBankModel questionBank) async {
+  Future<QuestionBankModel> createQuestionBank(
+    QuestionBankModel questionBank,
+  ) async {
     try {
       final docRef = await _firestore
           .collection('questionBanks')
@@ -77,7 +90,9 @@ class QuestionRemoteDataSourceImpl implements QuestionRemoteDataSource {
   }
 
   @override
-  Future<QuestionBankModel> updateQuestionBank(QuestionBankModel questionBank) async {
+  Future<QuestionBankModel> updateQuestionBank(
+    QuestionBankModel questionBank,
+  ) async {
     try {
       await _firestore
           .collection('questionBanks')
@@ -176,7 +191,10 @@ class QuestionRemoteDataSourceImpl implements QuestionRemoteDataSource {
   }
 
   @override
-  Future<List<QuestionModel>> getRandomQuestions(String questionBankId, int count) async {
+  Future<List<QuestionModel>> getRandomQuestions(
+    String questionBankId,
+    int count,
+  ) async {
     try {
       // Firestore doesn't have native random sampling, so we fetch all and shuffle
       final allQuestions = await getQuestionsByBank(questionBankId);

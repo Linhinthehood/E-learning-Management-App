@@ -15,4 +15,3 @@ class DeleteCourseUseCase {
     return await _courseRepository.deleteCourse(courseId);
   }
 }
-

@@ -5,10 +5,16 @@ import '../models/assignment_model.dart';
 /// Handles Firestore calls for assignments
 abstract class AssignmentRemoteDataSource {
   Future<List<AssignmentModel>> getAssignmentsByCourse(String courseId);
-  Future<List<AssignmentModel>> getAssignmentsByGroup(String courseId, String groupId);
+  Future<List<AssignmentModel>> getAssignmentsByGroup(
+    String courseId,
+    String groupId,
+  );
   Future<AssignmentModel?> getAssignmentById(String assignmentId);
   Future<List<AssignmentModel>> getOpenAssignments(String courseId);
-  Future<List<AssignmentModel>> getUpcomingAssignments(String courseId, int daysAhead);
+  Future<List<AssignmentModel>> getUpcomingAssignments(
+    String courseId,
+    int daysAhead,
+  );
   Future<AssignmentModel> createAssignment(AssignmentModel assignment);
   Future<AssignmentModel> updateAssignment(AssignmentModel assignment);
   Future<void> deleteAssignment(String assignmentId);
@@ -36,7 +42,10 @@ class AssignmentRemoteDataSourceImpl implements AssignmentRemoteDataSource {
   }
 
   @override
-  Future<List<AssignmentModel>> getAssignmentsByGroup(String courseId, String groupId) async {
+  Future<List<AssignmentModel>> getAssignmentsByGroup(
+    String courseId,
+    String groupId,
+  ) async {
     try {
       final querySnapshot = await _firestore
           .collection('assignments')
@@ -88,7 +97,10 @@ class AssignmentRemoteDataSourceImpl implements AssignmentRemoteDataSource {
   }
 
   @override
-  Future<List<AssignmentModel>> getUpcomingAssignments(String courseId, int daysAhead) async {
+  Future<List<AssignmentModel>> getUpcomingAssignments(
+    String courseId,
+    int daysAhead,
+  ) async {
     try {
       final now = DateTime.now();
       final futureDate = now.add(Duration(days: daysAhead));
@@ -97,7 +109,10 @@ class AssignmentRemoteDataSourceImpl implements AssignmentRemoteDataSource {
           .collection('assignments')
           .where('courseId', isEqualTo: courseId)
           .where('deadline', isGreaterThanOrEqualTo: Timestamp.fromDate(now))
-          .where('deadline', isLessThanOrEqualTo: Timestamp.fromDate(futureDate))
+          .where(
+            'deadline',
+            isLessThanOrEqualTo: Timestamp.fromDate(futureDate),
+          )
           .orderBy('deadline', descending: false)
           .get();
 

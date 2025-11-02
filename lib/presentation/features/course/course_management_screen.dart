@@ -18,7 +18,8 @@ class CourseManagementScreen extends ConsumerStatefulWidget {
       _CourseManagementScreenState();
 }
 
-class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen> {
+class _CourseManagementScreenState
+    extends ConsumerState<CourseManagementScreen> {
   SemesterEntity? _selectedSemester;
 
   @override
@@ -156,7 +157,9 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
     );
   }
 
-  Widget _buildSemesterSelector(AsyncValue<List<SemesterEntity>> semestersAsync) {
+  Widget _buildSemesterSelector(
+    AsyncValue<List<SemesterEntity>> semestersAsync,
+  ) {
     return semestersAsync.when(
       data: (semesters) {
         if (semesters.isEmpty) {
@@ -170,9 +173,7 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
             child: Center(
               child: Text(
                 'No semesters available. Please create a semester first.',
-                style: GoogleFonts.inter(
-                  color: AppColors.textSecondary,
-                ),
+                style: GoogleFonts.inter(color: AppColors.textSecondary),
               ),
             ),
           );
@@ -207,7 +208,10 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
                   child: DropdownButton<SemesterEntity>(
                     value: _selectedSemester,
                     isExpanded: true,
-                    icon: Icon(Icons.arrow_drop_down, color: AppColors.textPrimary),
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: AppColors.textPrimary,
+                    ),
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: AppColors.textPrimary,
@@ -264,9 +268,7 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.border),
         ),
-        child: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: const Center(child: CircularProgressIndicator()),
       ),
       error: (error, _) => Container(
         padding: const EdgeInsets.all(20),
@@ -278,9 +280,7 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
         child: Center(
           child: Text(
             'Error loading semesters: ${error.toString()}',
-            style: GoogleFonts.inter(
-              color: Colors.red,
-            ),
+            style: GoogleFonts.inter(color: Colors.red),
           ),
         ),
       ),
@@ -390,7 +390,8 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
                   topRight: Radius.circular(16),
                 ),
               ),
-              child: course.coverImageUrl != null &&
+              child:
+                  course.coverImageUrl != null &&
                       course.coverImageUrl!.isNotEmpty
                   ? ClipRRect(
                       borderRadius: const BorderRadius.only(
@@ -457,7 +458,10 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
                         children: [
                           IconButton(
                             onPressed: () => _showEnrollmentDialog(course),
-                            icon: const Icon(Icons.group_add_outlined, size: 18),
+                            icon: const Icon(
+                              Icons.group_add_outlined,
+                              size: 18,
+                            ),
                             color: AppColors.buttonPrimary,
                             tooltip: 'Manage Students',
                             padding: EdgeInsets.zero,
@@ -618,14 +622,15 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
           ),
           ElevatedButton(
             onPressed: () async {
+              if (!mounted) return;
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.of(context).pop();
               try {
-                await ref.read(courseProvider.notifier).deleteCourse(
-                      course.id,
-                      course.semesterId,
-                    );
+                await ref
+                    .read(courseProvider.notifier)
+                    .deleteCourse(course.id, course.semesterId);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(
                       content: Text('Course deleted successfully'),
                       backgroundColor: Colors.green,
@@ -634,7 +639,7 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('Error: ${e.toString()}'),
                       backgroundColor: Colors.red,
@@ -657,4 +662,3 @@ class _CourseManagementScreenState extends ConsumerState<CourseManagementScreen>
     );
   }
 }
-

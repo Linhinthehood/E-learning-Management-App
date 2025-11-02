@@ -7,7 +7,12 @@ abstract class IAuthRepository {
   Future<UserEntity?> login(String email, String password);
 
   /// Register new user with email and password
-  Future<UserEntity?> register(String email, String password, String displayName, UserRole role);
+  Future<UserEntity?> register(
+    String email,
+    String password,
+    String displayName,
+    UserRole role,
+  );
 
   /// Logout current user
   Future<void> logout();

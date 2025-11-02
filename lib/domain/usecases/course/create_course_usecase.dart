@@ -33,4 +33,3 @@ class CreateCourseUseCase {
     return await _courseRepository.createCourse(course);
   }
 }
-

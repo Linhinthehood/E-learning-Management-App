@@ -8,14 +8,14 @@ import '../datasources/models/material_model.dart';
 class MaterialRepositoryImpl implements IMaterialRepository {
   final MaterialRemoteDataSource remoteDataSource;
 
-  MaterialRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  MaterialRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<List<MaterialEntity>> getMaterialsByCourse(String courseId) async {
     try {
-      final materialModels = await remoteDataSource.getMaterialsByCourse(courseId);
+      final materialModels = await remoteDataSource.getMaterialsByCourse(
+        courseId,
+      );
       return materialModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -23,9 +23,15 @@ class MaterialRepositoryImpl implements IMaterialRepository {
   }
 
   @override
-  Future<List<MaterialEntity>> getMaterialsByGroup(String courseId, String groupId) async {
+  Future<List<MaterialEntity>> getMaterialsByGroup(
+    String courseId,
+    String groupId,
+  ) async {
     try {
-      final materialModels = await remoteDataSource.getMaterialsByGroup(courseId, groupId);
+      final materialModels = await remoteDataSource.getMaterialsByGroup(
+        courseId,
+        groupId,
+      );
       return materialModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -43,9 +49,15 @@ class MaterialRepositoryImpl implements IMaterialRepository {
   }
 
   @override
-  Future<List<MaterialEntity>> getMaterialsByType(String courseId, MaterialType type) async {
+  Future<List<MaterialEntity>> getMaterialsByType(
+    String courseId,
+    MaterialType type,
+  ) async {
     try {
-      final materialModels = await remoteDataSource.getMaterialsByType(courseId, type);
+      final materialModels = await remoteDataSource.getMaterialsByType(
+        courseId,
+        type,
+      );
       return materialModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;

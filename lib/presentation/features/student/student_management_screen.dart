@@ -82,7 +82,9 @@ class StudentManagementScreen extends ConsumerWidget {
                           Icon(
                             Icons.school_outlined,
                             size: 64,
-                            color: AppColors.textSecondary.withOpacity(0.5),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -182,8 +184,11 @@ class StudentManagementScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline,
-                          size: 48, color: Colors.red),
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Colors.red,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'Error loading students',
@@ -200,7 +205,8 @@ class StudentManagementScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () => ref.read(studentProvider.notifier).loadStudents(),
+                        onPressed: () =>
+                            ref.read(studentProvider.notifier).loadStudents(),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -214,14 +220,23 @@ class StudentManagementScreen extends ConsumerWidget {
     );
   }
 
-  void _showStudentDialog(BuildContext context, WidgetRef ref, {dynamic student}) {
+  void _showStudentDialog(
+    BuildContext context,
+    WidgetRef ref, {
+    dynamic student,
+  }) {
     showDialog(
       context: context,
       builder: (context) => StudentFormDialog(student: student),
     );
   }
 
-  void _deleteStudent(BuildContext context, WidgetRef ref, String userId, String name) {
+  void _deleteStudent(
+    BuildContext context,
+    WidgetRef ref,
+    String userId,
+    String name,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -236,10 +251,7 @@ class StudentManagementScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.inter(),
-            ),
+            child: Text('Cancel', style: GoogleFonts.inter()),
           ),
           ElevatedButton(
             onPressed: () async {

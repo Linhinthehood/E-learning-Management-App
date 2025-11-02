@@ -9,7 +9,10 @@ class GetStudentCoursesUseCase {
 
   /// Execute the use case
   /// Returns list of courses the student is enrolled in for the given semester
-  Future<List<CourseEntity>> execute(String studentId, String semesterId) async {
+  Future<List<CourseEntity>> execute(
+    String studentId,
+    String semesterId,
+  ) async {
     if (studentId.isEmpty || semesterId.isEmpty) {
       throw Exception('Student ID and Semester ID cannot be empty');
     }
@@ -17,4 +20,3 @@ class GetStudentCoursesUseCase {
     return await _courseRepository.getStudentCourses(studentId, semesterId);
   }
 }
-

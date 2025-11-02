@@ -5,9 +5,10 @@ import '../../domain/entities/announcement_entity.dart';
 import '../../domain/repositories/i_announcement_repository.dart';
 
 /// Provider for announcement remote data source
-final announcementRemoteDataSourceProvider = Provider<AnnouncementRemoteDataSource>((ref) {
-  return AnnouncementRemoteDataSourceImpl();
-});
+final announcementRemoteDataSourceProvider =
+    Provider<AnnouncementRemoteDataSource>((ref) {
+      return AnnouncementRemoteDataSourceImpl();
+    });
 
 /// Provider for announcement repository
 final announcementRepositoryProvider = Provider<IAnnouncementRepository>((ref) {
@@ -17,7 +18,8 @@ final announcementRepositoryProvider = Provider<IAnnouncementRepository>((ref) {
 });
 
 /// Announcement state notifier - manages announcements for a course
-class AnnouncementNotifier extends StateNotifier<AsyncValue<List<AnnouncementEntity>>> {
+class AnnouncementNotifier
+    extends StateNotifier<AsyncValue<List<AnnouncementEntity>>> {
   final IAnnouncementRepository _repository;
   String? _currentCourseId;
 
@@ -28,7 +30,9 @@ class AnnouncementNotifier extends StateNotifier<AsyncValue<List<AnnouncementEnt
     _currentCourseId = courseId;
     state = const AsyncValue.loading();
     try {
-      final announcements = await _repository.getAnnouncementsByCourse(courseId);
+      final announcements = await _repository.getAnnouncementsByCourse(
+        courseId,
+      );
       state = AsyncValue.data(announcements);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -40,7 +44,10 @@ class AnnouncementNotifier extends StateNotifier<AsyncValue<List<AnnouncementEnt
     _currentCourseId = courseId;
     state = const AsyncValue.loading();
     try {
-      final announcements = await _repository.getAnnouncementsByGroup(courseId, groupId);
+      final announcements = await _repository.getAnnouncementsByGroup(
+        courseId,
+        groupId,
+      );
       state = AsyncValue.data(announcements);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -52,7 +59,10 @@ class AnnouncementNotifier extends StateNotifier<AsyncValue<List<AnnouncementEnt
     _currentCourseId = courseId;
     state = const AsyncValue.loading();
     try {
-      final announcements = await _repository.getRecentAnnouncements(courseId, days);
+      final announcements = await _repository.getRecentAnnouncements(
+        courseId,
+        days,
+      );
       state = AsyncValue.data(announcements);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -104,12 +114,20 @@ class AnnouncementNotifier extends StateNotifier<AsyncValue<List<AnnouncementEnt
 }
 
 /// Provider for announcement state notifier
-final announcementProvider = StateNotifierProvider<AnnouncementNotifier, AsyncValue<List<AnnouncementEntity>>>((ref) {
-  return AnnouncementNotifier(ref.read(announcementRepositoryProvider));
-});
+final announcementProvider =
+    StateNotifierProvider<
+      AnnouncementNotifier,
+      AsyncValue<List<AnnouncementEntity>>
+    >((ref) {
+      return AnnouncementNotifier(ref.read(announcementRepositoryProvider));
+    });
 
 /// Provider for fetching a single announcement by ID
-final announcementByIdProvider = FutureProvider.family<AnnouncementEntity?, String>((ref, announcementId) async {
-  final repository = ref.read(announcementRepositoryProvider);
-  return await repository.getAnnouncementById(announcementId);
-});
+final announcementByIdProvider =
+    FutureProvider.family<AnnouncementEntity?, String>((
+      ref,
+      announcementId,
+    ) async {
+      final repository = ref.read(announcementRepositoryProvider);
+      return await repository.getAnnouncementById(announcementId);
+    });

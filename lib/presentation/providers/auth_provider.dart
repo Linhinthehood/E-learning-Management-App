@@ -95,7 +95,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
   }
 
   /// Login with email and password
-  Future<void> login(String email, String password, {bool rememberMe = false}) async {
+  Future<void> login(
+    String email,
+    String password, {
+    bool rememberMe = false,
+  }) async {
     state = const AsyncValue.loading();
     try {
       final user = await _loginUseCase.execute(email, password);
@@ -123,7 +127,12 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
   ) async {
     state = const AsyncValue.loading();
     try {
-      final user = await _registerUseCase.execute(email, password, displayName, role);
+      final user = await _registerUseCase.execute(
+        email,
+        password,
+        displayName,
+        role,
+      );
       state = AsyncValue.data(user);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);

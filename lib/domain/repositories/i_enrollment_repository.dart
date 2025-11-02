@@ -8,10 +8,16 @@ abstract class IEnrollmentRepository {
   Future<List<EnrollmentEntity>> getEnrollmentsByCourse(String courseId);
 
   /// Get all enrollments for a student in a semester
-  Future<List<EnrollmentEntity>> getEnrollmentsByStudent(String studentId, String semesterId);
+  Future<List<EnrollmentEntity>> getEnrollmentsByStudent(
+    String studentId,
+    String semesterId,
+  );
 
   /// Get enrollment for a student in a specific course
-  Future<EnrollmentEntity?> getEnrollmentByStudentAndCourse(String studentId, String courseId);
+  Future<EnrollmentEntity?> getEnrollmentByStudentAndCourse(
+    String studentId,
+    String courseId,
+  );
 
   /// Create a new enrollment
   /// Returns the created enrollment
@@ -27,4 +33,3 @@ abstract class IEnrollmentRepository {
   /// Check if student is already enrolled in the course
   Future<bool> isStudentEnrolledInCourse(String studentId, String courseId);
 }
-

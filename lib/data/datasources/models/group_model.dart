@@ -27,11 +27,7 @@ class GroupModel {
 
   /// Convert to JSON (Firestore document)
   Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'courseId': courseId,
-      'semesterId': semesterId,
-    };
+    return {'name': name, 'courseId': courseId, 'semesterId': semesterId};
   }
 
   /// Convert to Entity (domain layer)
@@ -54,4 +50,3 @@ class GroupModel {
     );
   }
 }
-

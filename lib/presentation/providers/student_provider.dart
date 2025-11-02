@@ -84,5 +84,5 @@ class StudentNotifier extends StateNotifier<AsyncValue<List<UserEntity>>> {
 /// Provider for student notifier
 final studentProvider =
     StateNotifierProvider<StudentNotifier, AsyncValue<List<UserEntity>>>((ref) {
-  return StudentNotifier(ref.read(studentRepositoryProvider));
-});
+      return StudentNotifier(ref.read(studentRepositoryProvider));
+    });

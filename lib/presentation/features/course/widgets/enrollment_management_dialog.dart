@@ -44,7 +44,9 @@ class _EnrollmentManagementDialogState
   }
 
   Future<void> _loadEnrollments() async {
-    await ref.read(enrollmentProvider.notifier).loadEnrollments(widget.course.id);
+    await ref
+        .read(enrollmentProvider.notifier)
+        .loadEnrollments(widget.course.id);
   }
 
   Future<void> _loadGroups() async {
@@ -54,10 +56,8 @@ class _EnrollmentManagementDialogState
   Future<void> _showCreateGroupDialog() async {
     final result = await showDialog(
       context: context,
-      builder: (context) => GroupFormDialog(
-        course: widget.course,
-        semesterId: widget.semesterId,
-      ),
+      builder: (context) =>
+          GroupFormDialog(course: widget.course, semesterId: widget.semesterId),
     );
 
     if (result == true) {
@@ -94,7 +94,9 @@ class _EnrollmentManagementDialogState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${student.displayName} added to ${_selectedGroup!.name}'),
+            content: Text(
+              '${student.displayName} added to ${_selectedGroup!.name}',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -162,10 +164,9 @@ class _EnrollmentManagementDialogState
       });
 
       try {
-        await ref.read(enrollmentProvider.notifier).deleteEnrollment(
-              enrollment.id,
-              widget.course.id,
-            );
+        await ref
+            .read(enrollmentProvider.notifier)
+            .deleteEnrollment(enrollment.id, widget.course.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -201,9 +202,7 @@ class _EnrollmentManagementDialogState
 
     return Dialog(
       backgroundColor: AppColors.cardBackground,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         width: 800,
         height: 700,
@@ -261,7 +260,11 @@ class _EnrollmentManagementDialogState
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.info_outline, color: AppColors.textSecondary, size: 20),
+                            Icon(
+                              Icons.info_outline,
+                              color: AppColors.textSecondary,
+                              size: 20,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -288,7 +291,10 @@ class _EnrollmentManagementDialogState
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.buttonPrimary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -302,7 +308,7 @@ class _EnrollmentManagementDialogState
                 // Update _selectedGroup to match the new list (fix object reference issue)
                 // When groups list reloads, we need to find the group from the new list by ID
                 GroupEntity? selectedGroupFromList;
-                
+
                 if (_selectedGroup != null && groups.isNotEmpty) {
                   // Try to find the group in the new list by ID
                   try {
@@ -337,7 +343,10 @@ class _EnrollmentManagementDialogState
                 }
 
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.background,
                     borderRadius: BorderRadius.circular(12),
@@ -345,7 +354,11 @@ class _EnrollmentManagementDialogState
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.group_outlined, size: 20, color: AppColors.textSecondary),
+                      Icon(
+                        Icons.group_outlined,
+                        size: 20,
+                        color: AppColors.textSecondary,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Group:',
@@ -361,7 +374,10 @@ class _EnrollmentManagementDialogState
                           child: DropdownButton<GroupEntity>(
                             value: selectedGroupFromList,
                             isExpanded: true,
-                            icon: Icon(Icons.arrow_drop_down, color: AppColors.textPrimary),
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: AppColors.textPrimary,
+                            ),
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               color: AppColors.textPrimary,
@@ -400,9 +416,7 @@ class _EnrollmentManagementDialogState
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.border),
                 ),
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                child: const Center(child: CircularProgressIndicator()),
               ),
               error: (error, _) => Container(
                 padding: const EdgeInsets.all(16),
@@ -413,7 +427,11 @@ class _EnrollmentManagementDialogState
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -440,7 +458,11 @@ class _EnrollmentManagementDialogState
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -480,9 +502,14 @@ class _EnrollmentManagementDialogState
                               // Filter out already enrolled students
                               return enrollmentsAsync.when(
                                 data: (enrollments) {
-                                  final enrolledStudentIds = enrollments.map((e) => e.studentId).toSet();
+                                  final enrolledStudentIds = enrollments
+                                      .map((e) => e.studentId)
+                                      .toSet();
                                   final availableStudents = students
-                                      .where((s) => !enrolledStudentIds.contains(s.uid))
+                                      .where(
+                                        (s) =>
+                                            !enrolledStudentIds.contains(s.uid),
+                                      )
                                       .toList();
 
                                   if (availableStudents.isEmpty) {
@@ -501,25 +528,34 @@ class _EnrollmentManagementDialogState
                                     itemBuilder: (context, index) {
                                       final student = availableStudents[index];
                                       return Container(
-                                        margin: const EdgeInsets.only(bottom: 8),
+                                        margin: const EdgeInsets.only(
+                                          bottom: 8,
+                                        ),
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
                                           color: AppColors.background,
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: AppColors.border),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: AppColors.border,
+                                          ),
                                         ),
                                         child: Row(
                                           children: [
                                             Expanded(
                                               child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
                                                     student.displayName,
                                                     style: GoogleFonts.inter(
                                                       fontSize: 14,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: AppColors.textPrimary,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color:
+                                                          AppColors.textPrimary,
                                                     ),
                                                   ),
                                                   const SizedBox(height: 4),
@@ -527,25 +563,33 @@ class _EnrollmentManagementDialogState
                                                     student.email,
                                                     style: GoogleFonts.inter(
                                                       fontSize: 12,
-                                                      color: AppColors.textSecondary,
+                                                      color: AppColors
+                                                          .textSecondary,
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             ),
                                             ElevatedButton(
-                                              onPressed: _isLoading || _selectedGroup == null
+                                              onPressed:
+                                                  _isLoading ||
+                                                      _selectedGroup == null
                                                   ? null
-                                                  : () => _addStudentToCourse(student),
+                                                  : () => _addStudentToCourse(
+                                                      student,
+                                                    ),
                                               style: ElevatedButton.styleFrom(
-                                                backgroundColor: AppColors.buttonPrimary,
+                                                backgroundColor:
+                                                    AppColors.buttonPrimary,
                                                 foregroundColor: Colors.white,
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 8,
-                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 8,
+                                                    ),
                                                 shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
                                                 ),
                                               ),
                                               child: Text(
@@ -562,11 +606,17 @@ class _EnrollmentManagementDialogState
                                     },
                                   );
                                 },
-                                loading: () => const Center(child: CircularProgressIndicator()),
-                                error: (_, __) => const Center(child: Text('Error loading enrollments')),
+                                loading: () => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                error: (_, __) => const Center(
+                                  child: Text('Error loading enrollments'),
+                                ),
                               );
                             },
-                            loading: () => const Center(child: CircularProgressIndicator()),
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                             error: (error, _) => Center(
                               child: Text(
                                 'Error: ${error.toString()}',
@@ -611,8 +661,11 @@ class _EnrollmentManagementDialogState
                               return FutureBuilder<List<Map<String, dynamic>>>(
                                 future: _getEnrollmentDetails(enrollments),
                                 builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return const Center(child: CircularProgressIndicator());
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
                                   }
 
                                   if (!snapshot.hasData) {
@@ -625,30 +678,44 @@ class _EnrollmentManagementDialogState
                                     itemCount: enrollmentDetails.length,
                                     itemBuilder: (context, index) {
                                       final detail = enrollmentDetails[index];
-                                      final enrollment = detail['enrollment'] as EnrollmentEntity;
-                                      final student = detail['student'] as UserEntity?;
-                                      final groupName = detail['groupName'] as String?;
+                                      final enrollment =
+                                          detail['enrollment']
+                                              as EnrollmentEntity;
+                                      final student =
+                                          detail['student'] as UserEntity?;
+                                      final groupName =
+                                          detail['groupName'] as String?;
 
                                       return Container(
-                                        margin: const EdgeInsets.only(bottom: 8),
+                                        margin: const EdgeInsets.only(
+                                          bottom: 8,
+                                        ),
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
                                           color: AppColors.background,
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: AppColors.border),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: AppColors.border,
+                                          ),
                                         ),
                                         child: Row(
                                           children: [
                                             Expanded(
                                               child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    student?.displayName ?? 'Unknown',
+                                                    student?.displayName ??
+                                                        'Unknown',
                                                     style: GoogleFonts.inter(
                                                       fontSize: 14,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: AppColors.textPrimary,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color:
+                                                          AppColors.textPrimary,
                                                     ),
                                                   ),
                                                   const SizedBox(height: 4),
@@ -656,25 +723,36 @@ class _EnrollmentManagementDialogState
                                                     student?.email ?? '',
                                                     style: GoogleFonts.inter(
                                                       fontSize: 12,
-                                                      color: AppColors.textSecondary,
+                                                      color: AppColors
+                                                          .textSecondary,
                                                     ),
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Container(
-                                                    padding: const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 2,
-                                                    ),
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 8,
+                                                          vertical: 2,
+                                                        ),
                                                     decoration: BoxDecoration(
-                                                      color: AppColors.buttonPrimary.withValues(alpha: 0.1),
-                                                      borderRadius: BorderRadius.circular(8),
+                                                      color: AppColors
+                                                          .buttonPrimary
+                                                          .withValues(
+                                                            alpha: 0.1,
+                                                          ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            8,
+                                                          ),
                                                     ),
                                                     child: Text(
                                                       'Group: ${groupName ?? "Unknown"}',
                                                       style: GoogleFonts.inter(
                                                         fontSize: 11,
-                                                        color: AppColors.buttonPrimary,
-                                                        fontWeight: FontWeight.w600,
+                                                        color: AppColors
+                                                            .buttonPrimary,
+                                                        fontWeight:
+                                                            FontWeight.w600,
                                                       ),
                                                     ),
                                                   ),
@@ -684,8 +762,13 @@ class _EnrollmentManagementDialogState
                                             IconButton(
                                               onPressed: _isLoading
                                                   ? null
-                                                  : () => _removeEnrollment(enrollment),
-                                              icon: const Icon(Icons.delete_outline, size: 18),
+                                                  : () => _removeEnrollment(
+                                                      enrollment,
+                                                    ),
+                                              icon: const Icon(
+                                                Icons.delete_outline,
+                                                size: 18,
+                                              ),
                                               color: Colors.red,
                                               tooltip: 'Remove',
                                             ),
@@ -697,7 +780,9 @@ class _EnrollmentManagementDialogState
                                 },
                               );
                             },
-                            loading: () => const Center(child: CircularProgressIndicator()),
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                             error: (error, _) => Center(
                               child: Text(
                                 'Error: ${error.toString()}',
@@ -722,7 +807,10 @@ class _EnrollmentManagementDialogState
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.background,
                     foregroundColor: AppColors.textPrimary,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: const BorderSide(color: AppColors.border),
@@ -730,9 +818,7 @@ class _EnrollmentManagementDialogState
                   ),
                   child: Text(
                     'Close',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -776,4 +862,3 @@ class _EnrollmentManagementDialogState
     return details;
   }
 }
-

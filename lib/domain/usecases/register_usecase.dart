@@ -40,4 +40,3 @@ class RegisterUseCase {
     return await _authRepository.register(email, password, displayName, role);
   }
 }
-

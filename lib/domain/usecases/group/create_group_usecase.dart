@@ -23,7 +23,9 @@ class CreateGroupUseCase {
     }
 
     // Check if group name already exists in the course
-    final existingGroups = await _groupRepository.getGroupsByCourse(group.courseId);
+    final existingGroups = await _groupRepository.getGroupsByCourse(
+      group.courseId,
+    );
     final duplicateName = existingGroups.any(
       (g) => g.name.toLowerCase().trim() == group.name.toLowerCase().trim(),
     );
@@ -35,4 +37,3 @@ class CreateGroupUseCase {
     return await _groupRepository.createGroup(group);
   }
 }
-

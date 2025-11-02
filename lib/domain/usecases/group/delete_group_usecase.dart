@@ -18,4 +18,3 @@ class DeleteGroupUseCase {
     return await _groupRepository.deleteGroup(groupId);
   }
 }
-

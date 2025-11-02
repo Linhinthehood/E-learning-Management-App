@@ -56,10 +56,9 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
     final userAsync = ref.read(authProvider);
     userAsync.whenData((user) {
       if (user != null && _selectedSemester != null) {
-        ref.read(studentCoursesProvider.notifier).loadCourses(
-              user.uid,
-              _selectedSemester!.id,
-            );
+        ref
+            .read(studentCoursesProvider.notifier)
+            .loadCourses(user.uid, _selectedSemester!.id);
       }
     });
   }
@@ -79,7 +78,10 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
             // Main Content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 40,
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 800),
                   child: Column(
@@ -235,7 +237,10 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.buttonPrimary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 15,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -274,7 +279,9 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
     );
   }
 
-  Widget _buildSemesterSwitcher(AsyncValue<List<SemesterEntity>> semestersAsync) {
+  Widget _buildSemesterSwitcher(
+    AsyncValue<List<SemesterEntity>> semestersAsync,
+  ) {
     return semestersAsync.when(
       data: (semesters) {
         if (semesters.isEmpty) {
@@ -324,7 +331,10 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                   child: DropdownButton<SemesterEntity>(
                     value: _selectedSemester,
                     isExpanded: true,
-                    icon: Icon(Icons.arrow_drop_down, color: AppColors.textPrimary),
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: AppColors.textPrimary,
+                    ),
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: AppColors.textPrimary,
@@ -334,9 +344,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                         value: semester,
                         child: Row(
                           children: [
-                            Expanded(
-                              child: Text(semester.name),
-                            ),
+                            Expanded(child: Text(semester.name)),
                             if (semester.isActive)
                               Container(
                                 margin: const EdgeInsets.only(left: 8),
@@ -469,7 +477,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                 return FutureBuilder<Map<String, String>?>(
                   future: _getInstructorInfo(course.instructorId),
                   builder: (context, snapshot) {
-                    final instructorName = snapshot.data?['name'] ?? 'Unknown Instructor';
+                    final instructorName =
+                        snapshot.data?['name'] ?? 'Unknown Instructor';
 
                     return CourseListItem(
                       title: course.name,
@@ -512,10 +521,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                 const SizedBox(height: 8),
                 Text(
                   error.toString(),
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.red,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 14, color: Colors.red),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -587,17 +593,22 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
 
   IconData _getCourseIcon(String courseName) {
     final name = courseName.toLowerCase();
-    if (name.contains('math') || name.contains('calculus')) return Icons.calculate;
+    if (name.contains('math') || name.contains('calculus'))
+      return Icons.calculate;
     if (name.contains('physics')) return Icons.science;
     if (name.contains('chemistry')) return Icons.science;
     if (name.contains('biology')) return Icons.biotech;
-    if (name.contains('computer') || name.contains('programming')) return Icons.computer;
-    if (name.contains('english') || name.contains('literature')) return Icons.book;
+    if (name.contains('computer') || name.contains('programming'))
+      return Icons.computer;
+    if (name.contains('english') || name.contains('literature'))
+      return Icons.book;
     if (name.contains('history')) return Icons.history_edu;
     if (name.contains('art')) return Icons.brush;
     if (name.contains('music')) return Icons.music_note;
-    if (name.contains('spanish') || name.contains('french')) return Icons.language;
-    if (name.contains('design') || name.contains('figma')) return Icons.design_services;
+    if (name.contains('spanish') || name.contains('french'))
+      return Icons.language;
+    if (name.contains('design') || name.contains('figma'))
+      return Icons.design_services;
     if (name.contains('photo')) return Icons.camera_alt;
     return Icons.school;
   }

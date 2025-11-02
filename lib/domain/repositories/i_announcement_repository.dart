@@ -16,10 +16,14 @@ abstract class IAnnouncementRepository {
   Future<AnnouncementEntity?> getAnnouncementById(String announcementId);
 
   /// Create a new announcement
-  Future<AnnouncementEntity> createAnnouncement(AnnouncementEntity announcement);
+  Future<AnnouncementEntity> createAnnouncement(
+    AnnouncementEntity announcement,
+  );
 
   /// Update an existing announcement
-  Future<AnnouncementEntity> updateAnnouncement(AnnouncementEntity announcement);
+  Future<AnnouncementEntity> updateAnnouncement(
+    AnnouncementEntity announcement,
+  );
 
   /// Delete an announcement
   Future<void> deleteAnnouncement(String announcementId);

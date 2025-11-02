@@ -17,4 +17,3 @@ class GetGroupsByCourseUseCase {
     return await _groupRepository.getGroupsByCourse(courseId);
   }
 }
-

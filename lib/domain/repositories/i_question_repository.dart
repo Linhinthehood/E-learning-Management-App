@@ -13,10 +13,14 @@ abstract class IQuestionRepository {
   Future<QuestionBankEntity?> getQuestionBankById(String questionBankId);
 
   /// Create a new question bank
-  Future<QuestionBankEntity> createQuestionBank(QuestionBankEntity questionBank);
+  Future<QuestionBankEntity> createQuestionBank(
+    QuestionBankEntity questionBank,
+  );
 
   /// Update an existing question bank
-  Future<QuestionBankEntity> updateQuestionBank(QuestionBankEntity questionBank);
+  Future<QuestionBankEntity> updateQuestionBank(
+    QuestionBankEntity questionBank,
+  );
 
   /// Delete a question bank
   Future<void> deleteQuestionBank(String questionBankId);

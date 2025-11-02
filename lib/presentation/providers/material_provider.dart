@@ -5,7 +5,9 @@ import '../../domain/entities/material_entity.dart';
 import '../../domain/repositories/i_material_repository.dart';
 
 /// Provider for material remote data source
-final materialRemoteDataSourceProvider = Provider<MaterialRemoteDataSource>((ref) {
+final materialRemoteDataSourceProvider = Provider<MaterialRemoteDataSource>((
+  ref,
+) {
   return MaterialRemoteDataSourceImpl();
 });
 
@@ -40,7 +42,10 @@ class MaterialNotifier extends StateNotifier<AsyncValue<List<MaterialEntity>>> {
     _currentCourseId = courseId;
     state = const AsyncValue.loading();
     try {
-      final materials = await _repository.getMaterialsByGroup(courseId, groupId);
+      final materials = await _repository.getMaterialsByGroup(
+        courseId,
+        groupId,
+      );
       state = AsyncValue.data(materials);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -113,12 +118,18 @@ class MaterialNotifier extends StateNotifier<AsyncValue<List<MaterialEntity>>> {
 }
 
 /// Provider for material state notifier
-final materialProvider = StateNotifierProvider<MaterialNotifier, AsyncValue<List<MaterialEntity>>>((ref) {
-  return MaterialNotifier(ref.read(materialRepositoryProvider));
-});
+final materialProvider =
+    StateNotifierProvider<MaterialNotifier, AsyncValue<List<MaterialEntity>>>((
+      ref,
+    ) {
+      return MaterialNotifier(ref.read(materialRepositoryProvider));
+    });
 
 /// Provider for fetching a single material by ID
-final materialByIdProvider = FutureProvider.family<MaterialEntity?, String>((ref, materialId) async {
+final materialByIdProvider = FutureProvider.family<MaterialEntity?, String>((
+  ref,
+  materialId,
+) async {
   final repository = ref.read(materialRepositoryProvider);
   return await repository.getMaterialById(materialId);
 });

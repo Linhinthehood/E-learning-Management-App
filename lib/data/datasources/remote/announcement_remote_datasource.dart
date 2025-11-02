@@ -37,7 +37,9 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
-  Future<List<AnnouncementModel>> getAnnouncementsByCourse(String courseId) async {
+  Future<List<AnnouncementModel>> getAnnouncementsByCourse(
+    String courseId,
+  ) async {
     try {
       final querySnapshot = await _firestore
           .collection('announcements')
@@ -116,7 +118,9 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
   }
 
   @override
-  Future<AnnouncementModel> createAnnouncement(AnnouncementModel announcement) async {
+  Future<AnnouncementModel> createAnnouncement(
+    AnnouncementModel announcement,
+  ) async {
     try {
       final docRef = await _firestore
           .collection('announcements')
@@ -130,7 +134,9 @@ class AnnouncementRemoteDataSourceImpl implements AnnouncementRemoteDataSource {
   }
 
   @override
-  Future<AnnouncementModel> updateAnnouncement(AnnouncementModel announcement) async {
+  Future<AnnouncementModel> updateAnnouncement(
+    AnnouncementModel announcement,
+  ) async {
     try {
       await _firestore
           .collection('announcements')

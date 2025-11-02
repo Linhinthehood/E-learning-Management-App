@@ -34,10 +34,11 @@ class CreateEnrollmentUseCase {
     );
 
     if (isEnrolled) {
-      throw Exception('Student is already enrolled in this course. A student can only belong to one group per course.');
+      throw Exception(
+        'Student is already enrolled in this course. A student can only belong to one group per course.',
+      );
     }
 
     return await _enrollmentRepository.createEnrollment(enrollment);
   }
 }
-

@@ -17,4 +17,3 @@ class GetEnrollmentsByCourseUseCase {
     return await _enrollmentRepository.getEnrollmentsByCourse(courseId);
   }
 }
-

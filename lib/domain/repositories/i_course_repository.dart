@@ -7,7 +7,10 @@ abstract class ICourseRepository {
   Future<List<CourseEntity>> getCoursesBySemester(String semesterId);
 
   /// Get courses that a student is enrolled in for a semester
-  Future<List<CourseEntity>> getStudentCourses(String studentId, String semesterId);
+  Future<List<CourseEntity>> getStudentCourses(
+    String studentId,
+    String semesterId,
+  );
 
   /// Get a single course by ID
   Future<CourseEntity?> getCourseById(String courseId);

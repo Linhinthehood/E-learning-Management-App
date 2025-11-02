@@ -10,10 +10,16 @@ abstract class EnrollmentRemoteDataSource {
   Future<List<EnrollmentModel>> getEnrollmentsByCourse(String courseId);
 
   /// Get all enrollments for a student in a semester
-  Future<List<EnrollmentModel>> getEnrollmentsByStudent(String studentId, String semesterId);
+  Future<List<EnrollmentModel>> getEnrollmentsByStudent(
+    String studentId,
+    String semesterId,
+  );
 
   /// Get enrollment for a student in a specific course
-  Future<EnrollmentModel?> getEnrollmentByStudentAndCourse(String studentId, String courseId);
+  Future<EnrollmentModel?> getEnrollmentByStudentAndCourse(
+    String studentId,
+    String courseId,
+  );
 
   /// Create a new enrollment
   Future<EnrollmentModel> createEnrollment(EnrollmentModel enrollment);
@@ -61,7 +67,10 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<List<EnrollmentModel>> getEnrollmentsByStudent(String studentId, String semesterId) async {
+  Future<List<EnrollmentModel>> getEnrollmentsByStudent(
+    String studentId,
+    String semesterId,
+  ) async {
     try {
       final querySnapshot = await _firestore
           .collection('enrollments')
@@ -78,7 +87,10 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<EnrollmentModel?> getEnrollmentByStudentAndCourse(String studentId, String courseId) async {
+  Future<EnrollmentModel?> getEnrollmentByStudentAndCourse(
+    String studentId,
+    String courseId,
+  ) async {
     try {
       final querySnapshot = await _firestore
           .collection('enrollments')
@@ -111,7 +123,9 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
       }
 
       // Create enrollment
-      final docRef = await _firestore.collection('enrollments').add(enrollment.toJson());
+      final docRef = await _firestore
+          .collection('enrollments')
+          .add(enrollment.toJson());
       final createdDoc = await docRef.get();
       return EnrollmentModel.fromJson(createdDoc.data()!, createdDoc.id);
     } catch (e) {
@@ -137,10 +151,7 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => UserModel.fromJson({
-                'uid': doc.id,
-                ...doc.data(),
-              }))
+          .map((doc) => UserModel.fromJson({'uid': doc.id, ...doc.data()}))
           .toList();
     } catch (e) {
       throw Exception('Failed to get students: ${e.toString()}');
@@ -148,9 +159,15 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
   }
 
   @override
-  Future<bool> isStudentEnrolledInCourse(String studentId, String courseId) async {
+  Future<bool> isStudentEnrolledInCourse(
+    String studentId,
+    String courseId,
+  ) async {
     try {
-      final enrollment = await getEnrollmentByStudentAndCourse(studentId, courseId);
+      final enrollment = await getEnrollmentByStudentAndCourse(
+        studentId,
+        courseId,
+      );
       return enrollment != null;
     } catch (e) {
       return false;
@@ -197,6 +214,7 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
     }
   }
 
+  @override
   /// Delete a group
   Future<void> deleteGroup(String groupId) async {
     try {
@@ -206,4 +224,3 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
     }
   }
 }
-

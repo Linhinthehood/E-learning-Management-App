@@ -15,4 +15,3 @@ class DeleteEnrollmentUseCase {
     return await _enrollmentRepository.deleteEnrollment(enrollmentId);
   }
 }
-

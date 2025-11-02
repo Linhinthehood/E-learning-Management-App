@@ -6,9 +6,15 @@ import '../../../domain/entities/material_entity.dart';
 /// Handles Firestore calls for course materials
 abstract class MaterialRemoteDataSource {
   Future<List<MaterialModel>> getMaterialsByCourse(String courseId);
-  Future<List<MaterialModel>> getMaterialsByGroup(String courseId, String groupId);
+  Future<List<MaterialModel>> getMaterialsByGroup(
+    String courseId,
+    String groupId,
+  );
   Future<MaterialModel?> getMaterialById(String materialId);
-  Future<List<MaterialModel>> getMaterialsByType(String courseId, MaterialType type);
+  Future<List<MaterialModel>> getMaterialsByType(
+    String courseId,
+    MaterialType type,
+  );
   Future<MaterialModel> createMaterial(MaterialModel material);
   Future<MaterialModel> updateMaterial(MaterialModel material);
   Future<void> deleteMaterial(String materialId);
@@ -37,7 +43,10 @@ class MaterialRemoteDataSourceImpl implements MaterialRemoteDataSource {
   }
 
   @override
-  Future<List<MaterialModel>> getMaterialsByGroup(String courseId, String groupId) async {
+  Future<List<MaterialModel>> getMaterialsByGroup(
+    String courseId,
+    String groupId,
+  ) async {
     try {
       final querySnapshot = await _firestore
           .collection('materials')
@@ -70,7 +79,10 @@ class MaterialRemoteDataSourceImpl implements MaterialRemoteDataSource {
   }
 
   @override
-  Future<List<MaterialModel>> getMaterialsByType(String courseId, MaterialType type) async {
+  Future<List<MaterialModel>> getMaterialsByType(
+    String courseId,
+    MaterialType type,
+  ) async {
     try {
       final querySnapshot = await _firestore
           .collection('materials')
@@ -147,7 +159,9 @@ class MaterialRemoteDataSourceImpl implements MaterialRemoteDataSource {
       // final downloadUrl = await uploadTask.ref.getDownloadURL();
       // return downloadUrl;
 
-      throw UnimplementedError('File upload not yet implemented - requires Firebase Storage setup');
+      throw UnimplementedError(
+        'File upload not yet implemented - requires Firebase Storage setup',
+      );
     } catch (e) {
       throw Exception('Failed to upload file: ${e.toString()}');
     }

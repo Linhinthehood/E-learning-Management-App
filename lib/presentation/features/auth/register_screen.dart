@@ -59,7 +59,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     try {
-      await ref.read(authProvider.notifier).register(
+      await ref
+          .read(authProvider.notifier)
+          .register(
             _emailController.text.trim(),
             _passwordController.text,
             _displayNameController.text.trim(),
@@ -280,49 +282,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: RadioListTile<UserRole>(
-                              title: Text(
-                                'Student',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              value: UserRole.student,
-                              groupValue: _selectedRole,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedRole = value!;
-                                });
-                              },
-                              activeColor: AppColors.buttonPrimary,
-                              contentPadding: EdgeInsets.zero,
-                            ),
+                      SegmentedButton<UserRole>(
+                        segments: const [
+                          ButtonSegment<UserRole>(
+                            value: UserRole.student,
+                            label: Text('Student'),
                           ),
-                          Expanded(
-                            child: RadioListTile<UserRole>(
-                              title: Text(
-                                'Instructor',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              value: UserRole.instructor,
-                              groupValue: _selectedRole,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedRole = value!;
-                                });
-                              },
-                              activeColor: AppColors.buttonPrimary,
-                              contentPadding: EdgeInsets.zero,
-                            ),
+                          ButtonSegment<UserRole>(
+                            value: UserRole.instructor,
+                            label: Text('Instructor'),
                           ),
                         ],
+                        selected: {_selectedRole},
+                        onSelectionChanged: (Set<UserRole> newSelection) {
+                          setState(() {
+                            _selectedRole = newSelection.first;
+                          });
+                        },
+                        style: SegmentedButton.styleFrom(
+                          selectedBackgroundColor: AppColors.buttonPrimary,
+                          selectedForegroundColor: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 25),
                       // Password field
@@ -547,8 +527,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 minimumSize: Size.zero,
-                                tapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: Text(
                                 'Sign in',
@@ -573,4 +552,3 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 }
-

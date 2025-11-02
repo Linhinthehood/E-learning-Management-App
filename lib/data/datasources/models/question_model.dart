@@ -39,7 +39,9 @@ class QuestionModel {
       type: QuestionType.values.byName(json['type'] as String),
       options: List<String>.from(json['options'] ?? []),
       correctAnswer: json['correctAnswer'],
-      difficulty: QuestionDifficulty.values.byName(json['difficulty'] as String),
+      difficulty: QuestionDifficulty.values.byName(
+        json['difficulty'] as String,
+      ),
       points: (json['points'] as num?)?.toDouble() ?? 1.0,
       explanation: json['explanation'] as String?,
       imageUrl: json['imageUrl'] as String?,

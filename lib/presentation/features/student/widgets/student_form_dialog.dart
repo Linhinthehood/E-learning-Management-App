@@ -26,7 +26,9 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.student?.displayName ?? '');
+    _nameController = TextEditingController(
+      text: widget.student?.displayName ?? '',
+    );
     _emailController = TextEditingController(text: widget.student?.email ?? '');
     _passwordController = TextEditingController(
       text: widget.student == null ? _generatePassword() : '',
@@ -42,9 +44,13 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
   }
 
   String _generatePassword() {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random.secure();
-    return List.generate(8, (index) => chars[random.nextInt(chars.length)]).join();
+    return List.generate(
+      8,
+      (index) => chars[random.nextInt(chars.length)],
+    ).join();
   }
 
   @override
@@ -129,7 +135,9 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter email';
                   }
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                  if (!RegExp(
+                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                  ).hasMatch(value)) {
                     return 'Please enter a valid email';
                   }
                   return null;
@@ -170,7 +178,9 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     hintText: 'Enter password',
-                    hintStyle: GoogleFonts.inter(color: AppColors.textSecondary),
+                    hintStyle: GoogleFonts.inter(
+                      color: AppColors.textSecondary,
+                    ),
                     filled: true,
                     fillColor: AppColors.background,
                     border: OutlineInputBorder(
@@ -180,7 +190,9 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
                     contentPadding: const EdgeInsets.all(16),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
                       onPressed: () {
                         setState(() {
@@ -203,13 +215,19 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                    border: Border.all(
+                      color: Colors.blue.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                      const Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: Colors.blue,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -275,7 +293,9 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
     try {
       if (widget.student != null) {
         // Update existing student
-        await ref.read(studentProvider.notifier).updateStudent(
+        await ref
+            .read(studentProvider.notifier)
+            .updateStudent(
               userId: widget.student!.uid,
               displayName: _nameController.text.trim(),
               email: _emailController.text.trim(),
@@ -288,7 +308,9 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
         }
       } else {
         // Create new student
-        await ref.read(studentProvider.notifier).createStudent(
+        await ref
+            .read(studentProvider.notifier)
+            .createStudent(
               email: _emailController.text.trim(),
               password: _passwordController.text,
               displayName: _nameController.text.trim(),
@@ -336,9 +358,9 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) {

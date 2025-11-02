@@ -14,4 +14,3 @@ class EnrollmentEntity {
     required this.semesterId,
   });
 }
-

@@ -11,18 +11,18 @@ void main() async {
   // Initialize Firebase
   try {
     await FirebaseInitializer.initialize();
-    print('✅ Firebase initialized successfully');
+    debugPrint('✅ Firebase initialized successfully');
   } catch (e) {
-    print('⚠️ Firebase initialization failed: $e');
-    print('💡 Make sure you have set up Firebase configuration');
+    debugPrint('⚠️ Firebase initialization failed: $e');
+    debugPrint('💡 Make sure you have set up Firebase configuration');
   }
 
   // Initialize Hive for offline storage
   try {
     await HiveInitializer.initialize();
-    print('✅ Hive initialized successfully');
+    debugPrint('✅ Hive initialized successfully');
   } catch (e) {
-    print('⚠️ Hive initialization failed: $e');
+    debugPrint('⚠️ Hive initialization failed: $e');
   }
 
   // Run app with Riverpod

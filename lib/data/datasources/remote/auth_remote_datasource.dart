@@ -6,15 +6,28 @@ import '../models/user_model.dart';
 /// Handles Firebase Auth and Firestore calls
 abstract class AuthRemoteDataSource {
   Future<UserModel?> login(String email, String password);
-  Future<UserModel?> register(String email, String password, String displayName, String role);
+  Future<UserModel?> register(
+    String email,
+    String password,
+    String displayName,
+    String role,
+  );
   Future<void> logout();
   Future<UserModel?> getCurrentUser();
   Future<UserModel> updateUserProfile(String userId, String? avatarUrl);
 
   // Student management methods
   Future<List<UserModel>> getAllStudents();
-  Future<UserModel> createStudent(String email, String password, String displayName);
-  Future<UserModel> updateStudent(String userId, String displayName, String email);
+  Future<UserModel> createStudent(
+    String email,
+    String password,
+    String displayName,
+  );
+  Future<UserModel> updateStudent(
+    String userId,
+    String displayName,
+    String email,
+  );
   Future<void> deleteStudent(String userId);
 }
 
@@ -49,7 +62,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           // User authenticated but doesn't have a profile
           // Sign them out and throw an error
           await _auth.signOut();
-          throw Exception('Account not found. Please contact an administrator to create your account');
+          throw Exception(
+            'Account not found. Please contact an administrator to create your account',
+          );
         }
       }
 
@@ -78,7 +93,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel?> register(String email, String password, String displayName, String role) async {
+  Future<UserModel?> register(
+    String email,
+    String password,
+    String displayName,
+    String role,
+  ) async {
     try {
       // Create user in Firebase Auth
       final userCredential = await _auth.createUserWithEmailAndPassword(
@@ -177,10 +197,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .get();
 
       final students = querySnapshot.docs
-          .map((doc) => UserModel.fromJson({
-                'uid': doc.id,
-                ...doc.data(),
-              }))
+          .map((doc) => UserModel.fromJson({'uid': doc.id, ...doc.data()}))
           .toList();
 
       // Sort by displayName in memory to avoid needing a composite index
@@ -193,7 +210,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> createStudent(String email, String password, String displayName) async {
+  Future<UserModel> createStudent(
+    String email,
+    String password,
+    String displayName,
+  ) async {
     try {
       // Create user in Firebase Auth
       final userCredential = await _auth.createUserWithEmailAndPassword(
@@ -227,7 +248,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> updateStudent(String userId, String displayName, String email) async {
+  Future<UserModel> updateStudent(
+    String userId,
+    String displayName,
+    String email,
+  ) async {
     try {
       final userDocRef = _firestore.collection('users').doc(userId);
 
@@ -244,10 +269,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // Get updated user data
       final updatedDoc = await userDocRef.get();
       if (updatedDoc.exists) {
-        return UserModel.fromJson({
-          'uid': userId,
-          ...updatedDoc.data()!,
-        });
+        return UserModel.fromJson({'uid': userId, ...updatedDoc.data()!});
       }
 
       throw Exception('User document not found');

@@ -36,7 +36,10 @@ class QuizRemoteDataSourceImpl implements QuizRemoteDataSource {
   }
 
   @override
-  Future<List<QuizModel>> getQuizzesByGroup(String courseId, String groupId) async {
+  Future<List<QuizModel>> getQuizzesByGroup(
+    String courseId,
+    String groupId,
+  ) async {
     try {
       final querySnapshot = await _firestore
           .collection('quizzes')
@@ -88,7 +91,10 @@ class QuizRemoteDataSourceImpl implements QuizRemoteDataSource {
   }
 
   @override
-  Future<List<QuizModel>> getUpcomingQuizzes(String courseId, int daysAhead) async {
+  Future<List<QuizModel>> getUpcomingQuizzes(
+    String courseId,
+    int daysAhead,
+  ) async {
     try {
       final now = DateTime.now();
       final futureDate = now.add(Duration(days: daysAhead));
@@ -97,7 +103,10 @@ class QuizRemoteDataSourceImpl implements QuizRemoteDataSource {
           .collection('quizzes')
           .where('courseId', isEqualTo: courseId)
           .where('timeOpen', isGreaterThanOrEqualTo: Timestamp.fromDate(now))
-          .where('timeOpen', isLessThanOrEqualTo: Timestamp.fromDate(futureDate))
+          .where(
+            'timeOpen',
+            isLessThanOrEqualTo: Timestamp.fromDate(futureDate),
+          )
           .orderBy('timeOpen', descending: false)
           .get();
 
@@ -112,9 +121,7 @@ class QuizRemoteDataSourceImpl implements QuizRemoteDataSource {
   @override
   Future<QuizModel> createQuiz(QuizModel quiz) async {
     try {
-      final docRef = await _firestore
-          .collection('quizzes')
-          .add(quiz.toJson());
+      final docRef = await _firestore.collection('quizzes').add(quiz.toJson());
 
       final docSnapshot = await docRef.get();
       return QuizModel.fromJson(docSnapshot.data()!, docSnapshot.id);
@@ -126,10 +133,7 @@ class QuizRemoteDataSourceImpl implements QuizRemoteDataSource {
   @override
   Future<QuizModel> updateQuiz(QuizModel quiz) async {
     try {
-      await _firestore
-          .collection('quizzes')
-          .doc(quiz.id)
-          .update(quiz.toJson());
+      await _firestore.collection('quizzes').doc(quiz.id).update(quiz.toJson());
 
       return quiz;
     } catch (e) {

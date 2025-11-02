@@ -45,7 +45,9 @@ class QuizModel {
       timeClose: (json['timeClose'] as Timestamp).toDate(),
       durationMinutes: json['durationMinutes'] as int? ?? 0,
       numAttempts: json['numAttempts'] as int? ?? 1,
-      structure: _quizStructureFromJson(json['structure'] as Map<String, dynamic>),
+      structure: _quizStructureFromJson(
+        json['structure'] as Map<String, dynamic>,
+      ),
       scopedGroupIds: List<String>.from(json['scopedGroupIds'] ?? []),
       shuffleQuestions: json['shuffleQuestions'] as bool? ?? false,
       shuffleAnswers: json['shuffleAnswers'] as bool? ?? false,
@@ -120,9 +122,7 @@ class QuizModel {
   }
 
   static Map<String, dynamic> _quizStructureToJson(QuizStructure structure) {
-    return {
-      'sections': structure.sections.map(_quizSectionToJson).toList(),
-    };
+    return {'sections': structure.sections.map(_quizSectionToJson).toList()};
   }
 
   static QuizSection _quizSectionFromJson(Map<String, dynamic> json) {

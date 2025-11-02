@@ -8,14 +8,14 @@ import '../datasources/models/course_model.dart';
 class CourseRepositoryImpl implements ICourseRepository {
   final CourseRemoteDataSource remoteDataSource;
 
-  CourseRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  CourseRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<List<CourseEntity>> getCoursesBySemester(String semesterId) async {
     try {
-      final courseModels = await remoteDataSource.getCoursesBySemester(semesterId);
+      final courseModels = await remoteDataSource.getCoursesBySemester(
+        semesterId,
+      );
       return courseModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -23,9 +23,15 @@ class CourseRepositoryImpl implements ICourseRepository {
   }
 
   @override
-  Future<List<CourseEntity>> getStudentCourses(String studentId, String semesterId) async {
+  Future<List<CourseEntity>> getStudentCourses(
+    String studentId,
+    String semesterId,
+  ) async {
     try {
-      final courseModels = await remoteDataSource.getStudentCourses(studentId, semesterId);
+      final courseModels = await remoteDataSource.getStudentCourses(
+        studentId,
+        semesterId,
+      );
       return courseModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -82,4 +88,3 @@ class CourseRepositoryImpl implements ICourseRepository {
     }
   }
 }
-

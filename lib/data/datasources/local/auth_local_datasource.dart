@@ -76,10 +76,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       final password = box.get(_passwordKey) as String?;
 
       if (email != null && password != null) {
-        return {
-          'email': email,
-          'password': password,
-        };
+        return {'email': email, 'password': password};
       }
 
       return null;
