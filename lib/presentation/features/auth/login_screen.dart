@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../common/styles/colors.dart';
 import '../../providers/auth_provider.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -17,8 +16,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
   bool _obscurePassword = true;
-  bool _isLoading = false;
-  String? _errorMessage;
+  String? _manualErrorMessage; // For validation errors
 
   @override
   void dispose() {
@@ -28,70 +26,68 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _login() async {
+    // Validate inputs
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _manualErrorMessage = 'Please enter both email and password';
+      });
+      return;
+    }
+
+    // Clear manual error
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      _manualErrorMessage = null;
     });
 
-    try {
-      await ref
-          .read(authProvider.notifier)
-          .login(_emailController.text.trim(), _passwordController.text);
-      
-      // Check auth state after login
-      await Future.delayed(const Duration(milliseconds: 200));
-      final authState = ref.read(authProvider);
-      
-      authState.when(
-        data: (user) {
-          // Login successful
-          if (mounted && user != null) {
-            setState(() {
-              _isLoading = false;
-            });
-          } else if (mounted) {
-            // Login failed - user is null
-            setState(() {
-              _isLoading = false;
-              _errorMessage = 'Login failed. Please try again.';
-            });
-          }
-        },
-        loading: () {
-          // Still loading - wait a bit more
-          if (mounted) {
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                setState(() {
-                  _isLoading = false;
-                  _errorMessage = 'Login timeout. Please try again.';
-                });
-              }
-            });
-          }
-        },
-        error: (error, stack) {
-          // Login failed with error
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-              _errorMessage = error.toString().replaceAll('Exception: ', '');
-            });
-          }
-        },
-      );
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.toString().replaceAll('Exception: ', '');
-          _isLoading = false;
-        });
-      }
-    }
+    print('🔐 Login attempt with email: $email');
+
+    // Attempt login with remember me option
+    await ref.read(authProvider.notifier).login(email, password, rememberMe: _rememberMe);
+  }
+
+  /// Extract clean error message from exception string
+  String _extractErrorMessage(String error) {
+    // Remove common exception prefixes
+    String cleanError = error
+        .replaceAll('Exception: ', '')
+        .replaceAll('Error: ', '')
+        .replaceAll('FirebaseAuthException: ', '');
+
+    // Return cleaned message
+    return cleanError.trim();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Watch auth state
+    final authState = ref.watch(authProvider);
+
+    // Determine what error message to show
+    String? errorToShow = _manualErrorMessage;
+    bool isLoading = false;
+
+    authState.when(
+      data: (user) {
+        // No error, not loading
+        isLoading = false;
+      },
+      loading: () {
+        // Loading state
+        isLoading = true;
+      },
+      error: (error, stack) {
+        // Error state - show the error
+        isLoading = false;
+        if (errorToShow == null) {
+          errorToShow = _extractErrorMessage(error.toString());
+          print('🔴 Displaying error from auth state: $errorToShow');
+        }
+      },
+    );
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Row(
@@ -343,7 +339,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 30),
                       // Error message
-                      if (_errorMessage != null) ...[
+                      if (errorToShow != null) ...[
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -363,10 +359,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  _errorMessage!,
+                                  errorToShow!,
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     color: Colors.red,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
@@ -379,7 +376,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _login,
+                          onPressed: isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.buttonPrimary,
                             foregroundColor: Colors.white,
@@ -389,7 +386,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             elevation: 0,
                           ),
-                          child: _isLoading
+                          child: isLoading
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
@@ -405,44 +402,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      // Sign up link
-                      Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Don't have an account? ",
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                    builder: (context) => const RegisterScreen(),
-                                  ),
-                                );
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: Text(
-                                'Sign up',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ],

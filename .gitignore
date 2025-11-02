@@ -43,3 +43,27 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android signing keys - NEVER COMMIT THESE
+*.jks
+*.keystore
+key.properties
+android/key.properties
+android/app/key.properties
+
+# iOS signing - NEVER COMMIT THESE
+*.p12
+*.mobileprovision
+*.certSigningRequest
+ios/Runner.xcodeproj/project.pbxproj.bak
+
+# macOS signing
+macos/Runner.xcodeproj/project.pbxproj.bak
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+
+# Firebase config with sensitive data (if you want to keep it private)
+# lib/data/datasources/remote/firebase_config.dart

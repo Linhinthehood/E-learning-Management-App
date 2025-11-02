@@ -52,12 +52,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
+  final AuthLocalDataSource _localDataSource;
 
   AuthNotifier(
     this._loginUseCase,
     this._registerUseCase,
     this._logoutUseCase,
     this._getCurrentUserUseCase,
+    this._localDataSource,
   ) : super(const AsyncValue.loading()) {
     // Check if user is already logged in on initialization
     _checkCurrentUser();
@@ -66,18 +68,46 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
   /// Check if user is currently logged in
   Future<void> _checkCurrentUser() async {
     try {
+      // First, try to get the currently authenticated user from Firebase
       final user = await _getCurrentUserUseCase.execute();
-      state = AsyncValue.data(user);
+      if (user != null) {
+        state = AsyncValue.data(user);
+        return;
+      }
+
+      // If no user is authenticated, check for cached credentials (Remember Me)
+      final credentials = await _localDataSource.getCachedCredentials();
+      if (credentials != null) {
+        // Auto-login with cached credentials
+        final email = credentials['email']!;
+        final password = credentials['password']!;
+        final loggedInUser = await _loginUseCase.execute(email, password);
+        state = AsyncValue.data(loggedInUser);
+      } else {
+        // No cached credentials, user needs to login
+        state = const AsyncValue.data(null);
+      }
     } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      // If auto-login fails, clear cached credentials and show login screen
+      await _localDataSource.clearCredentials();
+      state = const AsyncValue.data(null);
     }
   }
 
   /// Login with email and password
-  Future<void> login(String email, String password) async {
+  Future<void> login(String email, String password, {bool rememberMe = false}) async {
     state = const AsyncValue.loading();
     try {
       final user = await _loginUseCase.execute(email, password);
+
+      // Save credentials if remember me is checked
+      if (rememberMe) {
+        await _localDataSource.saveCredentials(email, password);
+      } else {
+        // Clear any existing cached credentials if remember me is not checked
+        await _localDataSource.clearCredentials();
+      }
+
       state = AsyncValue.data(user);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -105,9 +135,12 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
     try {
       state = const AsyncValue.loading();
       await _logoutUseCase.execute();
+      // Clear cached credentials on logout
+      await _localDataSource.clearCredentials();
       state = const AsyncValue.data(null);
     } catch (e, _) {
-      // Even if logout fails, set state to null
+      // Even if logout fails, clear credentials and set state to null
+      await _localDataSource.clearCredentials();
       state = const AsyncValue.data(null);
     }
   }
@@ -126,5 +159,6 @@ final authProvider =
         ref.read(registerUseCaseProvider),
         ref.read(logoutUseCaseProvider),
         ref.read(getCurrentUserUseCaseProvider),
+        ref.read(authLocalDataSourceProvider),
       );
     });

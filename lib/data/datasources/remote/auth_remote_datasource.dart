@@ -10,6 +10,12 @@ abstract class AuthRemoteDataSource {
   Future<void> logout();
   Future<UserModel?> getCurrentUser();
   Future<UserModel> updateUserProfile(String userId, String? avatarUrl);
+
+  // Student management methods
+  Future<List<UserModel>> getAllStudents();
+  Future<UserModel> createStudent(String email, String password, String displayName);
+  Future<UserModel> updateStudent(String userId, String displayName, String email);
+  Future<void> deleteStudent(String userId);
 }
 
 /// Implementation of AuthRemoteDataSource using Firebase
@@ -40,27 +46,32 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             ...userDoc.data()!,
           });
         } else {
-          // User doesn't exist in Firestore, create one
-          final userData = {
-            'uid': userCredential.user!.uid,
-            'email': userCredential.user!.email ?? email,
-            'displayName': email == 'admin@example.com'
-                ? 'Administrator'
-                : 'Student',
-            'role': email == 'admin@example.com' ? 'instructor' : 'student',
-            'avatarUrl': null,
-          };
-
-          await _firestore
-              .collection('users')
-              .doc(userCredential.user!.uid)
-              .set(userData);
-
-          return UserModel.fromJson(userData);
+          // User authenticated but doesn't have a profile
+          // Sign them out and throw an error
+          await _auth.signOut();
+          throw Exception('Account not found. Please contact an administrator to create your account');
         }
       }
 
       return null;
+    } on FirebaseAuthException catch (e) {
+      // Handle specific Firebase Auth errors with user-friendly messages
+      switch (e.code) {
+        case 'user-not-found':
+        case 'wrong-password':
+        case 'invalid-credential':
+          throw Exception('Wrong email or password');
+        case 'invalid-email':
+          throw Exception('Invalid email address');
+        case 'user-disabled':
+          throw Exception('This account has been disabled');
+        case 'too-many-requests':
+          throw Exception('Too many failed attempts. Please try again later');
+        case 'network-request-failed':
+          throw Exception('Network error. Please check your connection');
+        default:
+          throw Exception('Login failed. Please try again');
+      }
     } catch (e) {
       throw Exception('Login failed: ${e.toString()}');
     }
@@ -133,7 +144,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> updateUserProfile(String userId, String? avatarUrl) async {
     try {
       final userDocRef = _firestore.collection('users').doc(userId);
-      
+
       // Update only avatarUrl, keep other fields unchanged
       await userDocRef.update({
         'avatarUrl': avatarUrl,
@@ -150,10 +161,112 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           ...updatedDoc.data()!,
         });
       }
-      
+
       throw Exception('User document not found');
     } catch (e) {
       throw Exception('Failed to update user profile: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<List<UserModel>> getAllStudents() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: 'student')
+          .get();
+
+      final students = querySnapshot.docs
+          .map((doc) => UserModel.fromJson({
+                'uid': doc.id,
+                ...doc.data(),
+              }))
+          .toList();
+
+      // Sort by displayName in memory to avoid needing a composite index
+      students.sort((a, b) => a.displayName.compareTo(b.displayName));
+
+      return students;
+    } catch (e) {
+      throw Exception('Failed to get students: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<UserModel> createStudent(String email, String password, String displayName) async {
+    try {
+      // Create user in Firebase Auth
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential.user != null) {
+        // Create user document in Firestore
+        final userData = {
+          'uid': userCredential.user!.uid,
+          'email': userCredential.user!.email ?? email,
+          'displayName': displayName,
+          'role': 'student',
+          'avatarUrl': null,
+          'createdAt': DateTime.now().toIso8601String(),
+        };
+
+        await _firestore
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set(userData);
+
+        return UserModel.fromJson(userData);
+      }
+
+      throw Exception('Failed to create user');
+    } catch (e) {
+      throw Exception('Failed to create student: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<UserModel> updateStudent(String userId, String displayName, String email) async {
+    try {
+      final userDocRef = _firestore.collection('users').doc(userId);
+
+      // Update user data in Firestore
+      await userDocRef.update({
+        'displayName': displayName,
+        'email': email,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+
+      // Note: Firebase Auth email update requires re-authentication
+      // For now, we only update Firestore. Email update can be added later if needed.
+
+      // Get updated user data
+      final updatedDoc = await userDocRef.get();
+      if (updatedDoc.exists) {
+        return UserModel.fromJson({
+          'uid': userId,
+          ...updatedDoc.data()!,
+        });
+      }
+
+      throw Exception('User document not found');
+    } catch (e) {
+      throw Exception('Failed to update student: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> deleteStudent(String userId) async {
+    try {
+      // Delete user document from Firestore
+      await _firestore.collection('users').doc(userId).delete();
+
+      // Note: Firebase Auth user deletion requires the user to be signed in
+      // This should be handled by Cloud Functions in production
+      // For now, we only delete the Firestore document
+    } catch (e) {
+      throw Exception('Failed to delete student: ${e.toString()}');
     }
   }
 }

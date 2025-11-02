@@ -7,6 +7,7 @@ import '../auth/login_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../semester/semester_management_screen.dart';
 import '../course/course_management_screen.dart';
+import '../student/student_management_screen.dart';
 
 class InstructorDashboard extends ConsumerStatefulWidget {
   const InstructorDashboard({super.key});
@@ -24,7 +25,7 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
     const DashboardScreen(), // 0: Home/Dashboard
     const SemesterManagementScreen(), // 1: Semesters
     const CourseManagementScreen(), // 2: Courses
-    const Placeholder(), // 3: Students (TODO)
+    const StudentManagementScreen(), // 3: Students
     const Placeholder(), // 4: Settings (TODO)
   ];
 
