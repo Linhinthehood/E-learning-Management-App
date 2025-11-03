@@ -15,6 +15,7 @@ class AssignmentModel {
   final int maxAttempts;
   final List<String> allowedFileFormats;
   final int maxFileSizeMB;
+  final List<String> attachments;
   final DateTime createdAt;
 
   AssignmentModel({
@@ -29,6 +30,7 @@ class AssignmentModel {
     required this.maxAttempts,
     required this.allowedFileFormats,
     required this.maxFileSizeMB,
+    required this.attachments,
     required this.createdAt,
   });
 
@@ -48,6 +50,7 @@ class AssignmentModel {
       maxAttempts: json['maxAttempts'] as int? ?? 1,
       allowedFileFormats: List<String>.from(json['allowedFileFormats'] ?? []),
       maxFileSizeMB: json['maxFileSizeMB'] as int? ?? 10,
+      attachments: List<String>.from(json['attachments'] ?? []),
       createdAt: (json['createdAt'] as Timestamp).toDate(),
     );
   }
@@ -66,6 +69,7 @@ class AssignmentModel {
       'maxAttempts': maxAttempts,
       'allowedFileFormats': allowedFileFormats,
       'maxFileSizeMB': maxFileSizeMB,
+      'attachments': attachments,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -84,6 +88,7 @@ class AssignmentModel {
       maxAttempts: maxAttempts,
       allowedFileFormats: allowedFileFormats,
       maxFileSizeMB: maxFileSizeMB,
+      attachments: attachments,
       createdAt: createdAt,
     );
   }
@@ -102,6 +107,7 @@ class AssignmentModel {
       maxAttempts: entity.maxAttempts,
       allowedFileFormats: entity.allowedFileFormats,
       maxFileSizeMB: entity.maxFileSizeMB,
+      attachments: entity.attachments,
       createdAt: entity.createdAt,
     );
   }

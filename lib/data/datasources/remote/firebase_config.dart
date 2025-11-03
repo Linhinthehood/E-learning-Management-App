@@ -6,7 +6,7 @@ class FirebaseConfig {
       "e-learning-management-ap-351a8.firebaseapp.com";
   static const String projectId = "e-learning-management-ap-351a8";
   static const String storageBucket =
-      "e-learning-management-ap-351a8.firebasestorage.app";
+      "e-learning-management-ap-351a8.appspot.com";
   static const String messagingSenderId = "749862035515";
   static const String appId = "1:749862035515:web:46affdd8d4a1e62a64bc1e";
   static const String measurementId = "G-EHNGKWX2BB";

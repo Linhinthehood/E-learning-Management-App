@@ -6,6 +6,7 @@ import '../../../../domain/entities/course_entity.dart';
 import '../../../common/styles/colors.dart';
 import '../../../providers/material_provider.dart';
 import '../../../providers/group_provider.dart';
+import '../../../../services/file_upload_service.dart';
 
 /// Dialog for creating or editing a material
 class MaterialFormDialog extends ConsumerStatefulWidget {
@@ -31,6 +32,9 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
   bool _isForAllGroups = true;
   bool _isLoading = false;
   bool _isExternalLink = false;
+  bool _isUploading = false;
+  double _uploadProgress = 0.0;
+  final FileUploadService _fileUploadService = FileUploadService();
 
   @override
   void initState() {
@@ -108,6 +112,72 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
       return Uri.parse(url).hasScheme;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<void> _pickAndUploadFiles() async {
+    try {
+      // Pick files
+      final files = await _fileUploadService.pickFiles(allowMultiple: true);
+
+      if (files == null || files.isEmpty) return;
+
+      setState(() {
+        _isUploading = true;
+        _uploadProgress = 0.0;
+      });
+
+      // Upload files
+      final uploadedUrls = await _fileUploadService.uploadMultipleFiles(
+        files: files,
+        path: 'courses/${widget.course.id}/materials',
+        onProgress: (current, total) {
+          setState(() {
+            _uploadProgress = current / total;
+          });
+        },
+      );
+
+      // Add uploaded files to materials list
+      for (int i = 0; i < files.length; i++) {
+        setState(() {
+          _files.add(
+            MaterialFile(
+              name: files[i].name,
+              url: uploadedUrls[i],
+              type: _fileType,
+            ),
+          );
+        });
+      }
+
+      setState(() {
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${files.length} file(s) uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload files: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -434,6 +504,64 @@ class _MaterialFormDialogState extends ConsumerState<MaterialFormDialog> {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Upload file button
+                      ElevatedButton.icon(
+                        onPressed: _isUploading ? null : _pickAndUploadFiles,
+                        icon: const Icon(Icons.upload_file, size: 20),
+                        label: Text(
+                          _isUploading
+                              ? 'Uploading...'
+                              : 'Browse & Upload Files',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.buttonPrimary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+
+                      // Upload progress
+                      if (_isUploading) ...[
+                        const SizedBox(height: 12),
+                        LinearProgressIndicator(
+                          value: _uploadProgress,
+                          backgroundColor: AppColors.border,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.buttonPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 16),
+
+                      // Or add manually
+                      Text(
+                        'Or add file/link manually',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 8),

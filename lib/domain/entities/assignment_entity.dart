@@ -11,6 +11,7 @@ class AssignmentEntity {
   final int maxAttempts; // 0 = unlimited
   final List<String> allowedFileFormats; // e.g., ['pdf', 'doc', 'docx']
   final int maxFileSizeMB; // Maximum file size in MB
+  final List<String> attachments; // Instructor attachments (instructions, etc.)
   final DateTime createdAt;
 
   const AssignmentEntity({
@@ -25,6 +26,7 @@ class AssignmentEntity {
     required this.maxAttempts,
     required this.allowedFileFormats,
     required this.maxFileSizeMB,
+    this.attachments = const [],
     required this.createdAt,
   });
 
@@ -58,4 +60,7 @@ class AssignmentEntity {
     }
     return now.isAfter(deadline);
   }
+
+  /// Check if assignment is upcoming (not yet open)
+  bool get isUpcoming => DateTime.now().isBefore(startDate);
 }

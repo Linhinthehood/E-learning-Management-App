@@ -4,9 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../common/styles/colors.dart';
 import '../../../../domain/entities/course_entity.dart';
 import '../../../../domain/entities/assignment_entity.dart';
+import '../../../../domain/entities/assignment_submission_entity.dart';
 import '../../../providers/assignment_provider.dart';
+import '../../../providers/assignment_submission_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../widgets/assignment_form_dialog.dart';
+import '../widgets/assignment_submission_dialog.dart';
 
 /// Assignments tab - displays and manages assignments
 class AssignmentsTab extends ConsumerStatefulWidget {
@@ -19,6 +22,11 @@ class AssignmentsTab extends ConsumerStatefulWidget {
 }
 
 class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _filterStatus = 'All';
+  String _sortBy = 'Deadline (Nearest First)';
+
   @override
   void initState() {
     super.initState();
@@ -30,13 +38,72 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<AssignmentEntity> _applyFiltersAndSort(List<AssignmentEntity> assignments) {
+    var filtered = assignments.where((assignment) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = assignment.title
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            assignment.description
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+
+      // Status filter
+      if (_filterStatus != 'All') {
+        switch (_filterStatus) {
+          case 'Open':
+            if (!assignment.isOpen) return false;
+            break;
+          case 'Closed':
+            if (!assignment.isClosed) return false;
+            break;
+          case 'Upcoming':
+            if (!assignment.isUpcoming) return false;
+            break;
+        }
+      }
+
+      return true;
+    }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'Deadline (Nearest First)':
+        filtered.sort((a, b) => a.deadline.compareTo(b.deadline));
+        break;
+      case 'Deadline (Furthest First)':
+        filtered.sort((a, b) => b.deadline.compareTo(a.deadline));
+        break;
+      case 'Title (A-Z)':
+        filtered.sort((a, b) => a.title.compareTo(b.title));
+        break;
+      case 'Title (Z-A)':
+        filtered.sort((a, b) => b.title.compareTo(a.title));
+        break;
+    }
+
+    return filtered;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final assignmentsAsync = ref.watch(assignmentProvider);
 
     return assignmentsAsync.when(
       data: (assignments) {
+        final filteredAssignments = _applyFiltersAndSort(assignments);
+
         return Column(
           children: [
+            // Header with title and Add button
             Padding(
               padding: const EdgeInsets.all(24),
               child: Row(
@@ -75,8 +142,146 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                 ],
               ),
             ),
+
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search assignments...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: AppColors.cardBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Filter and Sort controls
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  // Filter dropdown
+                  Expanded(
+                    // ignore: deprecated_member_use
+                    child: DropdownButtonFormField<String>(
+                      // ignore: deprecated_member_use
+                      value: _filterStatus,
+                      decoration: InputDecoration(
+                        labelText: 'Filter by Status',
+                        prefixIcon: const Icon(Icons.filter_list, size: 20),
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      items: [
+                        'All',
+                        'Open',
+                        'Closed',
+                        'Upcoming',
+                      ].map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(
+                            status,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _filterStatus = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Sort dropdown
+                  Expanded(
+                    // ignore: deprecated_member_use
+                    child: DropdownButtonFormField<String>(
+                      // ignore: deprecated_member_use
+                      value: _sortBy,
+                      decoration: InputDecoration(
+                        labelText: 'Sort by',
+                        prefixIcon: const Icon(Icons.sort, size: 20),
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      items: [
+                        'Deadline (Nearest First)',
+                        'Deadline (Furthest First)',
+                        'Title (A-Z)',
+                        'Title (Z-A)',
+                      ].map((sortOption) {
+                        return DropdownMenuItem(
+                          value: sortOption,
+                          child: Text(
+                            sortOption,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _sortBy = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             Expanded(
-              child: assignments.isEmpty
+              child: filteredAssignments.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -90,21 +295,42 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No assignments yet',
+                            _searchQuery.isNotEmpty || _filterStatus != 'All'
+                                ? 'No assignments match your filters'
+                                : 'No assignments yet',
                             style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
                             ),
                           ),
+                          if (_searchQuery.isNotEmpty || _filterStatus != 'All') ...[
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                  _filterStatus = 'All';
+                                });
+                              },
+                              child: Text(
+                                'Clear filters',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: AppColors.buttonPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      itemCount: assignments.length,
+                      itemCount: filteredAssignments.length,
                       itemBuilder: (context, index) {
-                        final assignment = assignments[index];
+                        final assignment = filteredAssignments[index];
                         return _buildAssignmentCard(context, ref, assignment);
                       },
                     ),
@@ -141,6 +367,7 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
   ) {
     final userAsync = ref.read(authProvider);
     final isAuthor = userAsync.value?.uid == widget.course.instructorId;
+    final currentUserId = userAsync.value?.uid;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -383,6 +610,105 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                 }).toList(),
               ),
             ],
+
+            // Student submission section
+            if (!isAuthor && currentUserId != null) ...[
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              FutureBuilder<AssignmentSubmissionEntity?>(
+                future: ref
+                    .read(assignmentSubmissionProvider.notifier)
+                    .getLatestSubmission(assignment.id, currentUserId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  final latestSubmission = snapshot.data;
+                  final attemptCount = latestSubmission?.attemptNumber ?? 0;
+                  final canSubmit = assignment.hasUnlimitedAttempts ||
+                      attemptCount < assignment.maxAttempts;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Submission status
+                      _buildSubmissionStatus(
+                        latestSubmission,
+                        attemptCount,
+                        assignment,
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Submit button
+                      if (canSubmit && !assignment.isClosed)
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _showSubmissionDialog(
+                              context,
+                              ref,
+                              assignment,
+                              attemptCount + 1,
+                            ),
+                            icon: const Icon(Icons.upload_file, size: 20),
+                            label: Text(
+                              attemptCount == 0
+                                  ? 'Submit Assignment'
+                                  : 'Submit Attempt ${attemptCount + 1}',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.buttonPrimary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        )
+                      else if (!canSubmit)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.red),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error, color: Colors.red, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Maximum attempts reached',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -459,6 +785,137 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
             child: Text(
               'Delete',
               style: GoogleFonts.inter(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSubmissionDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AssignmentEntity assignment,
+    int attemptNumber,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AssignmentSubmissionDialog(
+        assignment: assignment,
+        attemptNumber: attemptNumber,
+      ),
+    ).then((success) {
+      if (mounted && success == true) {
+        // Refresh the assignments to update submission status
+        ref.read(assignmentProvider.notifier).loadAssignments(widget.course.id);
+      }
+    });
+  }
+
+  Widget _buildSubmissionStatus(
+    AssignmentSubmissionEntity? submission,
+    int attemptCount,
+    AssignmentEntity assignment,
+  ) {
+    if (submission == null) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.pending_actions, color: Colors.grey, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'Not submitted yet',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.grey,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Determine status color and icon
+    Color statusColor;
+    IconData statusIcon;
+    String statusText;
+
+    if (submission.status == SubmissionStatus.graded) {
+      statusColor = Colors.blue;
+      statusIcon = Icons.grading;
+      statusText = 'Graded: ${submission.grade?.toStringAsFixed(1)} points';
+    } else if (submission.status == SubmissionStatus.late) {
+      statusColor = Colors.orange;
+      statusIcon = Icons.schedule;
+      statusText = 'Submitted late (Attempt $attemptCount)';
+    } else {
+      statusColor = Colors.green;
+      statusIcon = Icons.check_circle;
+      statusText = 'Submitted on time (Attempt $attemptCount)';
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: statusColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(statusIcon, color: statusColor, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  statusText,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (submission.status == SubmissionStatus.graded &&
+              submission.feedback != null &&
+              submission.feedback!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
+            Text(
+              'Feedback:',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              submission.feedback!,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text(
+            'Submitted: ${_formatDateTime(submission.submissionTime)}',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: AppColors.textSecondary,
             ),
           ),
         ],

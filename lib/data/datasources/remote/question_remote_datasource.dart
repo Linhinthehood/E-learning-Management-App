@@ -75,12 +75,16 @@ class QuestionRemoteDataSourceImpl implements QuestionRemoteDataSource {
       final querySnapshot = await _firestore
           .collection('questionBanks')
           .where('courseId', isEqualTo: courseId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      final questionBanks = querySnapshot.docs
           .map((doc) => QuestionBankModel.fromJson(doc.data(), doc.id))
           .toList();
+
+      // Sort in memory to avoid needing a composite index
+      questionBanks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return questionBanks;
     } catch (e) {
       throw Exception('Failed to get question banks: ${e.toString()}');
     }
@@ -176,12 +180,16 @@ class QuestionRemoteDataSourceImpl implements QuestionRemoteDataSource {
       final querySnapshot = await _firestore
           .collection('questions')
           .where('questionBankId', isEqualTo: questionBankId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      final questions = querySnapshot.docs
           .map((doc) => QuestionModel.fromJson(doc.data(), doc.id))
           .toList();
+
+      // Sort in memory to avoid needing a composite index
+      questions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return questions;
     } catch (e) {
       throw Exception('Failed to get questions: ${e.toString()}');
     }
@@ -215,12 +223,16 @@ class QuestionRemoteDataSourceImpl implements QuestionRemoteDataSource {
           .collection('questions')
           .where('questionBankId', isEqualTo: questionBankId)
           .where('difficulty', isEqualTo: difficulty.name)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      final questions = querySnapshot.docs
           .map((doc) => QuestionModel.fromJson(doc.data(), doc.id))
           .toList();
+
+      // Sort in memory to avoid needing a composite index
+      questions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return questions;
     } catch (e) {
       throw Exception('Failed to get questions by difficulty: ${e.toString()}');
     }
@@ -236,12 +248,16 @@ class QuestionRemoteDataSourceImpl implements QuestionRemoteDataSource {
           .collection('questions')
           .where('questionBankId', isEqualTo: questionBankId)
           .where('type', isEqualTo: type.name)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return querySnapshot.docs
+      final questions = querySnapshot.docs
           .map((doc) => QuestionModel.fromJson(doc.data(), doc.id))
           .toList();
+
+      // Sort in memory to avoid needing a composite index
+      questions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return questions;
     } catch (e) {
       throw Exception('Failed to get questions by type: ${e.toString()}');
     }

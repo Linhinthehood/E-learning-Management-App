@@ -4,9 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../common/styles/colors.dart';
 import '../../../../domain/entities/course_entity.dart';
 import '../../../../domain/entities/quiz_entity.dart';
+import '../../../../domain/entities/quiz_attempt_entity.dart';
 import '../../../providers/quiz_provider.dart';
+import '../../../providers/quiz_attempt_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../widgets/quiz_form_dialog.dart';
+import '../quiz_taking_screen.dart';
 
 /// Quizzes tab - displays and manages quizzes
 class QuizzesTab extends ConsumerStatefulWidget {
@@ -19,6 +22,11 @@ class QuizzesTab extends ConsumerStatefulWidget {
 }
 
 class _QuizzesTabState extends ConsumerState<QuizzesTab> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _filterStatus = 'All';
+  String _sortBy = 'Close Date (Nearest First)';
+
   @override
   void initState() {
     super.initState();
@@ -30,13 +38,72 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<QuizEntity> _applyFiltersAndSort(List<QuizEntity> quizzes) {
+    var filtered = quizzes.where((quiz) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = quiz.title
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            quiz.description
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+
+      // Status filter
+      if (_filterStatus != 'All') {
+        switch (_filterStatus) {
+          case 'Open':
+            if (!quiz.isOpen) return false;
+            break;
+          case 'Closed':
+            if (!quiz.isClosed) return false;
+            break;
+          case 'Upcoming':
+            if (!quiz.isUpcoming) return false;
+            break;
+        }
+      }
+
+      return true;
+    }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'Close Date (Nearest First)':
+        filtered.sort((a, b) => a.timeClose.compareTo(b.timeClose));
+        break;
+      case 'Close Date (Furthest First)':
+        filtered.sort((a, b) => b.timeClose.compareTo(a.timeClose));
+        break;
+      case 'Title (A-Z)':
+        filtered.sort((a, b) => a.title.compareTo(b.title));
+        break;
+      case 'Title (Z-A)':
+        filtered.sort((a, b) => b.title.compareTo(a.title));
+        break;
+    }
+
+    return filtered;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final quizzesAsync = ref.watch(quizProvider);
 
     return quizzesAsync.when(
       data: (quizzes) {
+        final filteredQuizzes = _applyFiltersAndSort(quizzes);
+
         return Column(
           children: [
+            // Header
             Padding(
               padding: const EdgeInsets.all(24),
               child: Row(
@@ -75,8 +142,143 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                 ],
               ),
             ),
+
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search quizzes...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: AppColors.cardBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Filter and Sort
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    // ignore: deprecated_member_use
+                    child: DropdownButtonFormField<String>(
+                      // ignore: deprecated_member_use
+                      value: _filterStatus,
+                      decoration: InputDecoration(
+                        labelText: 'Filter by Status',
+                        prefixIcon: const Icon(Icons.filter_list, size: 20),
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      items: [
+                        'All',
+                        'Open',
+                        'Closed',
+                        'Upcoming',
+                      ].map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(
+                            status,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _filterStatus = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    // ignore: deprecated_member_use
+                    child: DropdownButtonFormField<String>(
+                      // ignore: deprecated_member_use
+                      value: _sortBy,
+                      decoration: InputDecoration(
+                        labelText: 'Sort by',
+                        prefixIcon: const Icon(Icons.sort, size: 20),
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      items: [
+                        'Close Date (Nearest First)',
+                        'Close Date (Furthest First)',
+                        'Title (A-Z)',
+                        'Title (Z-A)',
+                      ].map((sortOption) {
+                        return DropdownMenuItem(
+                          value: sortOption,
+                          child: Text(
+                            sortOption,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _sortBy = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             Expanded(
-              child: quizzes.isEmpty
+              child: filteredQuizzes.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -90,21 +292,42 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No quizzes yet',
+                            _searchQuery.isNotEmpty || _filterStatus != 'All'
+                                ? 'No quizzes match your filters'
+                                : 'No quizzes yet',
                             style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
                             ),
                           ),
+                          if (_searchQuery.isNotEmpty || _filterStatus != 'All') ...[
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                  _filterStatus = 'All';
+                                });
+                              },
+                              child: Text(
+                                'Clear filters',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: AppColors.buttonPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      itemCount: quizzes.length,
+                      itemCount: filteredQuizzes.length,
                       itemBuilder: (context, index) {
-                        final quiz = quizzes[index];
+                        final quiz = filteredQuizzes[index];
                         return _buildQuizCard(context, ref, quiz);
                       },
                     ),
@@ -135,6 +358,7 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
   Widget _buildQuizCard(BuildContext context, WidgetRef ref, QuizEntity quiz) {
     final userAsync = ref.read(authProvider);
     final isAuthor = userAsync.value?.uid == widget.course.instructorId;
+    final currentUserId = userAsync.value?.uid;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -390,6 +614,111 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                   ),
               ],
             ),
+
+            // Student quiz attempt section
+            if (!isAuthor && currentUserId != null) ...[
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              FutureBuilder<QuizAttemptEntity?>(
+                future: ref
+                    .read(quizAttemptProvider.notifier)
+                    .getLatestAttempt(quiz.id, currentUserId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  final latestAttempt = snapshot.data;
+
+                  return FutureBuilder<int>(
+                    future: ref
+                        .read(quizAttemptProvider.notifier)
+                        .countStudentAttempts(quiz.id, currentUserId),
+                    builder: (context, countSnapshot) {
+                      final attemptCount = countSnapshot.data ?? 0;
+                      final canTake = quiz.hasUnlimitedAttempts ||
+                          attemptCount < quiz.numAttempts;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Attempt status
+                          _buildAttemptStatus(latestAttempt, attemptCount, quiz),
+                          const SizedBox(height: 12),
+
+                          // Take quiz button
+                          if (canTake && quiz.isOpen)
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () => _startQuiz(
+                                  context,
+                                  ref,
+                                  quiz,
+                                  currentUserId,
+                                ),
+                                icon: const Icon(Icons.play_arrow, size: 20),
+                                label: Text(
+                                  attemptCount == 0
+                                      ? 'Start Quiz'
+                                      : latestAttempt?.isInProgress == true
+                                      ? 'Continue Quiz'
+                                      : 'Start Attempt ${attemptCount + 1}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.buttonPrimary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            )
+                          else if (!canTake)
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.red),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.error, color: Colors.red, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Maximum attempts reached',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -460,5 +789,152 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
         ],
       ),
     );
+  }
+
+  Widget _buildAttemptStatus(
+    QuizAttemptEntity? attempt,
+    int attemptCount,
+    QuizEntity quiz,
+  ) {
+    if (attempt == null) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.quiz, color: Colors.grey, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'Not attempted yet',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.grey,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Determine status color and icon
+    Color statusColor;
+    IconData statusIcon;
+    String statusText;
+
+    if (attempt.isGraded) {
+      statusColor = Colors.blue;
+      statusIcon = Icons.grading;
+      final percentage = attempt.percentage ?? 0;
+      statusText =
+          'Graded: ${attempt.score?.toStringAsFixed(1)}/${attempt.maxScore} (${percentage.toStringAsFixed(1)}%)';
+    } else if (attempt.isInProgress) {
+      statusColor = Colors.orange;
+      statusIcon = Icons.pending;
+      statusText = 'Quiz in progress (Attempt $attemptCount)';
+    } else {
+      statusColor = Colors.green;
+      statusIcon = Icons.check_circle;
+      final percentage = attempt.percentage ?? 0;
+      statusText =
+          'Completed: ${attempt.score?.toStringAsFixed(1)}/${attempt.maxScore} (${percentage.toStringAsFixed(1)}%)';
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: statusColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(statusIcon, color: statusColor, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  statusText,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (attempt.feedback != null && attempt.feedback!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
+            Text(
+              'Feedback:',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              attempt.feedback!,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+          if (attempt.endTime != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Submitted: ${_formatDateTime(attempt.endTime!)}',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _startQuiz(
+    BuildContext context,
+    WidgetRef ref,
+    QuizEntity quiz,
+    String studentId,
+  ) async {
+    // Capture context before async
+    final navigatorContext = context;
+
+    // Check if there's an in-progress attempt
+    final inProgressAttempt = await ref
+        .read(quizAttemptProvider.notifier)
+        .getInProgressAttempt(quiz.id, studentId);
+
+    if (!mounted || !navigatorContext.mounted) return;
+
+    // Navigate to quiz taking screen
+    final result = await Navigator.of(navigatorContext).push(
+      MaterialPageRoute(
+        builder: (context) => QuizTakingScreen(
+          quiz: quiz,
+          existingAttempt: inProgressAttempt,
+        ),
+      ),
+    );
+
+    // Refresh the quiz list if quiz was completed
+    if (result == true && mounted) {
+      ref.read(quizProvider.notifier).loadQuizzes(widget.course.id);
+    }
   }
 }

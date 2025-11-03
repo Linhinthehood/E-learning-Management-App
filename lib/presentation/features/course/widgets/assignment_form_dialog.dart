@@ -6,6 +6,7 @@ import '../../../../domain/entities/course_entity.dart';
 import '../../../common/styles/colors.dart';
 import '../../../providers/assignment_provider.dart';
 import '../../../providers/group_provider.dart';
+import '../../../../services/file_upload_service.dart';
 
 /// Dialog for creating or editing an assignment
 class AssignmentFormDialog extends ConsumerStatefulWidget {
@@ -38,6 +39,11 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
   bool _allowsLateSubmission = false;
   bool _isLoading = false;
   final List<String> _allowedFileFormats = [];
+  final List<String> _attachments = [];
+  late TextEditingController _attachmentController;
+  bool _isUploading = false;
+  double _uploadProgress = 0.0;
+  final FileUploadService _fileUploadService = FileUploadService();
 
   @override
   void initState() {
@@ -62,6 +68,8 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
     _allowedFileFormats.addAll(
       widget.assignment?.allowedFileFormats ?? ['pdf'],
     );
+    _attachmentController = TextEditingController();
+    _attachments.addAll(widget.assignment?.attachments ?? []);
 
     // Load groups when dialog opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -76,7 +84,79 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
     _titleController.dispose();
     _descriptionController.dispose();
     _fileFormatsController.dispose();
+    _attachmentController.dispose();
     super.dispose();
+  }
+
+  void _addAttachment() {
+    final url = _attachmentController.text.trim();
+    if (url.isNotEmpty && !_attachments.contains(url)) {
+      setState(() {
+        _attachments.add(url);
+        _attachmentController.clear();
+      });
+    }
+  }
+
+  Future<void> _pickAndUploadFiles() async {
+    try {
+      // Pick files
+      final files = await _fileUploadService.pickFiles(allowMultiple: true);
+
+      if (files == null || files.isEmpty) return;
+
+      setState(() {
+        _isUploading = true;
+        _uploadProgress = 0.0;
+      });
+
+      // Upload files
+      final uploadedUrls = await _fileUploadService.uploadMultipleFiles(
+        files: files,
+        path: 'courses/${widget.course.id}/assignments',
+        onProgress: (current, total) {
+          setState(() {
+            _uploadProgress = current / total;
+          });
+        },
+      );
+
+      // Add uploaded URLs to attachments
+      setState(() {
+        _attachments.addAll(uploadedUrls);
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${files.length} file(s) uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload files: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _removeAttachment(String url) {
+    setState(() {
+      _attachments.remove(url);
+    });
   }
 
   Future<void> _saveAssignment() async {
@@ -133,6 +213,7 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
         maxAttempts: _maxAttempts,
         allowedFileFormats: _allowedFileFormats,
         maxFileSizeMB: _maxFileSizeMB,
+        attachments: _attachments,
         createdAt: widget.assignment?.createdAt ?? DateTime.now(),
       );
 
@@ -690,6 +771,122 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
                                 style: GoogleFonts.inter(fontSize: 12),
                               ),
                               onDeleted: () => _removeFileFormat(format),
+                              deleteIcon: const Icon(Icons.close, size: 16),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+
+                      // Attachments
+                      Text(
+                        'Attachments (Instructions/Materials)',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Upload file button
+                      ElevatedButton.icon(
+                        onPressed: _isUploading ? null : _pickAndUploadFiles,
+                        icon: const Icon(Icons.upload_file, size: 20),
+                        label: Text(
+                          _isUploading
+                              ? 'Uploading...'
+                              : 'Browse & Upload Files',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.buttonPrimary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+
+                      // Upload progress
+                      if (_isUploading) ...[
+                        const SizedBox(height: 12),
+                        LinearProgressIndicator(
+                          value: _uploadProgress,
+                          backgroundColor: AppColors.border,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.buttonPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 16),
+
+                      // Or paste URL
+                      Text(
+                        'Or paste URL',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _attachmentController,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: AppColors.background,
+                                hintText: 'Enter attachment URL',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: _addAttachment,
+                            icon: const Icon(Icons.add),
+                            style: IconButton.styleFrom(
+                              backgroundColor: AppColors.buttonPrimary,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_attachments.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _attachments.map((attachment) {
+                            return Chip(
+                              label: Text(
+                                attachment.split('/').last,
+                                style: GoogleFonts.inter(fontSize: 12),
+                              ),
+                              onDeleted: () => _removeAttachment(attachment),
                               deleteIcon: const Icon(Icons.close, size: 16),
                             );
                           }).toList(),

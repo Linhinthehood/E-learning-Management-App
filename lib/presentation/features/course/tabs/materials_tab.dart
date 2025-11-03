@@ -6,6 +6,7 @@ import '../../../../domain/entities/course_entity.dart';
 import '../../../../domain/entities/material_entity.dart';
 import '../../../providers/material_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/view_tracking_provider.dart';
 import '../widgets/material_form_dialog.dart';
 
 /// Materials tab - displays and manages materials
@@ -19,6 +20,11 @@ class MaterialsTab extends ConsumerStatefulWidget {
 }
 
 class _MaterialsTabState extends ConsumerState<MaterialsTab> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _filterType = 'All';
+  String _sortBy = 'Date (Newest First)';
+
   @override
   void initState() {
     super.initState();
@@ -30,13 +36,84 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<MaterialEntity> _applyFiltersAndSort(List<MaterialEntity> materials) {
+    var filtered = materials.where((material) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = material.title
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            material.description
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+
+      // Type filter (based on file type)
+      if (_filterType != 'All') {
+        final hasMatchingType = material.files.any((file) {
+          final lowerUrl = file.url.toLowerCase();
+          switch (_filterType) {
+            case 'Documents':
+              return lowerUrl.endsWith('.pdf') ||
+                  lowerUrl.endsWith('.doc') ||
+                  lowerUrl.endsWith('.docx') ||
+                  lowerUrl.endsWith('.txt');
+            case 'Videos':
+              return lowerUrl.endsWith('.mp4') ||
+                  lowerUrl.endsWith('.avi') ||
+                  lowerUrl.endsWith('.mov') ||
+                  lowerUrl.contains('youtube.com') ||
+                  lowerUrl.contains('youtu.be');
+            case 'Links':
+              return file.isExternalLink ||
+                  lowerUrl.startsWith('http://') ||
+                  lowerUrl.startsWith('https://');
+            default:
+              return true;
+          }
+        });
+        if (!hasMatchingType) return false;
+      }
+
+      return true;
+    }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'Date (Newest First)':
+        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+      case 'Date (Oldest First)':
+        filtered.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+      case 'Title (A-Z)':
+        filtered.sort((a, b) => a.title.compareTo(b.title));
+        break;
+      case 'Title (Z-A)':
+        filtered.sort((a, b) => b.title.compareTo(a.title));
+        break;
+    }
+
+    return filtered;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final materialsAsync = ref.watch(materialProvider);
 
     return materialsAsync.when(
       data: (materials) {
+        final filteredMaterials = _applyFiltersAndSort(materials);
+
         return Column(
           children: [
+            // Header
             Padding(
               padding: const EdgeInsets.all(24),
               child: Row(
@@ -75,8 +152,143 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                 ],
               ),
             ),
+
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search materials...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: AppColors.cardBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Filter and Sort
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    // ignore: deprecated_member_use
+                    child: DropdownButtonFormField<String>(
+                      // ignore: deprecated_member_use
+                      value: _filterType,
+                      decoration: InputDecoration(
+                        labelText: 'Filter by Type',
+                        prefixIcon: const Icon(Icons.filter_list, size: 20),
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      items: [
+                        'All',
+                        'Documents',
+                        'Videos',
+                        'Links',
+                      ].map((type) {
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Text(
+                            type,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _filterType = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    // ignore: deprecated_member_use
+                    child: DropdownButtonFormField<String>(
+                      // ignore: deprecated_member_use
+                      value: _sortBy,
+                      decoration: InputDecoration(
+                        labelText: 'Sort by',
+                        prefixIcon: const Icon(Icons.sort, size: 20),
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      items: [
+                        'Date (Newest First)',
+                        'Date (Oldest First)',
+                        'Title (A-Z)',
+                        'Title (Z-A)',
+                      ].map((sortOption) {
+                        return DropdownMenuItem(
+                          value: sortOption,
+                          child: Text(
+                            sortOption,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _sortBy = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             Expanded(
-              child: materials.isEmpty
+              child: filteredMaterials.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -90,21 +302,53 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No materials yet',
+                            _searchQuery.isNotEmpty || _filterType != 'All'
+                                ? 'No materials match your filters'
+                                : 'No materials yet',
                             style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
                             ),
                           ),
+                          if (_searchQuery.isNotEmpty || _filterType != 'All') ...[
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                  _filterType = 'All';
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.buttonPrimary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Clear filters',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      itemCount: materials.length,
+                      itemCount: filteredMaterials.length,
                       itemBuilder: (context, index) {
-                        final material = materials[index];
+                        final material = filteredMaterials[index];
                         return _buildMaterialCard(context, ref, material);
                       },
                     ),
@@ -332,11 +576,11 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                 spacing: 8,
                 runSpacing: 8,
                 children: material.files.map((file) {
-                  return Chip(
+                  return ActionChip(
                     avatar: Icon(
                       file.isExternalLink
                           ? Icons.link
-                          : Icons.insert_drive_file,
+                          : Icons.download,
                       size: 16,
                     ),
                     label: Text(
@@ -344,6 +588,13 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                       style: GoogleFonts.inter(fontSize: 12),
                     ),
                     backgroundColor: AppColors.background,
+                    onPressed: () => _downloadFile(
+                      context,
+                      ref,
+                      material.id,
+                      file.url,
+                      file.name,
+                    ),
                   );
                 }).toList(),
               ),
@@ -441,5 +692,73 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
         ],
       ),
     );
+  }
+
+  Future<void> _downloadFile(
+    BuildContext context,
+    WidgetRef ref,
+    String materialId,
+    String fileUrl,
+    String fileName,
+  ) async {
+    try {
+      // Track download
+      await ref
+          .read(viewTrackingByContentProvider(
+            (contentId: materialId, contentType: 'material'),
+          ).notifier)
+          .trackDownload();
+
+      // Show file URL in a dialog for user to access
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              'Download File',
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'File: $fileName',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'URL:',
+                  style: GoogleFonts.inter(fontSize: 12),
+                ),
+                const SizedBox(height: 4),
+                SelectableText(
+                  fileUrl,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Close', style: GoogleFonts.inter()),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

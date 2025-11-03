@@ -7,6 +7,7 @@ import '../../../common/styles/colors.dart';
 import '../../../providers/announcement_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/group_provider.dart';
+import '../../../../services/file_upload_service.dart';
 
 /// Dialog for creating or editing an announcement
 class AnnouncementFormDialog extends ConsumerStatefulWidget {
@@ -34,6 +35,9 @@ class _AnnouncementFormDialogState
   final List<String> _selectedGroupIds = [];
   bool _isForAllGroups = true;
   bool _isLoading = false;
+  bool _isUploading = false;
+  double _uploadProgress = 0.0;
+  final FileUploadService _fileUploadService = FileUploadService();
 
   @override
   void initState() {
@@ -128,6 +132,61 @@ class _AnnouncementFormDialogState
         _attachments.add(url);
         _attachmentController.clear();
       });
+    }
+  }
+
+  Future<void> _pickAndUploadFiles() async {
+    try {
+      // Pick files
+      final files = await _fileUploadService.pickFiles(allowMultiple: true);
+
+      if (files == null || files.isEmpty) return;
+
+      setState(() {
+        _isUploading = true;
+        _uploadProgress = 0.0;
+      });
+
+      // Upload files
+      final uploadedUrls = await _fileUploadService.uploadMultipleFiles(
+        files: files,
+        path: 'courses/${widget.course.id}/announcements',
+        onProgress: (current, total) {
+          setState(() {
+            _uploadProgress = current / total;
+          });
+        },
+      );
+
+      // Add uploaded URLs to attachments
+      setState(() {
+        _attachments.addAll(uploadedUrls);
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${files.length} file(s) uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload files: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -348,11 +407,69 @@ class _AnnouncementFormDialogState
 
                       // Attachments
                       Text(
-                        'Attachments (URLs)',
+                        'Attachments',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Upload file button
+                      ElevatedButton.icon(
+                        onPressed: _isUploading ? null : _pickAndUploadFiles,
+                        icon: const Icon(Icons.upload_file, size: 20),
+                        label: Text(
+                          _isUploading
+                              ? 'Uploading...'
+                              : 'Browse & Upload Files',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.buttonPrimary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+
+                      // Upload progress
+                      if (_isUploading) ...[
+                        const SizedBox(height: 12),
+                        LinearProgressIndicator(
+                          value: _uploadProgress,
+                          backgroundColor: AppColors.border,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.buttonPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 16),
+
+                      // Or add URL manually
+                      Text(
+                        'Or paste URL',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 8),
