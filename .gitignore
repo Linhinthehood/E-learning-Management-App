@@ -60,6 +60,31 @@ ios/Runner.xcodeproj/project.pbxproj.bak
 # macOS signing
 macos/Runner.xcodeproj/project.pbxproj.bak
 
+# macOS specific files to ignore
+# CocoaPods
+macos/Pods/
+macos/Podfile.lock  # Optional: Keep if you want to lock dependency versions, or remove if you prefer flexibility
+
+# Xcode user-specific files
+macos/**/xcuserdata/
+macos/**/*.xcuserstate
+macos/**/*.xcworkspace/xcuserdata/
+macos/**/*.xcodeproj/xcuserdata/
+macos/**/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Flutter ephemeral files (auto-generated)
+macos/Flutter/ephemeral/
+macos/Flutter/Flutter-Generated.xcconfig
+
+# macOS build artifacts
+macos/Flutter/FlutterInputs.xcfilelist
+macos/Flutter/FlutterOutputs.xcfilelist
+macos/Flutter/.last_build_id
+
+# macOS derived data
+macos/.symlinks/
+macos/DerivedData/
+
 # Environment files with secrets
 .env
 .env.*
