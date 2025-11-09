@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../common/styles/colors.dart';
 import '../../common/widgets/left_sidebar.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/chat_provider.dart';
 import '../auth/login_screen.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../messaging/chat_list_screen.dart';
 import '../semester/semester_management_screen.dart';
 import '../course/course_management_screen.dart';
 import '../student/student_management_screen.dart';
@@ -82,6 +84,8 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final userAsync = ref.watch(authProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Row(
@@ -94,6 +98,86 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
           // Main Content
           Expanded(child: _screens[_selectedIndex]),
         ],
+      ),
+      floatingActionButton: userAsync.when(
+        data: (user) {
+          if (user == null) return null;
+
+          final unreadCountAsync = ref.watch(unreadChatCountProvider(user.uid));
+
+          return unreadCountAsync.when(
+            data: (unreadCount) => Stack(
+              clipBehavior: Clip.none,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChatListScreen(),
+                      ),
+                    );
+                  },
+                  backgroundColor: AppColors.buttonPrimary,
+                  child: const Icon(Icons.message, color: Colors.white),
+                ),
+                if (unreadCount > 0)
+                  Positioned(
+                    right: -4,
+                    top: -4,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 20,
+                        minHeight: 20,
+                      ),
+                      child: Center(
+                        child: Text(
+                          unreadCount > 99 ? '99+' : unreadCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            loading: () => FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChatListScreen(),
+                  ),
+                );
+              },
+              backgroundColor: AppColors.buttonPrimary,
+              child: const Icon(Icons.message, color: Colors.white),
+            ),
+            error: (_, __) => FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChatListScreen(),
+                  ),
+                );
+              },
+              backgroundColor: AppColors.buttonPrimary,
+              child: const Icon(Icons.message, color: Colors.white),
+            ),
+          );
+        },
+        loading: () => null,
+        error: (_, __) => null,
       ),
     );
   }

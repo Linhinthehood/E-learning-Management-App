@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../common/styles/colors.dart';
 import '../../providers/student_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/chat_provider.dart';
+import '../messaging/chat_screen.dart';
 import 'widgets/student_form_dialog.dart';
 
 class StudentManagementScreen extends ConsumerWidget {
@@ -153,6 +156,16 @@ class StudentManagementScreen extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
+                                icon: const Icon(Icons.message_outlined),
+                                color: AppColors.buttonPrimary,
+                                onPressed: () => _startChatWithStudent(
+                                  context,
+                                  ref,
+                                  student,
+                                ),
+                                tooltip: 'Message student',
+                              ),
+                              IconButton(
                                 icon: const Icon(Icons.edit_outlined),
                                 onPressed: () => _showStudentDialog(
                                   context,
@@ -280,5 +293,69 @@ class StudentManagementScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _startChatWithStudent(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic student,
+  ) async {
+    final userAsync = ref.read(authProvider);
+    final user = userAsync.value;
+    
+    if (user == null) {
+      return;
+    }
+
+    try {
+      // Show loading
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // Get or create chat (studentId, instructorId)
+      final chat = await ref
+          .read(chatProvider.notifier)
+          .getOrCreateChat(student.uid, user.uid);
+
+      // Close loading
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Navigate to chat screen
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              chatId: chat.id,
+              participantId: student.uid,
+              participantName: student.displayName,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error starting chat: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

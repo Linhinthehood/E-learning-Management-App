@@ -8,7 +8,10 @@ import '../../../../domain/entities/user_entity.dart';
 import '../../../providers/group_provider.dart';
 import '../../../providers/enrollment_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/chat_provider.dart';
+import '../../messaging/chat_screen.dart';
 import '../widgets/enrollment_management_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// People tab - displays instructor, groups, and students
 class PeopleTab extends ConsumerStatefulWidget {
@@ -241,89 +244,247 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
     );
   }
 
-  Widget _buildInstructorSection() {
-    return Card(
-      color: AppColors.cardBackground,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.border),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            // Instructor Avatar
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: AppColors.buttonPrimary.withValues(alpha: 0.2),
-              child: const Icon(
-                Icons.person,
-                size: 32,
-                color: AppColors.buttonPrimary,
-              ),
-            ),
-            const SizedBox(width: 16),
+  Future<String?> _getInstructorName(String instructorId) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(instructorId)
+          .get();
+      if (userDoc.exists) {
+        return userDoc.data()?['displayName'] as String? ?? 'Instructor';
+      }
+    } catch (e) {
+      // Error getting instructor name
+    }
+    return 'Instructor';
+  }
 
-            // Instructor Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+  Future<void> _startChatWithInstructor(BuildContext context) async {
+    final userAsync = ref.read(authProvider);
+    final user = userAsync.value;
+    
+    if (user == null || user.role != UserRole.student) {
+      return;
+    }
+
+    try {
+      // Show loading
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // Get or create chat
+      final chat = await ref
+          .read(chatProvider.notifier)
+          .getOrCreateChat(user.uid, widget.course.instructorId);
+
+      // Get instructor name
+      final instructorName = await _getInstructorName(widget.course.instructorId);
+
+      // Close loading
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Navigate to chat screen
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              chatId: chat.id,
+              participantId: widget.course.instructorId,
+              participantName: instructorName ?? 'Instructor',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error starting chat: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _startChatWithStudent(
+    BuildContext context,
+    UserEntity student,
+  ) async {
+    final userAsync = ref.read(authProvider);
+    final user = userAsync.value;
+    
+    if (user == null || user.role != UserRole.instructor) {
+      return;
+    }
+
+    try {
+      // Show loading
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // Get or create chat (studentId, instructorId)
+      final chat = await ref
+          .read(chatProvider.notifier)
+          .getOrCreateChat(student.uid, user.uid);
+
+      // Close loading
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Navigate to chat screen
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              chatId: chat.id,
+              participantId: student.uid,
+              participantName: student.displayName,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error starting chat: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildInstructorSection() {
+    final userAsync = ref.watch(authProvider);
+    final isStudent = userAsync.value?.role == UserRole.student;
+
+    return FutureBuilder<String?>(
+      future: _getInstructorName(widget.course.instructorId),
+      builder: (context, snapshot) {
+        final instructorName = snapshot.data ?? 'Instructor';
+
+        return Card(
+          color: AppColors.cardBackground,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.border),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                // Instructor Avatar
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: AppColors.buttonPrimary.withValues(alpha: 0.2),
+                  child: const Icon(
+                    Icons.person,
+                    size: 32,
+                    color: AppColors.buttonPrimary,
+                  ),
+                ),
+                const SizedBox(width: 16),
+
+                // Instructor Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Instructor',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.buttonPrimary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'Teacher',
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                color: AppColors.buttonPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
                       Text(
-                        'Instructor',
+                        instructorName,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'ID: ${widget.course.instructorId}',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.buttonPrimary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Teacher',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            color: AppColors.buttonPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Course Instructor',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
+                ),
+                // Message button (only for students)
+                if (isStudent)
+                  IconButton(
+                    icon: const Icon(Icons.message, color: AppColors.buttonPrimary),
+                    onPressed: () => _startChatWithInstructor(context),
+                    tooltip: 'Message instructor',
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'ID: ${widget.course.instructorId}',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -394,6 +555,9 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
   }
 
   Widget _buildStudentItem(UserEntity student) {
+    final userAsync = ref.watch(authProvider);
+    final isInstructor = userAsync.value?.role == UserRole.instructor;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -459,6 +623,17 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               ),
             ),
           ),
+          // Message button (only for instructors)
+          if (isInstructor) ...[
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.message, size: 20, color: AppColors.buttonPrimary),
+              onPressed: () => _startChatWithStudent(context, student),
+              tooltip: 'Message student',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
         ],
       ),
     );

@@ -29,7 +29,7 @@ class _LeftSidebarState extends State<LeftSidebar> {
       ),
       child: Column(
         children: [
-          const SizedBox(height: 40),
+          const SizedBox(height: 30),
           // Logo
           Container(
             width: 60,
@@ -49,20 +49,20 @@ class _LeftSidebarState extends State<LeftSidebar> {
               ),
             ),
           ),
-          const SizedBox(height: 60),
+          const SizedBox(height: 40),
           // Navigation items
           _buildNavItem(Icons.home_rounded, 0, 'Dashboard'),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           _buildNavItem(Icons.calendar_today_rounded, 1, 'Semesters'),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           _buildNavItem(Icons.school_rounded, 2, 'Courses'),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           _buildNavItem(Icons.person_rounded, 3, 'Students'),
           const Spacer(),
           _buildNavItem(Icons.settings_rounded, 4, 'Settings'),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           _buildNavItem(Icons.logout_rounded, 5, 'Logout'),
-          const SizedBox(height: 40),
+          const SizedBox(height: 30),
         ],
       ),
     );

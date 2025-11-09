@@ -199,12 +199,16 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
       return _firestore
           .collection('notifications')
           .where('studentId', isEqualTo: studentId)
-          .orderBy('createdAt', descending: true)
           .snapshots()
           .map((snapshot) {
-        return snapshot.docs
+        final notifications = snapshot.docs
             .map((doc) => NotificationModel.fromJson(doc.data(), doc.id))
             .toList();
+        
+        // Sort by createdAt descending (newest first) in memory
+        notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        
+        return notifications;
       });
     } catch (e) {
       throw Exception('Failed to listen to notifications: ${e.toString()}');

@@ -8,6 +8,7 @@ import '../../../providers/material_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/view_tracking_provider.dart';
 import '../widgets/material_form_dialog.dart';
+import '../../tracking/material_tracking_screen.dart';
 
 /// Materials tab - displays and manages materials
 class MaterialsTab extends ConsumerStatefulWidget {
@@ -531,6 +532,30 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                                 navigatorContext,
                                 ref,
                                 material,
+                              );
+                            }
+                          });
+                        },
+                      ),
+                      PopupMenuItem(
+                        child: const Row(
+                          children: [
+                            Icon(Icons.analytics, size: 20),
+                            SizedBox(width: 8),
+                            Text('View Tracking'),
+                          ],
+                        ),
+                        onTap: () {
+                          final navigatorContext = context;
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            if (mounted && navigatorContext.mounted) {
+                              Navigator.of(navigatorContext).push(
+                                MaterialPageRoute(
+                                  builder: (context) => MaterialTrackingScreen(
+                                    course: widget.course,
+                                    material: material,
+                                  ),
+                                ),
                               );
                             }
                           });

@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../domain/entities/announcement_entity.dart';
 import '../../../../domain/entities/course_entity.dart';
+import '../../../../domain/entities/notification_entity.dart';
 import '../../../common/styles/colors.dart';
 import '../../../providers/announcement_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/group_provider.dart';
+import '../../../providers/notification_provider.dart';
 import '../../../../services/file_upload_service.dart';
 
 /// Dialog for creating or editing an announcement
@@ -97,9 +99,42 @@ class _AnnouncementFormDialogState
       );
 
       if (widget.announcement == null) {
-        await ref
+        // Create new announcement
+        final createdAnnouncement = await ref
             .read(announcementProvider.notifier)
             .createAnnouncement(announcement);
+        
+        // Send notification to students
+        try {
+          final linkTo = 'announcement/${widget.course.id}/${createdAnnouncement.id}';
+          
+          if (createdAnnouncement.isForAllGroups) {
+            // Send to all students in course
+            await ref.read(notificationProvider.notifier).sendToAllStudentsInCourse(
+              widget.course.id,
+              'New Announcement: ${createdAnnouncement.title}',
+              createdAnnouncement.content.length > 100 
+                  ? '${createdAnnouncement.content.substring(0, 100)}...'
+                  : createdAnnouncement.content,
+              linkTo,
+              NotificationEntity.typeAnnouncement,
+            );
+          } else {
+            // Send to specific groups
+            await ref.read(notificationProvider.notifier).sendToGroupStudents(
+              createdAnnouncement.scopedGroupIds,
+              'New Announcement: ${createdAnnouncement.title}',
+              createdAnnouncement.content.length > 100 
+                  ? '${createdAnnouncement.content.substring(0, 100)}...'
+                  : createdAnnouncement.content,
+              linkTo,
+              NotificationEntity.typeAnnouncement,
+            );
+          }
+        } catch (e) {
+          // Log error but don't fail the announcement creation
+          debugPrint('Error sending notification: $e');
+        }
       } else {
         await ref
             .read(announcementProvider.notifier)

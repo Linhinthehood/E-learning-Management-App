@@ -10,6 +10,7 @@ import '../../../providers/assignment_submission_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../widgets/assignment_form_dialog.dart';
 import '../widgets/assignment_submission_dialog.dart';
+import '../../tracking/assignment_tracking_screen.dart';
 
 /// Assignments tab - displays and manages assignments
 class AssignmentsTab extends ConsumerStatefulWidget {
@@ -469,6 +470,30 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                                 navigatorContext,
                                 ref,
                                 assignment,
+                              );
+                            }
+                          });
+                        },
+                      ),
+                      PopupMenuItem(
+                        child: const Row(
+                          children: [
+                            Icon(Icons.analytics, size: 20),
+                            SizedBox(width: 8),
+                            Text('View Tracking'),
+                          ],
+                        ),
+                        onTap: () {
+                          final navigatorContext = context;
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            if (mounted && navigatorContext.mounted) {
+                              Navigator.of(navigatorContext).push(
+                                MaterialPageRoute(
+                                  builder: (context) => AssignmentTrackingScreen(
+                                    course: widget.course,
+                                    assignment: assignment,
+                                  ),
+                                ),
                               );
                             }
                           });

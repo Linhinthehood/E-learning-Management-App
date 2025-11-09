@@ -10,6 +10,7 @@ import '../../../providers/quiz_attempt_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../widgets/quiz_form_dialog.dart';
 import '../quiz_taking_screen.dart';
+import '../../tracking/quiz_tracking_screen.dart';
 
 /// Quizzes tab - displays and manages quizzes
 class QuizzesTab extends ConsumerStatefulWidget {
@@ -457,6 +458,30 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           Future.delayed(const Duration(milliseconds: 100), () {
                             if (mounted && navigatorContext.mounted) {
                               _showQuizDialog(navigatorContext, ref, quiz);
+                            }
+                          });
+                        },
+                      ),
+                      PopupMenuItem(
+                        child: const Row(
+                          children: [
+                            Icon(Icons.analytics, size: 20),
+                            SizedBox(width: 8),
+                            Text('View Tracking'),
+                          ],
+                        ),
+                        onTap: () {
+                          final navigatorContext = context;
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            if (mounted && navigatorContext.mounted) {
+                              Navigator.of(navigatorContext).push(
+                                MaterialPageRoute(
+                                  builder: (context) => QuizTrackingScreen(
+                                    course: widget.course,
+                                    quiz: quiz,
+                                  ),
+                                ),
+                              );
                             }
                           });
                         },

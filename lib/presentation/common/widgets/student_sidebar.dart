@@ -29,7 +29,7 @@ class _StudentSidebarState extends State<StudentSidebar> {
       ),
       child: Column(
         children: [
-          const SizedBox(height: 40),
+          const SizedBox(height: 30),
           // Logo
           Container(
             width: 60,
@@ -49,14 +49,14 @@ class _StudentSidebarState extends State<StudentSidebar> {
               ),
             ),
           ),
-          const SizedBox(height: 60),
+          const SizedBox(height: 40),
           // Navigation items
           _buildNavItem(Icons.home_rounded, 0, 'Home'),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           _buildNavItem(Icons.person_rounded, 1, 'Profile'),
           const Spacer(),
           _buildNavItem(Icons.logout_rounded, 2, 'Logout'),
-          const SizedBox(height: 40),
+          const SizedBox(height: 30),
         ],
       ),
     );

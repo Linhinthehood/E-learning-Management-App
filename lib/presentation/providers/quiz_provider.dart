@@ -72,12 +72,14 @@ class QuizNotifier extends StateNotifier<AsyncValue<List<QuizEntity>>> {
   }
 
   /// Create a new quiz
-  Future<void> createQuiz(QuizEntity quiz) async {
+  /// Returns the created quiz with the generated ID
+  Future<QuizEntity> createQuiz(QuizEntity quiz) async {
     try {
-      await _repository.createQuiz(quiz);
+      final createdQuiz = await _repository.createQuiz(quiz);
       if (_currentCourseId != null) {
         await loadQuizzes(_currentCourseId!); // Reload list
       }
+      return createdQuiz;
     } catch (e) {
       rethrow;
     }

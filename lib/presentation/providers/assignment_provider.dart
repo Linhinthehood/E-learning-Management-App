@@ -81,12 +81,14 @@ class AssignmentNotifier
   }
 
   /// Create a new assignment
-  Future<void> createAssignment(AssignmentEntity assignment) async {
+  /// Returns the created assignment with the generated ID
+  Future<AssignmentEntity> createAssignment(AssignmentEntity assignment) async {
     try {
-      await _repository.createAssignment(assignment);
+      final createdAssignment = await _repository.createAssignment(assignment);
       if (_currentCourseId != null) {
         await loadAssignments(_currentCourseId!); // Reload list
       }
+      return createdAssignment;
     } catch (e) {
       rethrow;
     }

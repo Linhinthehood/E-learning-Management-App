@@ -8,6 +8,7 @@ import 'tabs/assignments_tab.dart';
 import 'tabs/quizzes_tab.dart';
 import 'tabs/question_banks_tab.dart';
 import 'tabs/materials_tab.dart';
+import 'tabs/forum_tab.dart';
 import 'tabs/people_tab.dart';
 
 /// Course Detail Screen - Main screen for managing course content
@@ -27,7 +28,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
   }
 
   @override
@@ -82,6 +83,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             Tab(text: 'Quizzes', icon: Icon(Icons.quiz, size: 20)),
             Tab(text: 'Questions', icon: Icon(Icons.library_books, size: 20)),
             Tab(text: 'Materials', icon: Icon(Icons.folder, size: 20)),
+            Tab(text: 'Forum', icon: Icon(Icons.forum, size: 20)),
             Tab(text: 'People', icon: Icon(Icons.people, size: 20)),
           ],
         ),
@@ -94,6 +96,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           QuizzesTab(course: widget.course),
           QuestionBanksTab(course: widget.course),
           MaterialsTab(course: widget.course),
+          ForumTab(course: widget.course),
           PeopleTab(course: widget.course),
         ],
       ),

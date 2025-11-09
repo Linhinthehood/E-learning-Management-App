@@ -11,6 +11,7 @@ import '../../../providers/group_provider.dart';
 import '../../../providers/comment_provider.dart';
 import '../../../providers/view_tracking_provider.dart';
 import '../widgets/announcement_form_dialog.dart';
+import '../../tracking/announcement_tracking_screen.dart';
 
 /// Announcements tab - displays and manages announcements
 class AnnouncementsTab extends ConsumerStatefulWidget {
@@ -255,6 +256,30 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                                 navigatorContext,
                                 ref,
                                 announcement,
+                              );
+                            }
+                          });
+                        },
+                      ),
+                      PopupMenuItem(
+                        child: const Row(
+                          children: [
+                            Icon(Icons.analytics, size: 20),
+                            SizedBox(width: 8),
+                            Text('View Tracking'),
+                          ],
+                        ),
+                        onTap: () {
+                          final navigatorContext = context;
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            if (mounted && navigatorContext.mounted) {
+                              Navigator.of(navigatorContext).push(
+                                MaterialPageRoute(
+                                  builder: (context) => AnnouncementTrackingScreen(
+                                    course: widget.course,
+                                    announcement: announcement,
+                                  ),
+                                ),
                               );
                             }
                           });

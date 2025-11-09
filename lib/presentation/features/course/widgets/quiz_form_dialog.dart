@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../domain/entities/quiz_entity.dart';
 import '../../../../domain/entities/course_entity.dart';
+import '../../../../domain/entities/notification_entity.dart';
 import '../../../common/styles/colors.dart';
 import '../../../providers/quiz_provider.dart';
 import '../../../providers/group_provider.dart';
 import '../../../providers/question_provider.dart';
+import '../../../providers/notification_provider.dart';
 
 /// Dialog for creating or editing a quiz
 class QuizFormDialog extends ConsumerStatefulWidget {
@@ -147,7 +149,36 @@ class _QuizFormDialogState extends ConsumerState<QuizFormDialog> {
       );
 
       if (widget.quiz == null) {
-        await ref.read(quizProvider.notifier).createQuiz(quiz);
+        // Create new quiz
+        final createdQuiz = await ref.read(quizProvider.notifier).createQuiz(quiz);
+        
+        // Send notification to students
+        try {
+          final linkTo = 'quiz/${widget.course.id}/${createdQuiz.id}';
+          
+          if (createdQuiz.scopedGroupIds.isEmpty) {
+            // Send to all students in course
+            await ref.read(notificationProvider.notifier).sendToAllStudentsInCourse(
+              widget.course.id,
+              'New Quiz: ${createdQuiz.title}',
+              'A new quiz "${createdQuiz.title}" is now available. Opens: ${_formatDate(createdQuiz.timeOpen)}',
+              linkTo,
+              NotificationEntity.typeQuiz,
+            );
+          } else {
+            // Send to specific groups
+            await ref.read(notificationProvider.notifier).sendToGroupStudents(
+              createdQuiz.scopedGroupIds,
+              'New Quiz: ${createdQuiz.title}',
+              'A new quiz "${createdQuiz.title}" is now available. Opens: ${_formatDate(createdQuiz.timeOpen)}',
+              linkTo,
+              NotificationEntity.typeQuiz,
+            );
+          }
+        } catch (e) {
+          // Log error but don't fail the quiz creation
+          debugPrint('Error sending notification: $e');
+        }
       } else {
         await ref.read(quizProvider.notifier).updateQuiz(quiz);
       }
@@ -169,6 +200,14 @@ class _QuizFormDialogState extends ConsumerState<QuizFormDialog> {
         });
       }
     }
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
   Future<void> _selectOpenTime() async {
