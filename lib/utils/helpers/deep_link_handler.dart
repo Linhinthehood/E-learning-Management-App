@@ -19,6 +19,10 @@ class DeepLinkHandler {
     BuildContext context,
     String linkTo,
   ) async {
+    // Capture messenger before async operations
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    
     try {
       final parts = linkTo.split('/');
       if (parts.isEmpty) {
@@ -31,7 +35,7 @@ class DeepLinkHandler {
       // For now, show a message that deep linking is being implemented
       // In the future, this will navigate to the specific content
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Opening $type...'),
             duration: const Duration(seconds: 2),
@@ -49,7 +53,7 @@ class DeepLinkHandler {
       // Error handling deep link
       debugPrint('Error handling deep link: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Error opening notification: ${e.toString()}'),
             backgroundColor: Colors.red,

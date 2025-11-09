@@ -259,10 +259,12 @@ class _NotificationListScreenState
                                           }
 
                                           // Handle deep link
-                                          await DeepLinkHandler.handleDeepLink(
-                                            context,
-                                            notification.linkTo,
-                                          );
+                                          if (context.mounted) {
+                                            await DeepLinkHandler.handleDeepLink(
+                                              context,
+                                              notification.linkTo,
+                                            );
+                                          }
                                         },
                                         onDelete: () {
                                           ref

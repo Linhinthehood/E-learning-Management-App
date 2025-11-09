@@ -130,17 +130,19 @@ class _ForumTopicDetailScreenState
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+              navigator.pop();
               try {
                 await ref
                     .read(forumTopicProvider.notifier)
                     .deleteTopic(topic.id);
                 if (mounted) {
-                  Navigator.pop(context); // Go back to list
+                  navigator.pop(); // Go back to list
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  messenger.showSnackBar(
                     SnackBar(
                       content: Text('Error: ${e.toString()}'),
                       backgroundColor: Colors.red,
@@ -205,9 +207,10 @@ class _ForumTopicDetailScreenState
                           ],
                         ),
                         onTap: () {
+                          final navigatorContext = context;
                           Future.delayed(const Duration(milliseconds: 100), () {
-                            if (mounted) {
-                              _showTopicDialog(context, topic);
+                            if (mounted && navigatorContext.mounted) {
+                              _showTopicDialog(navigatorContext, topic);
                             }
                           });
                         },

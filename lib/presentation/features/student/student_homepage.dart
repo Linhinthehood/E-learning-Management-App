@@ -7,8 +7,14 @@ import '../../common/widgets/right_sidebar.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/semester_provider.dart';
+import '../../providers/student_dashboard_provider.dart';
 import '../../../domain/entities/semester_entity.dart';
 import '../../../domain/entities/course_entity.dart';
+import 'widgets/dashboard_statistics_cards.dart';
+import 'widgets/upcoming_deadlines_widget.dart';
+import 'widgets/course_progress_widget.dart';
+import 'widgets/recent_grades_widget.dart';
+import '../course/course_detail_screen.dart';
 
 /// Student Homepage - Displays enrolled courses with semester switcher
 class StudentHomepage extends ConsumerStatefulWidget {
@@ -82,40 +88,26 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                   horizontal: 30,
                   vertical: 40,
                 ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 800),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Greeting Section
-                      _buildGreeting(user.displayName),
-                      const SizedBox(height: 30),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Greeting Section
+                    _buildGreeting(user.displayName),
+                    const SizedBox(height: 30),
 
-                      // Featured Course
-                      coursesAsync.when(
-                        data: (courses) {
-                          if (courses.isNotEmpty) {
-                            return Column(
-                              children: [
-                                _buildFeaturedCourse(courses.first),
-                                const SizedBox(height: 40),
-                              ],
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        },
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
+                    // Semester Switcher
+                    _buildSemesterSwitcher(semestersAsync),
+                    const SizedBox(height: 30),
 
-                      // Semester Switcher
-                      _buildSemesterSwitcher(semestersAsync),
-                      const SizedBox(height: 30),
+                    // Dashboard Data
+                    if (_selectedSemester != null)
+                      _buildDashboardContent(user.uid, _selectedSemester!.id),
 
-                      // Courses Section with Tabs
-                      _buildCoursesSection(coursesAsync),
-                    ],
-                  ),
+                    const SizedBox(height: 30),
+
+                    // Courses Section with Tabs
+                    _buildCoursesSection(coursesAsync),
+                  ],
                 ),
               ),
             ),
@@ -170,114 +162,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
     );
   }
 
-  Widget _buildFeaturedCourse(CourseEntity course) {
-    return FutureBuilder<Map<String, String>?>(
-      future: _getInstructorInfo(course.instructorId),
-      builder: (context, snapshot) {
-        final instructorName = snapshot.data?['name'] ?? 'Unknown Instructor';
-
-        return Container(
-          padding: const EdgeInsets.all(25),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.borderLight, width: 1),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEE2E2),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Center(
-                  child: Text(
-                    _getCourseEmoji(course.name),
-                    style: const TextStyle(fontSize: 30),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      course.name,
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'by $instructorName',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.borderLight,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.access_time, size: 20),
-              ),
-              const SizedBox(width: 15),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.buttonPrimary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                    vertical: 15,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Continue',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 15),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.borderLight,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_back, size: 20),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.borderLight,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_forward, size: 20),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildSemesterSwitcher(
     AsyncValue<List<SemesterEntity>> semestersAsync,
@@ -567,6 +451,206 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
     );
   }
 
+  Widget _buildDashboardContent(String studentId, String semesterId) {
+    final dashboardAsync = ref.watch(
+      studentDashboardProvider(
+        StudentDashboardParams(
+          studentId: studentId,
+          semesterId: semesterId,
+        ),
+      ),
+    );
+
+    return dashboardAsync.when(
+      data: (data) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Statistics Cards
+            DashboardStatisticsCards(statistics: data.statistics),
+            const SizedBox(height: 24),
+
+            // Main Content - Responsive Layout
+            LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth > 1200) {
+                  // Wide layout: 2 columns
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Left Column: Upcoming Deadlines and Recent Grades
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          children: [
+                            UpcomingDeadlinesWidget(
+                              upcomingAssignments: data.upcomingAssignments,
+                              upcomingQuizzes: data.upcomingQuizzes,
+                              courseMap: data.courseMap,
+                              onAssignmentTap: (course, assignmentId) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CourseDetailScreen(
+                                      course: course,
+                                    ),
+                                  ),
+                                );
+                              },
+                              onQuizTap: (course, quizId) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CourseDetailScreen(
+                                      course: course,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 24),
+                            RecentGradesWidget(
+                              recentGrades: data.recentGrades,
+                              courseMap: data.courseMap,
+                              onTap: (course, assignmentId) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CourseDetailScreen(
+                                      course: course,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      // Right Column: Course Progress
+                      Expanded(
+                        flex: 2,
+                        child: CourseProgressWidget(
+                          courseProgress: data.courseProgress,
+                          courseMap: data.courseMap,
+                          onCourseTap: (course) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CourseDetailScreen(
+                                  course: course,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  // Narrow layout: Stack vertically
+                  return Column(
+                    children: [
+                      UpcomingDeadlinesWidget(
+                        upcomingAssignments: data.upcomingAssignments,
+                        upcomingQuizzes: data.upcomingQuizzes,
+                        courseMap: data.courseMap,
+                        onAssignmentTap: (course, assignmentId) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CourseDetailScreen(
+                                course: course,
+                              ),
+                            ),
+                          );
+                        },
+                        onQuizTap: (course, quizId) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CourseDetailScreen(
+                                course: course,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      RecentGradesWidget(
+                        recentGrades: data.recentGrades,
+                        courseMap: data.courseMap,
+                        onTap: (course, assignmentId) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CourseDetailScreen(
+                                course: course,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      CourseProgressWidget(
+                        courseProgress: data.courseProgress,
+                        courseMap: data.courseMap,
+                        onCourseTap: (course) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CourseDetailScreen(
+                                course: course,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(40),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (error, stack) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.red.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading dashboard data',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error.toString(),
+              style: GoogleFonts.inter(fontSize: 12, color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<Map<String, String>?> _getInstructorInfo(String instructorId) async {
     try {
       final repository = ref.read(courseRepositoryProvider);
@@ -574,21 +658,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
     } catch (e) {
       return null;
     }
-  }
-
-  String _getCourseEmoji(String courseName) {
-    final name = courseName.toLowerCase();
-    if (name.contains('math') || name.contains('calculus')) return '📐';
-    if (name.contains('physics')) return '⚛️';
-    if (name.contains('chemistry')) return '🧪';
-    if (name.contains('biology')) return '🧬';
-    if (name.contains('computer') || name.contains('programming')) return '💻';
-    if (name.contains('english') || name.contains('literature')) return '📚';
-    if (name.contains('history')) return '📜';
-    if (name.contains('art')) return '🎨';
-    if (name.contains('music')) return '🎵';
-    if (name.contains('spanish') || name.contains('french')) return '🗣️';
-    return '📖';
   }
 
   IconData _getCourseIcon(String courseName) {

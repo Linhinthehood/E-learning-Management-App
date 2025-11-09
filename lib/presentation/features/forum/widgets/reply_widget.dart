@@ -111,7 +111,9 @@ class _ReplyWidgetState extends ConsumerState<ReplyWidget> {
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+              navigator.pop();
               try {
                 await ref
                     .read(forumReplyProvider.notifier)
@@ -119,7 +121,7 @@ class _ReplyWidgetState extends ConsumerState<ReplyWidget> {
                 widget.onReplyUpdated();
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  messenger.showSnackBar(
                     SnackBar(
                       content: Text('Error: ${e.toString()}'),
                       backgroundColor: Colors.red,

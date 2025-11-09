@@ -10,6 +10,8 @@ import '../../../domain/entities/enrollment_entity.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../providers/quiz_attempt_provider.dart';
 import '../../providers/enrollment_provider.dart';
+import '../../../utils/services/csv_export_service.dart';
+import '../../../utils/helpers/file_download_helper.dart';
 import 'widgets/quiz_answer_detail_dialog.dart';
 
 /// Quiz Tracking Screen - shows quiz attempts for all students
@@ -78,6 +80,13 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download, color: AppColors.textPrimary),
+            onPressed: () => _exportToCsv(context, ref),
+            tooltip: 'Export to CSV',
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -433,6 +442,89 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
         attempt: attempt,
       ),
     );
+  }
+
+  /// Export quiz attempts to CSV
+  Future<void> _exportToCsv(BuildContext context, WidgetRef ref) async {
+    // Get data from providers
+    final enrollmentsAsync = ref.read(enrollmentProvider);
+    final studentsAsync = ref.read(studentsProvider);
+    final attemptsAsync = ref.read(quizAttemptProvider);
+
+    // Check if all data is loaded
+    if (enrollmentsAsync.isLoading || 
+        studentsAsync.isLoading || 
+        attemptsAsync.isLoading) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please wait for data to load'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (enrollmentsAsync.hasError || 
+        studentsAsync.hasError || 
+        attemptsAsync.hasError) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error loading data. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    final enrollments = enrollmentsAsync.value ?? [];
+    final students = studentsAsync.value ?? [];
+    final attempts = attemptsAsync.value ?? [];
+
+    try {
+      // Create student map
+      final studentMap = <String, UserEntity>{};
+      for (var student in students) {
+        studentMap[student.uid] = student;
+      }
+
+      // Get max score from attempts (use first attempt's maxScore, or default to 100)
+      final maxScore = attempts.isNotEmpty 
+          ? attempts.first.maxScore 
+          : 100.0;
+
+      // Generate CSV content
+      final csvContent = CsvExportService.exportQuizResults(
+        enrollments: enrollments,
+        attempts: attempts,
+        studentMap: studentMap,
+        maxScore: maxScore,
+      );
+
+      // Generate filename with timestamp
+      final dateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
+      final timestamp = dateFormat.format(DateTime.now());
+      final filename = 'quiz_${widget.quiz.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
+
+      // Download file
+      await FileDownloadHelper.downloadCsv(
+        csvContent: csvContent,
+        filename: filename,
+        context: context,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error exporting CSV: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 

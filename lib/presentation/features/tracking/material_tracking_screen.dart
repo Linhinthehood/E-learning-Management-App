@@ -10,6 +10,8 @@ import '../../../domain/entities/enrollment_entity.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../providers/view_tracking_provider.dart';
 import '../../providers/enrollment_provider.dart';
+import '../../../utils/services/csv_export_service.dart';
+import '../../../utils/helpers/file_download_helper.dart';
 
 /// Material Tracking Screen - shows who downloaded materials
 class MaterialTrackingScreen extends ConsumerStatefulWidget {
@@ -83,6 +85,13 @@ class _MaterialTrackingScreenState
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download, color: AppColors.textPrimary),
+            onPressed: () => _exportToCsv(context, ref),
+            tooltip: 'Export to CSV',
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -331,6 +340,85 @@ class _MaterialTrackingScreenState
               ),
       ),
     );
+  }
+
+  /// Export material downloads to CSV
+  Future<void> _exportToCsv(BuildContext context, WidgetRef ref) async {
+    // Get data from providers
+    final enrollmentsAsync = ref.read(enrollmentProvider);
+    final studentsAsync = ref.read(studentsProvider);
+    final trackingAsync = ref.read(viewTrackingByContentProvider(
+      (contentId: widget.material.id, contentType: 'material'),
+    ));
+
+    // Check if all data is loaded
+    if (enrollmentsAsync.isLoading || 
+        studentsAsync.isLoading || 
+        trackingAsync.isLoading) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please wait for data to load'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (enrollmentsAsync.hasError || 
+        studentsAsync.hasError || 
+        trackingAsync.hasError) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error loading data. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    final enrollments = enrollmentsAsync.value ?? [];
+    final students = studentsAsync.value ?? [];
+    final trackings = trackingAsync.value ?? [];
+
+    try {
+      // Create student map
+      final studentMap = <String, UserEntity>{};
+      for (var student in students) {
+        studentMap[student.uid] = student;
+      }
+
+      // Generate CSV content
+      final csvContent = CsvExportService.exportMaterialDownloads(
+        enrollments: enrollments,
+        downloads: trackings,
+        studentMap: studentMap,
+      );
+
+      // Generate filename with timestamp
+      final dateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
+      final timestamp = dateFormat.format(DateTime.now());
+      final filename = 'material_${widget.material.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
+
+      // Download file
+      await FileDownloadHelper.downloadCsv(
+        csvContent: csvContent,
+        filename: filename,
+        context: context,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error exporting CSV: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 

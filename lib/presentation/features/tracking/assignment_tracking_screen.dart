@@ -10,6 +10,8 @@ import '../../../domain/entities/enrollment_entity.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../providers/assignment_submission_provider.dart';
 import '../../providers/enrollment_provider.dart';
+import '../../../utils/services/csv_export_service.dart';
+import '../../../utils/helpers/file_download_helper.dart';
 
 /// Assignment Tracking Screen - shows submission status for all students
 class AssignmentTrackingScreen extends ConsumerStatefulWidget {
@@ -80,6 +82,13 @@ class _AssignmentTrackingScreenState
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download, color: AppColors.textPrimary),
+            onPressed: () => _exportToCsv(context, ref),
+            tooltip: 'Export to CSV',
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -487,6 +496,96 @@ class _AssignmentTrackingScreenState
         ],
       ),
     );
+  }
+
+  /// Export assignment submissions to CSV
+  Future<void> _exportToCsv(BuildContext context, WidgetRef ref) async {
+    // Get data from providers
+    final enrollmentsAsync = ref.read(enrollmentProvider);
+    final studentsAsync = ref.read(studentsProvider);
+    final submissionsAsync = ref.read(assignmentSubmissionProvider);
+
+    // Check if all data is loaded
+    if (enrollmentsAsync.isLoading || 
+        studentsAsync.isLoading || 
+        submissionsAsync.isLoading) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please wait for data to load'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (enrollmentsAsync.hasError || 
+        studentsAsync.hasError || 
+        submissionsAsync.hasError) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error loading data. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    final enrollments = enrollmentsAsync.value ?? [];
+    final students = studentsAsync.value ?? [];
+    final submissions = submissionsAsync.value ?? [];
+
+    if (submissions.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No submissions to export'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      // Create student map
+      final studentMap = <String, UserEntity>{};
+      for (var student in students) {
+        studentMap[student.uid] = student;
+      }
+
+      // Generate CSV content
+      final csvContent = CsvExportService.exportAssignmentSubmissions(
+        enrollments: enrollments,
+        submissions: submissions,
+        studentMap: studentMap,
+        assignment: widget.assignment,
+      );
+
+      // Generate filename with timestamp
+      final dateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
+      final timestamp = dateFormat.format(DateTime.now());
+      final filename = 'assignment_${widget.assignment.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
+
+      // Download file
+      await FileDownloadHelper.downloadCsv(
+        csvContent: csvContent,
+        filename: filename,
+        context: context,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error exporting CSV: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 
