@@ -1,7 +1,7 @@
 import '../../domain/entities/chat_entity.dart';
 import '../../domain/repositories/i_chat_repository.dart';
 import '../datasources/remote/chat_remote_datasource.dart';
-import '../datasources/models/chat_model.dart';
+
 
 /// Implementation of IChatRepository
 /// Handles conversion between models and entities

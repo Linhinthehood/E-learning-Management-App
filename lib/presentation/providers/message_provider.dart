@@ -41,7 +41,7 @@ class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
   /// Send a new message
   Future<void> sendMessage(MessageEntity message) async {
     try {
-      final sentMessage = await _repository.sendMessage(message);
+      
 
       // Update chat metadata with last message
       await _ref.read(chatRepositoryProvider).updateChatMetadata(
