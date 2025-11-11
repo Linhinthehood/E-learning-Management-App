@@ -19,7 +19,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _manualErrorMessage; // For validation errors
 
   @override
+  void initState() {
+    super.initState();
+    // Add listeners to clear errors when user starts typing
+    _emailController.addListener(_clearManualError);
+    _passwordController.addListener(_clearManualError);
+  }
+
+  void _clearManualError() {
+    if (_manualErrorMessage != null) {
+      setState(() {
+        _manualErrorMessage = null;
+      });
+    }
+    // Also clear auth provider error state
+    ref.read(authProvider.notifier).clearError();
+  }
+
+  @override
   void dispose() {
+    _emailController.removeListener(_clearManualError);
+    _passwordController.removeListener(_clearManualError);
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -37,10 +57,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    // Clear manual error
+    // Clear any previous errors
     setState(() {
       _manualErrorMessage = null;
     });
+
+    // Clear auth provider error state before attempting login
+    ref.read(authProvider.notifier).clearError();
 
     debugPrint('🔐 Login attempt with email: $email');
 

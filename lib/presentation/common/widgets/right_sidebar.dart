@@ -2,8 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../styles/colors.dart';
 
+class CourseProgressData {
+  final String name;
+  final double progress;
+  final Color color;
+
+  CourseProgressData({
+    required this.name,
+    required this.progress,
+    required this.color,
+  });
+}
+
 class RightSidebar extends StatelessWidget {
-  const RightSidebar({super.key});
+  final int totalCourses;
+  final int totalStudents;
+  final List<CourseProgressData> courseProgressList;
+  final String? firstCardLabel;
+  final String? secondCardLabel;
+
+  const RightSidebar({
+    super.key,
+    required this.totalCourses,
+    required this.totalStudents,
+    required this.courseProgressList,
+    this.firstCardLabel,
+    this.secondCardLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -83,11 +108,19 @@ class RightSidebar extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _buildStatCard('11', 'Courses\ncompleted', context),
+                child: _buildStatCard(
+                  totalCourses.toString(),
+                  firstCardLabel ?? 'Total\nCourses',
+                  context,
+                ),
               ),
               const SizedBox(width: 15),
               Expanded(
-                child: _buildStatCard('4', 'Courses\nin progress', context),
+                child: _buildStatCard(
+                  totalStudents.toString(),
+                  secondCardLabel ?? 'Total\nStudents',
+                  context,
+                ),
               ),
             ],
           ),
@@ -104,7 +137,7 @@ class RightSidebar extends StatelessWidget {
           const SizedBox(height: 20),
           // Title
           Text(
-            'Course Completion This Semester',
+            'Course Progress',
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -113,75 +146,91 @@ class RightSidebar extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           // Course Progress List
-          Expanded(child: _buildCourseProgressList()),
-          const SizedBox(height: 30),
-          // Premium banner
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppColors.borderLight,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          if (courseProgressList.isNotEmpty)
+            Expanded(
+              child: ListView.builder(
+                itemCount: courseProgressList.length,
+                itemBuilder: (context, index) {
+                  final course = courseProgressList[index];
+                  final progress = course.progress * 100;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                course.name,
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              '${progress.toInt()}%',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: AppColors.borderLight,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: course.progress,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: course.color,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            )
+          else
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Lern even more!',
-                            style: GoogleFonts.inter(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'Unlock premium features only for \$9.99 per month.',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: AppColors.textSecondary,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
+                    const Icon(
+                      Icons.school_outlined,
+                      size: 48,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No courses yet',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(width: 15),
-                    const Text('📚', style: TextStyle(fontSize: 50)),
                   ],
                 ),
-                const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.buttonPrimary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Go Premium',
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -219,99 +268,4 @@ class RightSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildCourseProgressList() {
-    // Sample course completion data
-    final courses = [
-      {
-        'name': 'Mobile App Development',
-        'progress': 0.85,
-        'color': const Color(0xFF000000),
-      },
-      {
-        'name': 'Database Systems',
-        'progress': 0.60,
-        'color': const Color(0xFF000000),
-      },
-      {
-        'name': 'Artificial Intelligence',
-        'progress': 0.45,
-        'color': const Color(0xFF000000),
-      },
-      {
-        'name': 'Web Development',
-        'progress': 0.92,
-        'color': const Color(0xFF000000),
-      },
-      {
-        'name': 'Data Structures',
-        'progress': 0.73,
-        'color': const Color(0xFF000000),
-      },
-      {
-        'name': 'Machine Learning',
-        'progress': 0.28,
-        'color': const Color(0xFF000000),
-      },
-    ];
-
-    return ListView.builder(
-      itemCount: courses.length,
-      itemBuilder: (context, index) {
-        final course = courses[index];
-        final progress = (course['progress'] as double) * 100;
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      course['name'] as String,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    '${progress.toInt()}%',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors.borderLight,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: course['progress'] as double,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: course['color'] as Color,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

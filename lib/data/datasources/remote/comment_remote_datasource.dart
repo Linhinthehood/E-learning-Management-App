@@ -21,10 +21,17 @@ class CommentRemoteDataSource {
       final snapshot = await _firestore
           .collection('comments')
           .where('announcementId', isEqualTo: announcementId)
-          .orderBy('createdAt', descending: false)
           .get();
 
-      return snapshot.docs.map((doc) => CommentModel.fromFirestore(doc)).toList();
+      // Convert to list and sort in memory (avoids need for Firestore index)
+      final comments = snapshot.docs
+          .map((doc) => CommentModel.fromFirestore(doc))
+          .toList();
+
+      // Sort by createdAt (oldest first)
+      comments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+      return comments;
     } catch (e) {
       throw Exception('Failed to load comments: $e');
     }

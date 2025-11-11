@@ -1,0 +1,175 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================
+    // Helper Functions
+    // ============================================
+
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if user owns a resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if user is an instructor
+    function isInstructor() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'instructor';
+    }
+
+    // Check if user is a student
+    function isStudent() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student';
+    }
+
+    // Check if user is enrolled in a course
+    function isEnrolledInCourse(courseId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + courseId));
+    }
+
+    // Check if user is the instructor of a course
+    function isInstructorOfCourse(courseId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/courses/$(courseId)) &&
+             get(/databases/$(database)/documents/courses/$(courseId)).data.instructorId == request.auth.uid;
+    }
+
+    // ============================================
+    // Collection Rules
+    // ============================================
+
+    // 1. Users Collection
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isInstructor());
+      allow create, update: if isOwner(userId);
+      allow delete: if false; // Users cannot delete themselves
+    }
+
+    // 2. Semesters Collection
+    match /semesters/{semesterId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isInstructor();
+    }
+
+    // 3. Courses Collection
+    match /courses/{courseId} {
+      allow read: if isAuthenticated();
+      allow create: if isInstructor();
+      allow update, delete: if isInstructorOfCourse(courseId);
+    }
+
+    // 4. Enrollments Collection
+    match /enrollments/{enrollmentId} {
+      allow read, create, update, delete: if isAuthenticated();
+    }
+
+    // 5. Groups Collection
+    match /groups/{groupId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isInstructor();
+    }
+
+    // 6. Announcements Collection
+    match /announcements/{announcementId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isInstructor();
+    }
+
+    // 7. Assignments Collection
+    match /assignments/{assignmentId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isInstructor();
+    }
+
+    // 8. Assignment Submissions Collection
+    match /assignmentSubmissions/{submissionId} {
+      allow read, create, update, delete: if isAuthenticated();
+    }
+
+    // 9. Quizzes Collection
+    match /quizzes/{quizId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isInstructor();
+    }
+
+    // 10. Questions Collection
+    match /questions/{questionId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isInstructor();
+    }
+
+    // 11. Quiz Attempts Collection
+    match /quizAttempts/{attemptId} {
+      allow read, create, update, delete: if isAuthenticated();
+    }
+
+    // 12. Materials Collection
+    match /materials/{materialId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isInstructor();
+    }
+
+    // 13. Forum Topics Collection
+    match /forumTopics/{topicId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() &&
+                              (resource.data.authorId == request.auth.uid || isInstructor());
+    }
+
+    // 14. Forum Replies Collection
+    match /forumReplies/{replyId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() &&
+                              (resource.data.authorId == request.auth.uid || isInstructor());
+    }
+
+    // 15. Chats Collection
+    match /chats/{chatId} {
+      allow read, create, update: if isAuthenticated() &&
+                                    (request.auth.uid in resource.data.participantIds ||
+                                     request.auth.uid in request.resource.data.participantIds);
+      allow delete: if false; // Chats cannot be deleted
+
+      // 16. Messages Sub-collection
+      match /messages/{messageId} {
+        allow read, create, update: if isAuthenticated() &&
+                                      request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
+        allow delete: if false; // Messages cannot be deleted
+      }
+    }
+
+    // 17. Notifications Collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.studentId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.studentId == request.auth.uid;
+    }
+
+    // 18. View Tracking Collection
+    match /viewTracking/{trackingId} {
+      allow read, create, update, delete: if isAuthenticated();
+    }
+
+    // 19. Comments Collection
+    match /comments/{commentId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+    }
+
+    // 20. Deadline Reminders Collection (NEW)
+    match /deadlineReminders/{reminderId} {
+      allow read: if isAuthenticated() && resource.data.studentId == request.auth.uid;
+      allow create, update: if isAuthenticated();
+      allow delete: if isAuthenticated() && (resource.data.studentId == request.auth.uid || isInstructor());
+    }
+  }
+}

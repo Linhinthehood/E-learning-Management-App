@@ -1,8 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/remote/message_remote_datasource.dart';
+import '../../data/datasources/remote/notification_remote_datasource.dart';
 import '../../data/repositories/message_repository_impl.dart';
+import '../../data/repositories/notification_repository_impl.dart';
 import '../../domain/entities/message_entity.dart';
+import '../../domain/entities/notification_entity.dart';
 import '../../domain/repositories/i_message_repository.dart';
+import '../../domain/repositories/i_notification_repository.dart';
 import './chat_provider.dart';
 
 /// Provider for message remote data source
@@ -17,13 +21,22 @@ final messageRepositoryProvider = Provider<IMessageRepository>((ref) {
   );
 });
 
+/// Provider for notification repository (for message notifications)
+final notificationRepositoryForMessageProvider =
+    Provider<INotificationRepository>((ref) {
+  return NotificationRepositoryImpl(
+    remoteDataSource: NotificationRemoteDataSourceImpl(),
+  );
+});
+
 /// Message state notifier - manages messages for a chat
 class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
   final IMessageRepository _repository;
+  final INotificationRepository _notificationRepository;
   final Ref _ref;
   String? _currentChatId;
 
-  MessageNotifier(this._repository, this._ref)
+  MessageNotifier(this._repository, this._notificationRepository, this._ref)
       : super(const AsyncValue.loading());
 
   /// Load messages for a chat
@@ -59,6 +72,11 @@ class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
         await _ref
             .read(chatRepositoryProvider)
             .incrementUnreadCount(message.chatId, recipientId);
+
+        // Send notification if instructor sends message to student
+        if (message.senderId == chat.instructorId && recipientId == chat.studentId) {
+          await _sendMessageNotification(chat.studentId, message.chatId);
+        }
       }
 
       if (_currentChatId != null) {
@@ -66,6 +84,28 @@ class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
       }
     } catch (e) {
       rethrow;
+    }
+  }
+
+  /// Send notification when instructor sends a message
+  Future<void> _sendMessageNotification(String studentId, String chatId) async {
+    try {
+      // Create notification
+      final notification = NotificationEntity(
+        id: '', // Firestore will generate
+        studentId: studentId,
+        title: 'New Message',
+        message: 'You received a new message from your instructor',
+        isRead: false,
+        createdAt: DateTime.now(),
+        linkTo: 'message/$chatId',
+        type: NotificationEntity.typeMessage,
+      );
+
+      await _notificationRepository.createNotification(notification);
+    } catch (e) {
+      // Don't fail the message if notification fails
+      print('Failed to send message notification: $e');
     }
   }
 
@@ -105,6 +145,7 @@ final messageProvider = StateNotifierProvider<
 >((ref) {
   return MessageNotifier(
     ref.read(messageRepositoryProvider),
+    ref.read(notificationRepositoryForMessageProvider),
     ref,
   );
 });

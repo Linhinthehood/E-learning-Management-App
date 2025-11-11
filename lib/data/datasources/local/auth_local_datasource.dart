@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 
 /// Local data source for authentication
@@ -50,21 +51,25 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> clearCache() async {
     try {
+      debugPrint('🗑️ Hive: Clearing user cache...');
       final box = Hive.box(_userBoxName);
       await box.delete(_userKey);
+      debugPrint('✅ Hive: User cache cleared');
     } catch (e) {
-      // Silently fail
+      debugPrint('⚠️ Hive: Failed to clear cache: $e');
     }
   }
 
   @override
   Future<void> saveCredentials(String email, String password) async {
     try {
+      debugPrint('💾 Hive: Saving credentials for $email');
       final box = Hive.box(_userBoxName);
       await box.put(_emailKey, email);
       await box.put(_passwordKey, password);
+      debugPrint('✅ Hive: Credentials saved');
     } catch (e) {
-      // Silently fail
+      debugPrint('⚠️ Hive: Failed to save credentials: $e');
     }
   }
 
@@ -75,12 +80,17 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       final email = box.get(_emailKey) as String?;
       final password = box.get(_passwordKey) as String?;
 
+      debugPrint('🔍 Hive: Checking cached credentials - email: $email, hasPassword: ${password != null}');
+
       if (email != null && password != null) {
+        debugPrint('✅ Hive: Found cached credentials');
         return {'email': email, 'password': password};
       }
 
+      debugPrint('ℹ️ Hive: No cached credentials found');
       return null;
     } catch (e) {
+      debugPrint('⚠️ Hive: Failed to get cached credentials: $e');
       return null;
     }
   }
@@ -88,11 +98,13 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> clearCredentials() async {
     try {
+      debugPrint('🗑️ Hive: Clearing credentials...');
       final box = Hive.box(_userBoxName);
       await box.delete(_emailKey);
       await box.delete(_passwordKey);
+      debugPrint('✅ Hive: Credentials cleared');
     } catch (e) {
-      // Silently fail
+      debugPrint('⚠️ Hive: Failed to clear credentials: $e');
     }
   }
 }

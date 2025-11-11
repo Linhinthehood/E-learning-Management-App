@@ -111,8 +111,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                 ),
               ),
             ),
-            // Right Sidebar
-            const RightSidebar(),
+            // Right Sidebar with student data
+            _buildRightSidebar(user.uid),
           ],
         );
       },
@@ -685,5 +685,75 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
     }
     if (name.contains('photo')) return Icons.camera_alt;
     return Icons.school;
+  }
+
+  Widget _buildRightSidebar(String studentId) {
+    if (_selectedSemester == null) {
+      return const RightSidebar(
+        totalCourses: 0,
+        totalStudents: 0,
+        courseProgressList: [],
+      );
+    }
+
+    final dashboardAsync = ref.watch(
+      studentDashboardProvider(
+        StudentDashboardParams(
+          studentId: studentId,
+          semesterId: _selectedSemester!.id,
+        ),
+      ),
+    );
+
+    return dashboardAsync.when(
+      data: (data) {
+        final colors = [
+          const Color(0xFF6366F1), // Indigo
+          const Color(0xFF8B5CF6), // Purple
+          const Color(0xFFEC4899), // Pink
+          const Color(0xFFF59E0B), // Amber
+          const Color(0xFF10B981), // Green
+          const Color(0xFF3B82F6), // Blue
+        ];
+
+        // Build course progress list from student's enrolled courses
+        final courseProgressList = <CourseProgressData>[];
+        int colorIndex = 0;
+
+        for (final entry in data.courseProgress.entries) {
+          final courseProgress = entry.value;
+          final course = data.courseMap[entry.key];
+          if (course != null) {
+            // Calculate overall progress as average of assignment and quiz progress
+            final progress = (courseProgress.assignmentProgress + courseProgress.quizProgress) / 2;
+
+            courseProgressList.add(CourseProgressData(
+              name: course.name,
+              progress: progress.clamp(0.0, 1.0),
+              color: colors[colorIndex % colors.length],
+            ));
+            colorIndex++;
+          }
+        }
+
+        return RightSidebar(
+          totalCourses: data.statistics.totalCourses,
+          totalStudents: data.statistics.pendingAssignments,
+          courseProgressList: courseProgressList,
+          firstCardLabel: 'Enrolled\nCourses',
+          secondCardLabel: 'Pending\nAssignments',
+        );
+      },
+      loading: () => const RightSidebar(
+        totalCourses: 0,
+        totalStudents: 0,
+        courseProgressList: [],
+      ),
+      error: (_, __) => const RightSidebar(
+        totalCourses: 0,
+        totalStudents: 0,
+        courseProgressList: [],
+      ),
+    );
   }
 }

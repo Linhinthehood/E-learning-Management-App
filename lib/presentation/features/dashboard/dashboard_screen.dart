@@ -1,56 +1,132 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../common/styles/colors.dart';
 import '../../common/widgets/right_sidebar.dart';
-import '../../common/widgets/course_list_item.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/instructor_dashboard_provider.dart';
+import 'widgets/instructor_statistics_cards.dart';
+import 'widgets/instructor_activity_feed.dart';
+import 'widgets/instructor_charts.dart';
+import 'widgets/instructor_quick_actions.dart';
 
-class DashboardScreen extends StatefulWidget {
+// Export CourseProgressData from right_sidebar
+export '../../common/widgets/right_sidebar.dart' show CourseProgressData;
+
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedTab = 0;
-
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Main Content
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildGreeting(),
-                  const SizedBox(height: 30),
-                  _buildFeaturedCourse(),
-                  const SizedBox(height: 40),
-                  _buildCoursesSection(),
-                ],
+    final userAsync = ref.watch(authProvider);
+
+    return userAsync.when(
+      data: (user) {
+        if (user == null) return const SizedBox.shrink();
+
+        final dashboardAsync = ref.watch(instructorDashboardProvider(user.uid));
+
+        return Row(
+          children: [
+            // Main Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildGreeting(user.displayName),
+                    const SizedBox(height: 30),
+                    // Dashboard Data
+                    dashboardAsync.when(
+                      data: (data) => _buildDashboardContent(data),
+                      loading: () => const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(40),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                      error: (error, stack) => Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.red.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Error loading dashboard data',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              error.toString(),
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: Colors.red,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ),
-        // Right Sidebar
-        const RightSidebar(),
-      ],
+            // Right Sidebar
+            dashboardAsync.when(
+              data: (data) => RightSidebar(
+                totalCourses: data.statistics.totalCourses,
+                totalStudents: data.statistics.totalStudents,
+                courseProgressList: _buildCourseProgressList(data),
+              ),
+              loading: () => const RightSidebar(
+                totalCourses: 0,
+                totalStudents: 0,
+                courseProgressList: [],
+              ),
+              error: (_, __) => const RightSidebar(
+                totalCourses: 0,
+                totalStudents: 0,
+                courseProgressList: [],
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const Center(child: Text('Error loading user')),
     );
   }
 
-  Widget _buildGreeting() {
+  Widget _buildGreeting(String displayName) {
     return Row(
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hello Josh!',
+              'Hello $displayName!',
               style: GoogleFonts.inter(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -59,7 +135,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 5),
             Text(
-              "It's good to see you again.",
+              "Welcome to your instructor dashboard.",
               style: GoogleFonts.inter(
                 fontSize: 15,
                 color: AppColors.textSecondary,
@@ -68,7 +144,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
         const SizedBox(width: 30),
-        // Illustration placeholder
+        // Illustration
         Container(
           width: 120,
           height: 120,
@@ -77,228 +153,94 @@ class _DashboardScreenState extends State<DashboardScreen> {
             borderRadius: BorderRadius.circular(15),
           ),
           child: const Center(
-            child: Text('👋', style: TextStyle(fontSize: 60)),
+            child: Text('👨‍🏫', style: TextStyle(fontSize: 60)),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFeaturedCourse() {
-    return Container(
-      padding: const EdgeInsets.all(25),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderLight, width: 1),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFEE2E2),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: const Center(
-              child: Text('🇪🇸', style: TextStyle(fontSize: 30)),
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Spanish B2',
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'by Alejandro Velazquez',
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.borderLight,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.access_time, size: 20),
-          ),
-          const SizedBox(width: 15),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.buttonPrimary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              'Continue',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(width: 15),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.borderLight,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.arrow_back, size: 20),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.borderLight,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.arrow_forward, size: 20),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCoursesSection() {
-    final courses = [
-      {
-        'title': 'Learn Figma',
-        'instructor': 'Christopher Morgan',
-        'duration': '6h 30min',
-        'rating': 4.0,
-        'icon': Icons.design_services,
-        'color': const Color(0xFFFF6B6B),
-      },
-      {
-        'title': 'Analog photography',
-        'instructor': 'Gordon Norman',
-        'duration': '3h 15min',
-        'rating': 4.7,
-        'icon': Icons.camera_alt,
-        'color': const Color(0xFF4ECDC4),
-      },
-      {
-        'title': 'Master Instagram',
-        'instructor': 'Sophie Gill',
-        'duration': '7h 40min',
-        'rating': 4.6,
-        'icon': Icons.photo_camera,
-        'color': const Color(0xFFE056FD),
-      },
-      {
-        'title': 'Basics of drawing',
-        'instructor': 'Jean Tate',
-        'duration': '11h 30min',
-        'rating': 4.8,
-        'icon': Icons.brush,
-        'color': const Color(0xFFFFA726),
-      },
-      {
-        'title': 'Photoshop - Essence',
-        'instructor': 'David Green',
-        'duration': '5h 35min',
-        'rating': 4.7,
-        'icon': Icons.photo,
-        'color': const Color(0xFF42A5F5),
-      },
-    ];
-
+  Widget _buildDashboardContent(InstructorDashboardData data) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Courses',
-          style: GoogleFonts.inter(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
+        // Statistics Cards
+        InstructorStatisticsCards(statistics: data.statistics),
+        const SizedBox(height: 30),
+        // Quick Actions
+        const InstructorQuickActions(),
+        const SizedBox(height: 30),
+        // Charts
+        InstructorCharts(
+          submissionData: data.submissionChartData,
+          quizScoreData: data.quizScoreChartData,
         ),
-        const SizedBox(height: 20),
-        // Tabs
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildTab('All Courses', 0),
-              const SizedBox(width: 30),
-              _buildTab('Courses This Semester', 1),
-              const SizedBox(width: 30),
-              _buildTab('Need Homework Courses', 2),
-              const SizedBox(width: 30),
-              _buildTab('Course With Upcoming Test', 3),
-            ],
-          ),
-        ),
-        const SizedBox(height: 25),
-        // Course list
-        ...courses.map(
-          (course) => CourseListItem(
-            title: course['title'] as String,
-            instructor: course['instructor'] as String,
-            duration: course['duration'] as String,
-            rating: course['rating'] as double,
-            icon: course['icon'] as IconData,
-            iconColor: course['color'] as Color,
-          ),
+        const SizedBox(height: 30),
+        // Recent Activity Feed
+        InstructorActivityFeed(
+          activities: data.recentActivities,
+          courseMap: data.courseMap,
         ),
       ],
     );
   }
 
-  Widget _buildTab(String label, int index) {
-    final isSelected = _selectedTab == index;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTab = index;
-        });
-      },
-      child: Column(
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 15,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected
-                  ? AppColors.textPrimary
-                  : AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          if (isSelected)
-            Container(
-              height: 3,
-              width: 30,
-              decoration: BoxDecoration(
-                color: AppColors.textPrimary,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-        ],
-      ),
-    );
+  List<CourseProgressData> _buildCourseProgressList(InstructorDashboardData data) {
+    final courseProgressList = <CourseProgressData>[];
+    final colors = [
+      const Color(0xFF6366F1), // Indigo
+      const Color(0xFF8B5CF6), // Purple
+      const Color(0xFFEC4899), // Pink
+      const Color(0xFFF59E0B), // Amber
+      const Color(0xFF10B981), // Green
+      const Color(0xFF3B82F6), // Blue
+    ];
+
+    int colorIndex = 0;
+
+    // Calculate progress for each course
+    // Progress is based on student engagement (submission rate + quiz participation)
+    for (final courseEntry in data.courseMap.entries) {
+      final course = courseEntry.value;
+
+      // Count assignments and quizzes for this course from chart data
+      final courseAssignments = data.submissionChartData
+          .where((sub) => sub.assignmentTitle.isNotEmpty)
+          .toList();
+
+      final courseQuizzes = data.quizScoreChartData
+          .where((quiz) => quiz.attempts > 0)
+          .toList();
+
+      // Calculate progress based on submission rate and quiz participation
+      double progress;
+      if (courseAssignments.isEmpty && courseQuizzes.isEmpty) {
+        // No activities yet, show minimal progress
+        progress = 0.15;
+      } else {
+        // Combine submission rate and quiz score as engagement metrics
+        final submissionRate = data.statistics.averageSubmissionRate / 100;
+        final quizScore = data.statistics.averageQuizScore / 100;
+
+        // Average of both metrics (or just submission if no quizzes)
+        if (courseQuizzes.isEmpty) {
+          progress = submissionRate;
+        } else if (courseAssignments.isEmpty) {
+          progress = quizScore;
+        } else {
+          progress = (submissionRate + quizScore) / 2;
+        }
+      }
+
+      courseProgressList.add(CourseProgressData(
+        name: course.name,
+        progress: progress.clamp(0.0, 1.0),
+        color: colors[colorIndex % colors.length],
+      ));
+
+      colorIndex++;
+    }
+
+    return courseProgressList;
   }
 }

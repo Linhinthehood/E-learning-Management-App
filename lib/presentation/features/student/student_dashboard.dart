@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../common/styles/colors.dart';
 import '../../common/widgets/student_sidebar.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../providers/assignment_provider.dart';
+import '../../providers/quiz_provider.dart';
+import '../../../utils/services/deadline_reminder_service.dart';
 import '../auth/login_screen.dart';
 import '../messaging/chat_list_screen.dart';
 import '../notifications/notification_list_screen.dart';
@@ -21,6 +25,7 @@ class StudentDashboard extends ConsumerStatefulWidget {
 
 class _StudentDashboardState extends ConsumerState<StudentDashboard> {
   int _selectedIndex = 0;
+  bool _hasCheckedReminders = false;
 
   // List of screens for each navigation item
   final List<Widget> _screens = [
@@ -79,9 +84,38 @@ class _StudentDashboardState extends ConsumerState<StudentDashboard> {
     }
   }
 
+  /// Check for upcoming deadline reminders
+  Future<void> _checkDeadlineReminders(String studentId) async {
+    if (_hasCheckedReminders) return; // Only check once per session
+
+    try {
+      final deadlineService = DeadlineReminderService(
+        assignmentRepository: ref.read(assignmentRepositoryProvider),
+        quizRepository: ref.read(quizRepositoryProvider),
+        notificationRepository: ref.read(notificationRepositoryProvider),
+        firestore: FirebaseFirestore.instance,
+      );
+
+      await deadlineService.checkAndSendReminders(studentId);
+      _hasCheckedReminders = true;
+      debugPrint('Deadline reminder check completed for student $studentId');
+    } catch (e) {
+      debugPrint('Error checking deadline reminders: $e');
+      // Don't show error to user - this is a background task
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(authProvider);
+
+    // Check for deadline reminders when user data is available
+    userAsync.whenData((user) {
+      if (user != null && !_hasCheckedReminders) {
+        // Run deadline check in background
+        Future.microtask(() => _checkDeadlineReminders(user.uid));
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,

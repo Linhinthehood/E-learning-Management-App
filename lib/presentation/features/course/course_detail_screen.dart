@@ -14,8 +14,13 @@ import 'tabs/people_tab.dart';
 /// Course Detail Screen - Main screen for managing course content
 class CourseDetailScreen extends ConsumerStatefulWidget {
   final CourseEntity course;
+  final int initialTabIndex;
 
-  const CourseDetailScreen({super.key, required this.course});
+  const CourseDetailScreen({
+    super.key,
+    required this.course,
+    this.initialTabIndex = 0,
+  });
 
   @override
   ConsumerState<CourseDetailScreen> createState() => _CourseDetailScreenState();
@@ -28,7 +33,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 7, vsync: this);
+    _tabController = TabController(
+      length: 7,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
   }
 
   @override
