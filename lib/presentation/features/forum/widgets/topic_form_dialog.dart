@@ -1,26 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:io' show File;
 import '../../../../domain/entities/course_entity.dart';
 import '../../../../domain/entities/forum_topic_entity.dart';
 import '../../../common/styles/colors.dart';
 import '../../../providers/forum_topic_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../../services/file_upload_service.dart';
 
 /// Topic Form Dialog - for creating or editing forum topics
 class TopicFormDialog extends ConsumerStatefulWidget {
   final CourseEntity course;
   final ForumTopicEntity? topic; // null for create, non-null for edit
 
-  const TopicFormDialog({
-    super.key,
-    required this.course,
-    this.topic,
-  });
+  const TopicFormDialog({super.key, required this.course, this.topic});
 
   @override
   ConsumerState<TopicFormDialog> createState() => _TopicFormDialogState();
@@ -32,6 +25,8 @@ class _TopicFormDialogState extends ConsumerState<TopicFormDialog> {
   final _contentController = TextEditingController();
   List<String> _attachments = [];
   bool _isUploading = false;
+  double _uploadProgress = 0.0;
+  final FileUploadService _fileUploadService = FileUploadService();
 
   @override
   void initState() {
@@ -52,77 +47,52 @@ class _TopicFormDialogState extends ConsumerState<TopicFormDialog> {
 
   Future<void> _pickFiles() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        allowMultiple: true,
-        type: FileType.any,
+      // Pick files
+      final files = await _fileUploadService.pickFiles(allowMultiple: true);
+
+      if (files == null || files.isEmpty) return;
+
+      setState(() {
+        _isUploading = true;
+        _uploadProgress = 0.0;
+      });
+
+      // Upload files to Cloudinary
+      final uploadedUrls = await _fileUploadService.uploadMultipleFiles(
+        files: files,
+        path: 'forum_attachments',
+        onProgress: (current, total) {
+          setState(() {
+            _uploadProgress = current / total;
+          });
+        },
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        setState(() {
-          _isUploading = true;
-        });
+      // Add uploaded URLs to attachments
+      setState(() {
+        _attachments.addAll(uploadedUrls);
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
 
-        final storage = FirebaseStorage.instance;
-        final uploadedUrls = <String>[];
-
-        for (var file in result.files) {
-          try {
-            // Create a unique file path
-            final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
-            final storageRef = storage.ref().child('forum_attachments/$fileName');
-
-            if (kIsWeb) {
-              // For web, upload bytes directly
-              if (file.bytes != null) {
-                await storageRef.putData(
-                  file.bytes!,
-                  SettableMetadata(
-                    contentType: file.extension != null
-                        ? 'application/${file.extension}'
-                        : null,
-                  ),
-                );
-              } else {
-                continue; // Skip if no bytes
-              }
-            } else {
-              // For mobile/desktop, upload file
-              if (file.path != null) {
-                await storageRef.putFile(File(file.path!));
-              } else {
-                continue; // Skip if no path
-              }
-            }
-
-            // Get download URL
-            final downloadUrl = await storageRef.getDownloadURL();
-            uploadedUrls.add(downloadUrl);
-          } catch (e) {
-            // Handle upload error
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error uploading ${file.name}: ${e.toString()}'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
-        }
-
-        setState(() {
-          _attachments.addAll(uploadedUrls);
-          _isUploading = false;
-        });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${files.length} file(s) uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
       }
     } catch (e) {
       setState(() {
         _isUploading = false;
+        _uploadProgress = 0.0;
       });
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error picking files: ${e.toString()}'),
+            content: Text('Failed to upload files: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -192,9 +162,7 @@ class _TopicFormDialogState extends ConsumerState<TopicFormDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         constraints: const BoxConstraints(maxHeight: 600),
@@ -205,9 +173,7 @@ class _TopicFormDialogState extends ConsumerState<TopicFormDialog> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.border),
-                ),
+                border: Border(bottom: BorderSide(color: AppColors.border)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -298,7 +264,9 @@ class _TopicFormDialogState extends ConsumerState<TopicFormDialog> {
                                 ? const SizedBox(
                                     width: 16,
                                     height: 16,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
                                   )
                                 : const Icon(Icons.attach_file, size: 20),
                             label: Text(
@@ -308,6 +276,25 @@ class _TopicFormDialogState extends ConsumerState<TopicFormDialog> {
                           ),
                         ],
                       ),
+                      // Upload progress
+                      if (_isUploading) ...[
+                        const SizedBox(height: 8),
+                        LinearProgressIndicator(
+                          value: _uploadProgress,
+                          backgroundColor: AppColors.background,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.buttonPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                       if (_attachments.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Wrap(
@@ -337,9 +324,7 @@ class _TopicFormDialogState extends ConsumerState<TopicFormDialog> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: AppColors.border),
-                ),
+                border: Border(top: BorderSide(color: AppColors.border)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -379,4 +364,3 @@ class _TopicFormDialogState extends ConsumerState<TopicFormDialog> {
     );
   }
 }
-

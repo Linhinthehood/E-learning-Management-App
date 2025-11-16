@@ -12,7 +12,7 @@ class FileDownloadHelperImpl {
     try {
       // Get downloads directory
       Directory? directory;
-      
+
       if (Platform.isAndroid) {
         // Android: Try to use external storage downloads directory
         try {
@@ -30,9 +30,10 @@ class FileDownloadHelperImpl {
         directory = await getApplicationDocumentsDirectory();
       } else {
         // Desktop: Use downloads directory
-        final homePath = Platform.environment['HOME'] ?? 
-                        Platform.environment['USERPROFILE'] ?? 
-                        '';
+        final homePath =
+            Platform.environment['HOME'] ??
+            Platform.environment['USERPROFILE'] ??
+            '';
         if (homePath.isNotEmpty) {
           directory = Directory('$homePath/Downloads');
           if (!await directory.exists()) {
@@ -67,4 +68,3 @@ class FileDownloadHelperImpl {
     }
   }
 }
-

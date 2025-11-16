@@ -172,7 +172,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
     );
   }
 
-
   Widget _buildSemesterSwitcher(
     AsyncValue<List<SemesterEntity>> semestersAsync,
   ) {
@@ -464,10 +463,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
   Widget _buildDashboardContent(String studentId, String semesterId) {
     final dashboardAsync = ref.watch(
       studentDashboardProvider(
-        StudentDashboardParams(
-          studentId: studentId,
-          semesterId: semesterId,
-        ),
+        StudentDashboardParams(studentId: studentId, semesterId: semesterId),
       ),
     );
 
@@ -501,9 +497,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => CourseDetailScreen(
-                                      course: course,
-                                    ),
+                                    builder: (context) =>
+                                        CourseDetailScreen(course: course),
                                   ),
                                 );
                               },
@@ -511,9 +506,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => CourseDetailScreen(
-                                      course: course,
-                                    ),
+                                    builder: (context) =>
+                                        CourseDetailScreen(course: course),
                                   ),
                                 );
                               },
@@ -526,9 +520,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => CourseDetailScreen(
-                                      course: course,
-                                    ),
+                                    builder: (context) =>
+                                        CourseDetailScreen(course: course),
                                   ),
                                 );
                               },
@@ -547,9 +540,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CourseDetailScreen(
-                                  course: course,
-                                ),
+                                builder: (context) =>
+                                    CourseDetailScreen(course: course),
                               ),
                             );
                           },
@@ -569,9 +561,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CourseDetailScreen(
-                                course: course,
-                              ),
+                              builder: (context) =>
+                                  CourseDetailScreen(course: course),
                             ),
                           );
                         },
@@ -579,9 +570,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CourseDetailScreen(
-                                course: course,
-                              ),
+                              builder: (context) =>
+                                  CourseDetailScreen(course: course),
                             ),
                           );
                         },
@@ -594,9 +584,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CourseDetailScreen(
-                                course: course,
-                              ),
+                              builder: (context) =>
+                                  CourseDetailScreen(course: course),
                             ),
                           );
                         },
@@ -609,9 +598,8 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CourseDetailScreen(
-                                course: course,
-                              ),
+                              builder: (context) =>
+                                  CourseDetailScreen(course: course),
                             ),
                           );
                         },
@@ -735,13 +723,18 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
           final course = data.courseMap[entry.key];
           if (course != null) {
             // Calculate overall progress as average of assignment and quiz progress
-            final progress = (courseProgress.assignmentProgress + courseProgress.quizProgress) / 2;
+            final progress =
+                (courseProgress.assignmentProgress +
+                    courseProgress.quizProgress) /
+                2;
 
-            courseProgressList.add(CourseProgressData(
-              name: course.name,
-              progress: progress.clamp(0.0, 1.0),
-              color: colors[colorIndex % colors.length],
-            ));
+            courseProgressList.add(
+              CourseProgressData(
+                name: course.name,
+                progress: progress.clamp(0.0, 1.0),
+                color: colors[colorIndex % colors.length],
+              ),
+            );
             colorIndex++;
           }
         }

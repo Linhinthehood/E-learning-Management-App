@@ -18,10 +18,7 @@ abstract class IQuizAttemptRepository {
   );
 
   /// Get student's latest attempt for a quiz
-  Future<QuizAttemptEntity?> getLatestAttempt(
-    String quizId,
-    String studentId,
-  );
+  Future<QuizAttemptEntity?> getLatestAttempt(String quizId, String studentId);
 
   /// Get student's in-progress attempt for a quiz
   Future<QuizAttemptEntity?> getInProgressAttempt(

@@ -23,8 +23,9 @@ class MessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        mainAxisAlignment:
-            isSent ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isSent
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isSent && showAvatar) ...[
@@ -49,8 +50,9 @@ class MessageBubble extends StatelessWidget {
           // Message bubble
           Flexible(
             child: Column(
-              crossAxisAlignment:
-                  isSent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isSent
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 if (!isSent && participantName != null) ...[
                   Padding(
@@ -82,10 +84,7 @@ class MessageBubble extends StatelessWidget {
                     ),
                     border: isSent
                         ? null
-                        : Border.all(
-                            color: AppColors.border,
-                            width: 1,
-                          ),
+                        : Border.all(color: AppColors.border, width: 1),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,9 +93,7 @@ class MessageBubble extends StatelessWidget {
                         message.content,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: isSent
-                              ? Colors.white
-                              : AppColors.textPrimary,
+                          color: isSent ? Colors.white : AppColors.textPrimary,
                           height: 1.4,
                         ),
                       ),
@@ -116,9 +113,7 @@ class MessageBubble extends StatelessWidget {
                           if (isSent) ...[
                             const SizedBox(width: 4),
                             Icon(
-                              message.isRead
-                                  ? Icons.done_all
-                                  : Icons.done,
+                              message.isRead ? Icons.done_all : Icons.done,
                               size: 12,
                               color: message.isRead
                                   ? Colors.blue.shade300
@@ -149,4 +144,3 @@ class MessageBubble extends StatelessWidget {
     return '$displayHour:$minute $period';
   }
 }
-

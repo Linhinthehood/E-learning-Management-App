@@ -7,11 +7,9 @@ class CommentRemoteDataSource {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  CommentRemoteDataSource({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  CommentRemoteDataSource({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   /// Get comments by announcement ID
   Future<List<CommentModel>> getCommentsByAnnouncementId(
@@ -48,7 +46,8 @@ class CommentRemoteDataSource {
 
       // Get user name from users collection
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      final userName = userDoc.data()?['displayName'] as String? ?? 'Unknown User';
+      final userName =
+          userDoc.data()?['displayName'] as String? ?? 'Unknown User';
 
       await _firestore.collection('comments').add({
         'announcementId': announcementId,

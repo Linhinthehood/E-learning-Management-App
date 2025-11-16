@@ -19,9 +19,7 @@ class QuizAnswerDetailDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: AppColors.cardBackground,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.8,
@@ -68,9 +66,7 @@ class QuizAnswerDetailDialog extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 16),
             // Answers list
-            Expanded(
-              child: _buildAnswersList(),
-            ),
+            Expanded(child: _buildAnswersList()),
           ],
         ),
       ),
@@ -83,7 +79,7 @@ class QuizAnswerDetailDialog extends StatelessWidget {
     // 1. Load the actual questions from the quiz structure
     // 2. Match student answers with questions
     // 3. Show correct/incorrect indicators
-    
+
     if (attempt.answers.isEmpty) {
       return Center(
         child: Column(
@@ -143,11 +139,7 @@ class QuizAnswerDetailDialog extends StatelessWidget {
                     ),
                     const Spacer(),
                     // Note: In real implementation, check if answer is correct
-                    Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 20,
-                    ),
+                    Icon(Icons.check_circle, color: Colors.green, size: 20),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -184,4 +176,3 @@ class QuizAnswerDetailDialog extends StatelessWidget {
     );
   }
 }
-

@@ -2,7 +2,6 @@ import '../../domain/entities/chat_entity.dart';
 import '../../domain/repositories/i_chat_repository.dart';
 import '../datasources/remote/chat_remote_datasource.dart';
 
-
 /// Implementation of IChatRepository
 /// Handles conversion between models and entities
 class ChatRepositoryImpl implements IChatRepository {
@@ -31,7 +30,10 @@ class ChatRepositoryImpl implements IChatRepository {
   }
 
   @override
-  Future<ChatEntity> getOrCreateChat(String studentId, String instructorId) async {
+  Future<ChatEntity> getOrCreateChat(
+    String studentId,
+    String instructorId,
+  ) async {
     try {
       final chatModel = await remoteDataSource.getOrCreateChat(
         studentId,

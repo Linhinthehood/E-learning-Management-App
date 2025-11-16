@@ -17,11 +17,7 @@ class QuizzesTab extends ConsumerStatefulWidget {
   final CourseEntity course;
   final bool isReadOnly;
 
-  const QuizzesTab({
-    super.key,
-    required this.course,
-    this.isReadOnly = false,
-  });
+  const QuizzesTab({super.key, required this.course, this.isReadOnly = false});
 
   @override
   ConsumerState<QuizzesTab> createState() => _QuizzesTabState();
@@ -53,12 +49,9 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
     var filtered = quizzes.where((quiz) {
       // Search filter
       if (_searchQuery.isNotEmpty) {
-        final matchesSearch = quiz.title
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            quiz.description
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase());
+        final matchesSearch =
+            quiz.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            quiz.description.toLowerCase().contains(_searchQuery.toLowerCase());
         if (!matchesSearch) return false;
       }
 
@@ -212,12 +205,9 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
                       ),
-                      items: [
-                        'All',
-                        'Open',
-                        'Closed',
-                        'Upcoming',
-                      ].map((status) {
+                      items: ['All', 'Open', 'Closed', 'Upcoming'].map((
+                        status,
+                      ) {
                         return DropdownMenuItem(
                           value: status,
                           child: Text(
@@ -255,20 +245,21 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
                       ),
-                      items: [
-                        'Close Date (Nearest First)',
-                        'Close Date (Furthest First)',
-                        'Title (A-Z)',
-                        'Title (Z-A)',
-                      ].map((sortOption) {
-                        return DropdownMenuItem(
-                          value: sortOption,
-                          child: Text(
-                            sortOption,
-                            style: GoogleFonts.inter(fontSize: 14),
-                          ),
-                        );
-                      }).toList(),
+                      items:
+                          [
+                            'Close Date (Nearest First)',
+                            'Close Date (Furthest First)',
+                            'Title (A-Z)',
+                            'Title (Z-A)',
+                          ].map((sortOption) {
+                            return DropdownMenuItem(
+                              value: sortOption,
+                              child: Text(
+                                sortOption,
+                                style: GoogleFonts.inter(fontSize: 14),
+                              ),
+                            );
+                          }).toList(),
                       onChanged: (value) {
                         if (value != null) {
                           setState(() {
@@ -307,7 +298,8 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                               color: AppColors.textSecondary,
                             ),
                           ),
-                          if (_searchQuery.isNotEmpty || _filterStatus != 'All') ...[
+                          if (_searchQuery.isNotEmpty ||
+                              _filterStatus != 'All') ...[
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
@@ -672,14 +664,19 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                         .countStudentAttempts(quiz.id, currentUserId),
                     builder: (context, countSnapshot) {
                       final attemptCount = countSnapshot.data ?? 0;
-                      final canTake = quiz.hasUnlimitedAttempts ||
+                      final canTake =
+                          quiz.hasUnlimitedAttempts ||
                           attemptCount < quiz.numAttempts;
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Attempt status
-                          _buildAttemptStatus(latestAttempt, attemptCount, quiz),
+                          _buildAttemptStatus(
+                            latestAttempt,
+                            attemptCount,
+                            quiz,
+                          ),
                           const SizedBox(height: 12),
 
                           // Take quiz button
@@ -729,7 +726,11 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.error, color: Colors.red, size: 20),
+                                  const Icon(
+                                    Icons.error,
+                                    color: Colors.red,
+                                    size: 20,
+                                  ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Maximum attempts reached',
@@ -955,10 +956,8 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
     // Navigate to quiz taking screen
     final result = await Navigator.of(navigatorContext).push(
       MaterialPageRoute(
-        builder: (context) => QuizTakingScreen(
-          quiz: quiz,
-          existingAttempt: inProgressAttempt,
-        ),
+        builder: (context) =>
+            QuizTakingScreen(quiz: quiz, existingAttempt: inProgressAttempt),
       ),
     );
 

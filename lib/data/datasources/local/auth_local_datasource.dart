@@ -80,7 +80,9 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       final email = box.get(_emailKey) as String?;
       final password = box.get(_passwordKey) as String?;
 
-      debugPrint('🔍 Hive: Checking cached credentials - email: $email, hasPassword: ${password != null}');
+      debugPrint(
+        '🔍 Hive: Checking cached credentials - email: $email, hasPassword: ${password != null}',
+      );
 
       if (email != null && password != null) {
         debugPrint('✅ Hive: Found cached credentials');

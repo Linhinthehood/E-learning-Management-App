@@ -15,8 +15,8 @@ class NotificationRepositoryImpl implements INotificationRepository {
     String studentId,
   ) async {
     try {
-      final notificationModels =
-          await remoteDataSource.getNotificationsByStudent(studentId);
+      final notificationModels = await remoteDataSource
+          .getNotificationsByStudent(studentId);
       return notificationModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -28,8 +28,9 @@ class NotificationRepositoryImpl implements INotificationRepository {
     String studentId,
   ) async {
     try {
-      final notificationModels =
-          await remoteDataSource.getUnreadNotifications(studentId);
+      final notificationModels = await remoteDataSource.getUnreadNotifications(
+        studentId,
+      );
       return notificationModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       rethrow;
@@ -37,12 +38,11 @@ class NotificationRepositoryImpl implements INotificationRepository {
   }
 
   @override
-  Future<NotificationEntity?> getNotificationById(
-    String notificationId,
-  ) async {
+  Future<NotificationEntity?> getNotificationById(String notificationId) async {
     try {
-      final notificationModel =
-          await remoteDataSource.getNotificationById(notificationId);
+      final notificationModel = await remoteDataSource.getNotificationById(
+        notificationId,
+      );
       return notificationModel?.toEntity();
     } catch (e) {
       rethrow;
@@ -55,8 +55,9 @@ class NotificationRepositoryImpl implements INotificationRepository {
   ) async {
     try {
       final notificationModel = NotificationModel.fromEntity(notification);
-      final createdModel =
-          await remoteDataSource.createNotification(notificationModel);
+      final createdModel = await remoteDataSource.createNotification(
+        notificationModel,
+      );
       return createdModel.toEntity();
     } catch (e) {
       rethrow;
@@ -102,7 +103,9 @@ class NotificationRepositoryImpl implements INotificationRepository {
   @override
   Stream<List<NotificationEntity>> listenToNotifications(String studentId) {
     try {
-      return remoteDataSource.listenToNotifications(studentId).map(
+      return remoteDataSource
+          .listenToNotifications(studentId)
+          .map(
             (notificationModels) =>
                 notificationModels.map((model) => model.toEntity()).toList(),
           );

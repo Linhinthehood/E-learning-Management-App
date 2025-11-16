@@ -29,24 +29,28 @@ class UpcomingDeadlinesWidget extends StatelessWidget {
 
     // Add assignments
     for (var assignment in upcomingAssignments) {
-      allDeadlines.add(_DeadlineItem(
-        id: assignment.id,
-        courseId: assignment.courseId,
-        title: assignment.title,
-        deadline: assignment.deadline,
-        type: _DeadlineType.assignment,
-      ));
+      allDeadlines.add(
+        _DeadlineItem(
+          id: assignment.id,
+          courseId: assignment.courseId,
+          title: assignment.title,
+          deadline: assignment.deadline,
+          type: _DeadlineType.assignment,
+        ),
+      );
     }
 
     // Add quizzes
     for (var quiz in upcomingQuizzes) {
-      allDeadlines.add(_DeadlineItem(
-        id: quiz.id,
-        courseId: quiz.courseId,
-        title: quiz.title,
-        deadline: quiz.timeClose,
-        type: _DeadlineType.quiz,
-      ));
+      allDeadlines.add(
+        _DeadlineItem(
+          id: quiz.id,
+          courseId: quiz.courseId,
+          title: quiz.title,
+          deadline: quiz.timeClose,
+          type: _DeadlineType.quiz,
+        ),
+      );
     }
 
     // Sort by deadline
@@ -92,11 +96,7 @@ class UpcomingDeadlinesWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.event,
-                color: AppColors.buttonPrimary,
-                size: 24,
-              ),
+              Icon(Icons.event, color: AppColors.buttonPrimary, size: 24),
               const SizedBox(width: 12),
               Text(
                 'Upcoming Deadlines',
@@ -109,19 +109,23 @@ class UpcomingDeadlinesWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          ...allDeadlines.take(5).map((deadline) => _DeadlineItemWidget(
-                item: deadline,
-                onTap: () {
-                  final course = courseMap[deadline.courseId];
-                  if (course != null) {
-                    if (deadline.type == _DeadlineType.assignment) {
-                      onAssignmentTap?.call(course, deadline.id);
-                    } else {
-                      onQuizTap?.call(course, deadline.id);
+          ...allDeadlines
+              .take(5)
+              .map(
+                (deadline) => _DeadlineItemWidget(
+                  item: deadline,
+                  onTap: () {
+                    final course = courseMap[deadline.courseId];
+                    if (course != null) {
+                      if (deadline.type == _DeadlineType.assignment) {
+                        onAssignmentTap?.call(course, deadline.id);
+                      } else {
+                        onQuizTap?.call(course, deadline.id);
+                      }
                     }
-                  }
-                },
-              )),
+                  },
+                ),
+              ),
         ],
       ),
     );
@@ -150,10 +154,7 @@ class _DeadlineItemWidget extends StatelessWidget {
   final _DeadlineItem item;
   final VoidCallback onTap;
 
-  const _DeadlineItemWidget({
-    required this.item,
-    required this.onTap,
-  });
+  const _DeadlineItemWidget({required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -226,10 +227,7 @@ class _DeadlineItemWidget extends StatelessWidget {
             ),
             if (isUrgent)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(8),
@@ -249,4 +247,3 @@ class _DeadlineItemWidget extends StatelessWidget {
     );
   }
 }
-

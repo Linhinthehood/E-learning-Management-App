@@ -102,9 +102,7 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   }
 
   @override
-  Future<NotificationModel?> getNotificationById(
-    String notificationId,
-  ) async {
+  Future<NotificationModel?> getNotificationById(String notificationId) async {
     try {
       final docSnapshot = await _firestore
           .collection('notifications')
@@ -140,10 +138,9 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   @override
   Future<void> markAsRead(String notificationId) async {
     try {
-      await _firestore
-          .collection('notifications')
-          .doc(notificationId)
-          .update({'isRead': true});
+      await _firestore.collection('notifications').doc(notificationId).update({
+        'isRead': true,
+      });
     } catch (e) {
       throw Exception('Failed to mark notification as read: ${e.toString()}');
     }
@@ -201,15 +198,15 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
           .where('studentId', isEqualTo: studentId)
           .snapshots()
           .map((snapshot) {
-        final notifications = snapshot.docs
-            .map((doc) => NotificationModel.fromJson(doc.data(), doc.id))
-            .toList();
-        
-        // Sort by createdAt descending (newest first) in memory
-        notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        
-        return notifications;
-      });
+            final notifications = snapshot.docs
+                .map((doc) => NotificationModel.fromJson(doc.data(), doc.id))
+                .toList();
+
+            // Sort by createdAt descending (newest first) in memory
+            notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+            return notifications;
+          });
     } catch (e) {
       throw Exception('Failed to listen to notifications: ${e.toString()}');
     }
@@ -258,7 +255,9 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
 
       await batch.commit();
     } catch (e) {
-      throw Exception('Failed to send notifications to course: ${e.toString()}');
+      throw Exception(
+        'Failed to send notifications to course: ${e.toString()}',
+      );
     }
   }
 
@@ -307,7 +306,9 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
 
       await batch.commit();
     } catch (e) {
-      throw Exception('Failed to send notifications to groups: ${e.toString()}');
+      throw Exception(
+        'Failed to send notifications to groups: ${e.toString()}',
+      );
     }
   }
 }

@@ -14,7 +14,8 @@ class ModernMobileHomepage extends ConsumerStatefulWidget {
   const ModernMobileHomepage({super.key});
 
   @override
-  ConsumerState<ModernMobileHomepage> createState() => _ModernMobileHomepageState();
+  ConsumerState<ModernMobileHomepage> createState() =>
+      _ModernMobileHomepageState();
 }
 
 class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
@@ -147,10 +148,14 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: AppColors.buttonPrimary,
-                backgroundImage: photoURL != null ? NetworkImage(photoURL) : null,
+                backgroundImage: photoURL != null
+                    ? NetworkImage(photoURL)
+                    : null,
                 child: photoURL == null
                     ? Text(
-                        displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U',
+                        displayName.isNotEmpty
+                            ? displayName[0].toUpperCase()
+                            : 'U',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -354,7 +359,11 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
   }
 
   /// Build a section with title and grid of items
-  Widget _buildSection(String title, IconData icon, List<QuickAccessItem> items) {
+  Widget _buildSection(
+    String title,
+    IconData icon,
+    List<QuickAccessItem> items,
+  ) {
     final padding = _getResponsivePadding(context);
     final columns = _getGridColumns(context);
 
@@ -394,11 +403,7 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
-              return _buildQuickAccessButton(
-                item.icon,
-                item.label,
-                item.onTap,
-              );
+              return _buildQuickAccessButton(item.icon, item.label, item.onTap);
             },
           ),
         ],
@@ -407,7 +412,11 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
   }
 
   /// Quick access button with uniform design
-  Widget _buildQuickAccessButton(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildQuickAccessButton(
+    IconData icon,
+    String label,
+    VoidCallback onTap,
+  ) {
     final iconSize = _getIconSize(context);
     final iconPadding = iconSize * 0.47; // Icon is 47% of container size
 
@@ -422,11 +431,10 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
             height: iconSize,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(iconSize * 0.27), // ~16px for 60px
-              border: Border.all(
-                color: AppColors.textPrimary,
-                width: 2,
-              ),
+              borderRadius: BorderRadius.circular(
+                iconSize * 0.27,
+              ), // ~16px for 60px
+              border: Border.all(color: AppColors.textPrimary, width: 2),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -435,11 +443,7 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
                 ),
               ],
             ),
-            child: Icon(
-              icon,
-              size: iconPadding,
-              color: AppColors.textPrimary,
-            ),
+            child: Icon(icon, size: iconPadding, color: AppColors.textPrimary),
           ),
 
           const SizedBox(height: 8),
@@ -480,31 +484,69 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(Icons.home_outlined, Icons.home, 'Home', true, () {}),
-              _buildNavItem(Icons.school_outlined, Icons.school, 'Courses', false, () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const StudentHomepage()),
-                );
-              }),
-              _buildNavItem(Icons.notifications_outlined, Icons.notifications, 'Alerts', false, () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const NotificationListScreen()),
-                );
-              }),
-              _buildNavItem(Icons.message_outlined, Icons.message, 'Messages', false, () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ChatListScreen()),
-                );
-              }),
-              _buildNavItem(Icons.person_outline, Icons.person, 'Profile', false, () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const StudentProfileScreen()),
-                );
-              }),
+              _buildNavItem(
+                Icons.home_outlined,
+                Icons.home,
+                'Home',
+                true,
+                () {},
+              ),
+              _buildNavItem(
+                Icons.school_outlined,
+                Icons.school,
+                'Courses',
+                false,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StudentHomepage(),
+                    ),
+                  );
+                },
+              ),
+              _buildNavItem(
+                Icons.notifications_outlined,
+                Icons.notifications,
+                'Alerts',
+                false,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationListScreen(),
+                    ),
+                  );
+                },
+              ),
+              _buildNavItem(
+                Icons.message_outlined,
+                Icons.message,
+                'Messages',
+                false,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ChatListScreen(),
+                    ),
+                  );
+                },
+              ),
+              _buildNavItem(
+                Icons.person_outline,
+                Icons.person,
+                'Profile',
+                false,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StudentProfileScreen(),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -512,7 +554,13 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
     );
   }
 
-  Widget _buildNavItem(IconData outlinedIcon, IconData filledIcon, String label, bool isActive, VoidCallback onTap) {
+  Widget _buildNavItem(
+    IconData outlinedIcon,
+    IconData filledIcon,
+    String label,
+    bool isActive,
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -524,14 +572,18 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
             Icon(
               isActive ? filledIcon : outlinedIcon,
               size: 26,
-              color: isActive ? AppColors.buttonPrimary : AppColors.textSecondary,
+              color: isActive
+                  ? AppColors.buttonPrimary
+                  : AppColors.textSecondary,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: GoogleFonts.inter(
                 fontSize: 11,
-                color: isActive ? AppColors.buttonPrimary : AppColors.textSecondary,
+                color: isActive
+                    ? AppColors.buttonPrimary
+                    : AppColors.textSecondary,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
@@ -559,7 +611,9 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
       QuickAccessItem(Icons.notifications_outlined, 'Notifications', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const NotificationListScreen()),
+          MaterialPageRoute(
+            builder: (context) => const NotificationListScreen(),
+          ),
         );
       }),
       QuickAccessItem(Icons.person_outline, 'Profile', () {
@@ -594,7 +648,9 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
       QuickAccessItem(Icons.notifications_outlined, 'Notifications', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const NotificationListScreen()),
+          MaterialPageRoute(
+            builder: (context) => const NotificationListScreen(),
+          ),
         );
       }),
     ];
@@ -617,7 +673,9 @@ class _ModernMobileHomepageState extends ConsumerState<ModernMobileHomepage> {
       QuickAccessItem(Icons.notifications_outlined, 'Notifications', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const NotificationListScreen()),
+          MaterialPageRoute(
+            builder: (context) => const NotificationListScreen(),
+          ),
         );
       }),
       QuickAccessItem(Icons.person_outline, 'Profile', () {

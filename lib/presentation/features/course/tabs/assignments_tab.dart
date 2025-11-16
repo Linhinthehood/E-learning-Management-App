@@ -11,6 +11,7 @@ import '../../../providers/auth_provider.dart';
 import '../widgets/assignment_form_dialog.dart';
 import '../widgets/assignment_submission_dialog.dart';
 import '../../tracking/assignment_tracking_screen.dart';
+import '../../../../services/file_download_service.dart';
 
 /// Assignments tab - displays and manages assignments
 class AssignmentsTab extends ConsumerStatefulWidget {
@@ -49,16 +50,19 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
     super.dispose();
   }
 
-  List<AssignmentEntity> _applyFiltersAndSort(List<AssignmentEntity> assignments) {
+  List<AssignmentEntity> _applyFiltersAndSort(
+    List<AssignmentEntity> assignments,
+  ) {
     var filtered = assignments.where((assignment) {
       // Search filter
       if (_searchQuery.isNotEmpty) {
-        final matchesSearch = assignment.title
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            assignment.description
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase());
+        final matchesSearch =
+            assignment.title.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
+            assignment.description.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            );
         if (!matchesSearch) return false;
       }
 
@@ -213,12 +217,9 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
                       ),
-                      items: [
-                        'All',
-                        'Open',
-                        'Closed',
-                        'Upcoming',
-                      ].map((status) {
+                      items: ['All', 'Open', 'Closed', 'Upcoming'].map((
+                        status,
+                      ) {
                         return DropdownMenuItem(
                           value: status,
                           child: Text(
@@ -258,20 +259,21 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
                       ),
-                      items: [
-                        'Deadline (Nearest First)',
-                        'Deadline (Furthest First)',
-                        'Title (A-Z)',
-                        'Title (Z-A)',
-                      ].map((sortOption) {
-                        return DropdownMenuItem(
-                          value: sortOption,
-                          child: Text(
-                            sortOption,
-                            style: GoogleFonts.inter(fontSize: 14),
-                          ),
-                        );
-                      }).toList(),
+                      items:
+                          [
+                            'Deadline (Nearest First)',
+                            'Deadline (Furthest First)',
+                            'Title (A-Z)',
+                            'Title (Z-A)',
+                          ].map((sortOption) {
+                            return DropdownMenuItem(
+                              value: sortOption,
+                              child: Text(
+                                sortOption,
+                                style: GoogleFonts.inter(fontSize: 14),
+                              ),
+                            );
+                          }).toList(),
                       onChanged: (value) {
                         if (value != null) {
                           setState(() {
@@ -310,7 +312,8 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                               color: AppColors.textSecondary,
                             ),
                           ),
-                          if (_searchQuery.isNotEmpty || _filterStatus != 'All') ...[
+                          if (_searchQuery.isNotEmpty ||
+                              _filterStatus != 'All') ...[
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
@@ -494,10 +497,11 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                             if (mounted && navigatorContext.mounted) {
                               Navigator.of(navigatorContext).push(
                                 MaterialPageRoute(
-                                  builder: (context) => AssignmentTrackingScreen(
-                                    course: widget.course,
-                                    assignment: assignment,
-                                  ),
+                                  builder: (context) =>
+                                      AssignmentTrackingScreen(
+                                        course: widget.course,
+                                        assignment: assignment,
+                                      ),
                                 ),
                               );
                             }
@@ -542,6 +546,75 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
+
+            // Attachments
+            if (assignment.attachments.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: assignment.attachments.map((attachment) {
+                  final fileName = attachment.split('/').last;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.attach_file, size: 16),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            fileName,
+                            style: GoogleFonts.inter(fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Open button
+                        IconButton(
+                          icon: const Icon(Icons.open_in_new, size: 16),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 24,
+                            minHeight: 24,
+                          ),
+                          onPressed: () => _openFile(
+                            context,
+                            attachment,
+                          ),
+                          tooltip: 'Open file',
+                        ),
+                        // Download button
+                        IconButton(
+                          icon: const Icon(Icons.download, size: 16),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 24,
+                            minHeight: 24,
+                          ),
+                          onPressed: () => _downloadFile(
+                            context,
+                            attachment,
+                            fileName,
+                          ),
+                          tooltip: 'Download file',
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+
             const SizedBox(height: 16),
 
             // Details
@@ -662,7 +735,8 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
 
                   final latestSubmission = snapshot.data;
                   final attemptCount = latestSubmission?.attemptNumber ?? 0;
-                  final canSubmit = assignment.hasUnlimitedAttempts ||
+                  final canSubmit =
+                      assignment.hasUnlimitedAttempts ||
                       attemptCount < assignment.maxAttempts;
 
                   return Column(
@@ -721,7 +795,11 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error, color: Colors.red, size: 20),
+                              const Icon(
+                                Icons.error,
+                                color: Colors.red,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Maximum attempts reached',
@@ -820,6 +898,88 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
         ],
       ),
     );
+  }
+
+  Future<void> _openFile(
+    BuildContext context,
+    String fileUrl,
+  ) async {
+    final downloadService = FileDownloadService();
+    
+    try {
+      await downloadService.openFile(fileUrl: fileUrl);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to open file: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _downloadFile(
+    BuildContext context,
+    String fileUrl,
+    String fileName,
+  ) async {
+    final downloadService = FileDownloadService();
+    
+    try {
+      // Show loading
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text('Downloading $fileName...'),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+
+      await downloadService.downloadFile(
+        fileUrl: fileUrl,
+        fileName: fileName,
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File downloaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        final errorMessage = e.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              errorMessage.contains('untrusted')
+                  ? 'Cannot download: Cloudinary account needs verification. Use "Open" to view file.'
+                  : 'Failed to download file: ${e.toString()}',
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
   }
 
   void _showSubmissionDialog(

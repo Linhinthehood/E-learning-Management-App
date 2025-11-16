@@ -7,10 +7,7 @@ import '../../../providers/student_dashboard_provider.dart';
 class DashboardStatisticsCards extends StatelessWidget {
   final Statistics statistics;
 
-  const DashboardStatisticsCards({
-    super.key,
-    required this.statistics,
-  });
+  const DashboardStatisticsCards({super.key, required this.statistics});
 
   @override
   Widget build(BuildContext context) {
@@ -111,4 +108,3 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
-

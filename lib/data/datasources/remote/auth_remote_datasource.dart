@@ -45,7 +45,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // Check current auth state before login
       final currentUser = _auth.currentUser;
       if (currentUser != null) {
-        debugPrint('⚠️ Firebase Auth: User already logged in: ${currentUser.email}');
+        debugPrint(
+          '⚠️ Firebase Auth: User already logged in: ${currentUser.email}',
+        );
         debugPrint('🔄 Firebase Auth: Signing out current user first...');
         await _auth.signOut();
       }
@@ -161,7 +163,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel?> getCurrentUser() async {
     try {
       final currentUser = _auth.currentUser;
-      debugPrint('🔍 Firebase Auth: getCurrentUser - ${currentUser?.email ?? "null"}');
+      debugPrint(
+        '🔍 Firebase Auth: getCurrentUser - ${currentUser?.email ?? "null"}',
+      );
 
       if (currentUser != null) {
         final userDoc = await _firestore
@@ -177,7 +181,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             ...userDoc.data()!,
           });
         } else {
-          debugPrint('⚠️ Firebase Auth: User authenticated but no profile in Firestore');
+          debugPrint(
+            '⚠️ Firebase Auth: User authenticated but no profile in Firestore',
+          );
         }
       }
       return null;

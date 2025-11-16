@@ -29,15 +29,11 @@ class CourseLocalDataSourceImpl implements CourseLocalDataSource {
       final cachedData = box.get(_getKey(semesterId));
 
       if (cachedData != null && cachedData is List) {
-        return cachedData
-            .map(
-              (item) {
-                final map = Map<String, dynamic>.from(item);
-                final id = map['id'] as String;
-                return CourseModel.fromJson(map, id);
-              },
-            )
-            .toList();
+        return cachedData.map((item) {
+          final map = Map<String, dynamic>.from(item);
+          final id = map['id'] as String;
+          return CourseModel.fromJson(map, id);
+        }).toList();
       }
 
       return [];
@@ -47,7 +43,10 @@ class CourseLocalDataSourceImpl implements CourseLocalDataSource {
   }
 
   @override
-  Future<void> cacheCourses(String semesterId, List<CourseModel> courses) async {
+  Future<void> cacheCourses(
+    String semesterId,
+    List<CourseModel> courses,
+  ) async {
     try {
       final box = await _getBox();
       final coursesJson = courses.map((c) {
@@ -57,7 +56,10 @@ class CourseLocalDataSourceImpl implements CourseLocalDataSource {
       }).toList();
       await box.put(_getKey(semesterId), coursesJson);
       // Also store last sync timestamp
-      await box.put('${_getKey(semesterId)}_timestamp', DateTime.now().toIso8601String());
+      await box.put(
+        '${_getKey(semesterId)}_timestamp',
+        DateTime.now().toIso8601String(),
+      );
     } catch (e) {
       // Silently fail - caching is not critical
     }

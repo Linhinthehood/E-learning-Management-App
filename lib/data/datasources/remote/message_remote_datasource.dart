@@ -131,10 +131,10 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
           .orderBy('timestamp', descending: false)
           .snapshots()
           .map((snapshot) {
-        return snapshot.docs
-            .map((doc) => MessageModel.fromJson(doc.data(), doc.id))
-            .toList();
-      });
+            return snapshot.docs
+                .map((doc) => MessageModel.fromJson(doc.data(), doc.id))
+                .toList();
+          });
     } catch (e) {
       throw Exception('Failed to listen to messages: ${e.toString()}');
     }

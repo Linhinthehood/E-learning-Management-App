@@ -33,9 +33,10 @@ class _StudentManagementScreenState
     var filtered = students.where((student) {
       // Search filter
       if (_searchQuery.isNotEmpty) {
-        final matchesSearch = student.displayName
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
+        final matchesSearch =
+            student.displayName.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
             student.email.toLowerCase().contains(_searchQuery.toLowerCase());
         if (!matchesSearch) return false;
       }
@@ -220,20 +221,21 @@ class _StudentManagementScreenState
                     borderSide: const BorderSide(color: AppColors.border),
                   ),
                 ),
-                items: [
-                  'Name (A-Z)',
-                  'Name (Z-A)',
-                  'Email (A-Z)',
-                  'Email (Z-A)',
-                ].map((sortOption) {
-                  return DropdownMenuItem(
-                    value: sortOption,
-                    child: Text(
-                      sortOption,
-                      style: GoogleFonts.inter(fontSize: 14),
-                    ),
-                  );
-                }).toList(),
+                items:
+                    [
+                      'Name (A-Z)',
+                      'Name (Z-A)',
+                      'Email (A-Z)',
+                      'Email (Z-A)',
+                    ].map((sortOption) {
+                      return DropdownMenuItem(
+                        value: sortOption,
+                        child: Text(
+                          sortOption,
+                          style: GoogleFonts.inter(fontSize: 14),
+                        ),
+                      );
+                    }).toList(),
                 onChanged: (value) {
                   if (value != null) {
                     setState(() {
@@ -510,7 +512,7 @@ class _StudentManagementScreenState
   ) async {
     final userAsync = ref.read(authProvider);
     final user = userAsync.value;
-    
+
     if (user == null) {
       return;
     }
@@ -521,9 +523,8 @@ class _StudentManagementScreenState
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          builder: (context) =>
+              const Center(child: CircularProgressIndicator()),
         );
       }
 

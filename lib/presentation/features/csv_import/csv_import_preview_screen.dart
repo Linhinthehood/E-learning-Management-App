@@ -24,8 +24,7 @@ class CsvImportPreviewScreen<T> extends StatefulWidget {
       _CsvImportPreviewScreenState<T>();
 }
 
-class _CsvImportPreviewScreenState<T>
-    extends State<CsvImportPreviewScreen<T>> {
+class _CsvImportPreviewScreenState<T> extends State<CsvImportPreviewScreen<T>> {
   bool _isProcessing = false;
   CsvImportFinalResult? _finalResult;
 
@@ -49,9 +48,7 @@ class _CsvImportPreviewScreenState<T>
           const Divider(height: 1),
 
           // Preview table
-          Expanded(
-            child: _buildPreviewTable(),
-          ),
+          Expanded(child: _buildPreviewTable()),
 
           // Action buttons
           _buildActionButtons(),
@@ -69,9 +66,9 @@ class _CsvImportPreviewScreenState<T>
         children: [
           Text(
             'Import Summary',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -133,10 +130,7 @@ class _CsvImportPreviewScreenState<T>
             ),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -151,8 +145,15 @@ class _CsvImportPreviewScreenState<T>
         child: DataTable(
           headingRowColor: MaterialStateProperty.all(Colors.grey[200]),
           columns: [
-            const DataColumn(label: Text('#', style: TextStyle(fontWeight: FontWeight.bold))),
-            const DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+            const DataColumn(
+              label: Text('#', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            const DataColumn(
+              label: Text(
+                'Status',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
             ...widget.displayColumns.map(
               (col) => DataColumn(
                 label: Text(
@@ -174,7 +175,9 @@ class _CsvImportPreviewScreenState<T>
                       : row.rawData;
                   return DataCell(
                     Text(
-                      displayData[col]?.toString() ?? row.rawData[col]?.toString() ?? '-',
+                      displayData[col]?.toString() ??
+                          row.rawData[col]?.toString() ??
+                          '-',
                       overflow: TextOverflow.ellipsis,
                     ),
                   );
@@ -339,13 +342,21 @@ class _CsvImportPreviewScreenState<T>
               Text(
                 'Import Complete',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 32),
-              _buildResultCard('Successfully Added', result.addedCount, Colors.green),
+              _buildResultCard(
+                'Successfully Added',
+                result.addedCount,
+                Colors.green,
+              ),
               const SizedBox(height: 16),
-              _buildResultCard('Skipped (Duplicates)', result.skippedCount, Colors.orange),
+              _buildResultCard(
+                'Skipped (Duplicates)',
+                result.skippedCount,
+                Colors.orange,
+              ),
               const SizedBox(height: 16),
               _buildResultCard('Errors', result.errorCount, Colors.red),
               if (result.errors.isNotEmpty) ...[
@@ -390,7 +401,10 @@ class _CsvImportPreviewScreenState<T>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 48,
+                    vertical: 16,
+                  ),
                 ),
                 child: const Text('Done'),
               ),

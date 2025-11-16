@@ -105,9 +105,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   children: [
                     // Logo
                     Container(
-                      width: MediaQuery.of(context).size.width < 600
-                          ? 80
-                          : 100,
+                      width: MediaQuery.of(context).size.width < 600 ? 80 : 100,
                       height: MediaQuery.of(context).size.width < 600
                           ? 80
                           : 100,

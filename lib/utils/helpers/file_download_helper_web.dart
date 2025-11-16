@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use
 
-import 'dart:html' as html; 
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 
 /// Web implementation for file download helper
@@ -14,15 +14,15 @@ class FileDownloadHelperImpl {
     try {
       // Create blob with CSV content
       final blob = html.Blob([csvContent], 'text/csv;charset=utf-8');
-      
+
       // Create object URL
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // Create anchor element and trigger download
       html.AnchorElement(href: url)
         ..setAttribute('download', filename)
         ..click();
-      
+
       // Revoke object URL to free memory
       html.Url.revokeObjectUrl(url);
 
@@ -41,4 +41,3 @@ class FileDownloadHelperImpl {
     }
   }
 }
-

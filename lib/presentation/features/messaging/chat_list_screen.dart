@@ -68,9 +68,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     return userAsync.when(
       data: (user) {
         if (user == null) {
-          return const Center(
-            child: Text('Please log in to view messages'),
-          );
+          return const Center(child: Text('Please log in to view messages'));
         }
 
         return Scaffold(
@@ -97,7 +95,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             children: [
               // Filter chips
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     FilterChip(
@@ -120,7 +121,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                   data: (chats) {
                     // Filter chats based on selected filter
                     final filteredChats = _filterOption == 'unread'
-                        ? chats.where((chat) => chat.hasUnreadFor(user.uid)).toList()
+                        ? chats
+                              .where((chat) => chat.hasUnreadFor(user.uid))
+                              .toList()
                         : chats;
 
                     if (filteredChats.isEmpty) {
@@ -131,7 +134,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                             Icon(
                               Icons.chat_bubble_outline,
                               size: 64,
-                              color: AppColors.textSecondary.withValues(alpha: 0.5),
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -173,12 +178,17 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                       ),
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'Error loading chats',
@@ -217,7 +227,11 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     );
   }
 
-  Widget _buildChatCard(BuildContext context, ChatEntity chat, String currentUserId) {
+  Widget _buildChatCard(
+    BuildContext context,
+    ChatEntity chat,
+    String currentUserId,
+  ) {
     // Determine the other participant (not current user)
     final otherParticipantId = chat.studentId == currentUserId
         ? chat.instructorId
@@ -339,7 +353,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
-                                  unreadCount > 99 ? '99+' : unreadCount.toString(),
+                                  unreadCount > 99
+                                      ? '99+'
+                                      : unreadCount.toString(),
                                   style: GoogleFonts.inter(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
@@ -382,4 +398,3 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     }
   }
 }
-

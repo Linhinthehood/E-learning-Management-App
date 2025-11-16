@@ -9,16 +9,18 @@ final viewTrackingRepositoryProvider = Provider<ViewTrackingRepository>((ref) {
 });
 
 /// Provider for view tracking by content ID
-final viewTrackingByContentProvider = StateNotifierProvider.family<
-    ViewTrackingNotifier,
-    AsyncValue<List<ViewTrackingEntity>>,
-    ({String contentId, String contentType})>((ref, params) {
-  return ViewTrackingNotifier(
-    ref.read(viewTrackingRepositoryProvider),
-    params.contentId,
-    params.contentType,
-  );
-});
+final viewTrackingByContentProvider =
+    StateNotifierProvider.family<
+      ViewTrackingNotifier,
+      AsyncValue<List<ViewTrackingEntity>>,
+      ({String contentId, String contentType})
+    >((ref, params) {
+      return ViewTrackingNotifier(
+        ref.read(viewTrackingRepositoryProvider),
+        params.contentId,
+        params.contentType,
+      );
+    });
 
 /// View tracking notifier
 class ViewTrackingNotifier
@@ -27,11 +29,8 @@ class ViewTrackingNotifier
   final String _contentId;
   final String _contentType;
 
-  ViewTrackingNotifier(
-    this._repository,
-    this._contentId,
-    this._contentType,
-  ) : super(const AsyncValue.loading()) {
+  ViewTrackingNotifier(this._repository, this._contentId, this._contentType)
+    : super(const AsyncValue.loading()) {
     loadTracking();
   }
 

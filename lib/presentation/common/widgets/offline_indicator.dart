@@ -24,11 +24,7 @@ class OfflineIndicator extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            const Icon(
-              Icons.cloud_off,
-              color: Colors.white,
-              size: 20,
-            ),
+            const Icon(Icons.cloud_off, color: Colors.white, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -70,10 +66,7 @@ class OfflineIndicator extends ConsumerWidget {
 class CachedDataIndicator extends StatelessWidget {
   final DateTime? lastSyncTime;
 
-  const CachedDataIndicator({
-    super.key,
-    this.lastSyncTime,
-  });
+  const CachedDataIndicator({super.key, this.lastSyncTime});
 
   @override
   Widget build(BuildContext context) {
@@ -82,18 +75,12 @@ class CachedDataIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.orange.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.cloud_download,
-            size: 14,
-            color: Colors.orange.shade700,
-          ),
+          Icon(Icons.cloud_download, size: 14, color: Colors.orange.shade700),
           const SizedBox(width: 4),
           Text(
             'Cached',
@@ -157,10 +144,7 @@ mixin OfflineAware {
             Expanded(
               child: Text(
                 'You are offline. This action requires an internet connection.',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.white,
-                ),
+                style: GoogleFonts.inter(fontSize: 14, color: Colors.white),
               ),
             ),
           ],
@@ -183,10 +167,7 @@ mixin OfflineAware {
             Expanded(
               child: Text(
                 'Changes saved locally. Will sync when back online.',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.white,
-                ),
+                style: GoogleFonts.inter(fontSize: 14, color: Colors.white),
               ),
             ),
           ],

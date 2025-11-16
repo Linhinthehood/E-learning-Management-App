@@ -32,10 +32,7 @@ class NotificationBadge extends StatelessWidget {
               color: Colors.red,
               shape: BoxShape.circle,
             ),
-            constraints: const BoxConstraints(
-              minWidth: 16,
-              minHeight: 16,
-            ),
+            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
             child: Text(
               count > 99 ? '99+' : count.toString(),
               style: const TextStyle(
@@ -51,4 +48,3 @@ class NotificationBadge extends StatelessWidget {
     );
   }
 }
-

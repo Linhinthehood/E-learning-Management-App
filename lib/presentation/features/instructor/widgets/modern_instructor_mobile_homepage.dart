@@ -151,7 +151,9 @@ class _ModernInstructorMobileHomepageState
               CircleAvatar(
                 radius: 24,
                 backgroundColor: AppColors.buttonPrimary,
-                backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                backgroundImage: avatarUrl != null
+                    ? NetworkImage(avatarUrl)
+                    : null,
                 child: avatarUrl == null
                     ? Text(
                         displayName.isNotEmpty
@@ -356,7 +358,10 @@ class _ModernInstructorMobileHomepageState
 
   /// Build a section with title and grid of items
   Widget _buildSection(
-      String title, IconData icon, List<QuickAccessItem> items) {
+    String title,
+    IconData icon,
+    List<QuickAccessItem> items,
+  ) {
     final padding = _getResponsivePadding(context);
     final columns = _getGridColumns(context);
 
@@ -396,11 +401,7 @@ class _ModernInstructorMobileHomepageState
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
-              return _buildQuickAccessButton(
-                item.icon,
-                item.label,
-                item.onTap,
-              );
+              return _buildQuickAccessButton(item.icon, item.label, item.onTap);
             },
           ),
         ],
@@ -410,7 +411,10 @@ class _ModernInstructorMobileHomepageState
 
   /// Quick access button with uniform design
   Widget _buildQuickAccessButton(
-      IconData icon, String label, VoidCallback onTap) {
+    IconData icon,
+    String label,
+    VoidCallback onTap,
+  ) {
     final iconSize = _getIconSize(context);
     final iconPadding = iconSize * 0.47; // Icon is 47% of container size
 
@@ -425,11 +429,10 @@ class _ModernInstructorMobileHomepageState
             height: iconSize,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(iconSize * 0.27), // ~16px for 60px
-              border: Border.all(
-                color: AppColors.textPrimary,
-                width: 2,
-              ),
+              borderRadius: BorderRadius.circular(
+                iconSize * 0.27,
+              ), // ~16px for 60px
+              border: Border.all(color: AppColors.textPrimary, width: 2),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -438,11 +441,7 @@ class _ModernInstructorMobileHomepageState
                 ),
               ],
             ),
-            child: Icon(
-              icon,
-              size: iconPadding,
-              color: AppColors.textPrimary,
-            ),
+            child: Icon(icon, size: iconPadding, color: AppColors.textPrimary),
           ),
 
           const SizedBox(height: 8),
@@ -483,15 +482,26 @@ class _ModernInstructorMobileHomepageState
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
+              _buildNavItem(Icons.home_outlined, Icons.home, 'Home', true),
               _buildNavItem(
-                  Icons.home_outlined, Icons.home, 'Home', true),
-              _buildNavItem(Icons.message_outlined, Icons.message,
-                  'Messages', false),
+                Icons.message_outlined,
+                Icons.message,
+                'Messages',
+                false,
+              ),
               _buildCenterNavItem(),
-              _buildNavItem(Icons.analytics_outlined, Icons.analytics,
-                  'Analytics', false),
               _buildNavItem(
-                  Icons.person_outline, Icons.person, 'Account', false),
+                Icons.analytics_outlined,
+                Icons.analytics,
+                'Analytics',
+                false,
+              ),
+              _buildNavItem(
+                Icons.person_outline,
+                Icons.person,
+                'Account',
+                false,
+              ),
             ],
           ),
         ),
@@ -499,8 +509,12 @@ class _ModernInstructorMobileHomepageState
     );
   }
 
-  Widget _buildNavItem(IconData outlinedIcon, IconData filledIcon,
-      String label, bool isActive) {
+  Widget _buildNavItem(
+    IconData outlinedIcon,
+    IconData filledIcon,
+    String label,
+    bool isActive,
+  ) {
     return GestureDetector(
       onTap: () {
         // Handle navigation
@@ -511,9 +525,7 @@ class _ModernInstructorMobileHomepageState
           Icon(
             isActive ? filledIcon : outlinedIcon,
             size: 26,
-            color: isActive
-                ? AppColors.buttonPrimary
-                : AppColors.textSecondary,
+            color: isActive ? AppColors.buttonPrimary : AppColors.textSecondary,
           ),
           const SizedBox(height: 4),
           Text(
@@ -554,11 +566,7 @@ class _ModernInstructorMobileHomepageState
             ),
           ],
         ),
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 28,
-        ),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }
@@ -575,19 +583,25 @@ class _ModernInstructorMobileHomepageState
       QuickAccessItem(Icons.calendar_today, 'Semesters', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SemesterManagementScreen()),
+          MaterialPageRoute(
+            builder: (context) => const SemesterManagementScreen(),
+          ),
         );
       }),
       QuickAccessItem(Icons.book_outlined, 'Courses', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CourseManagementScreen()),
+          MaterialPageRoute(
+            builder: (context) => const CourseManagementScreen(),
+          ),
         );
       }),
       QuickAccessItem(Icons.people_outline, 'Students', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const StudentManagementScreen()),
+          MaterialPageRoute(
+            builder: (context) => const StudentManagementScreen(),
+          ),
         );
       }),
     ];
@@ -598,19 +612,25 @@ class _ModernInstructorMobileHomepageState
       QuickAccessItem(Icons.school_outlined, 'Courses', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CourseManagementScreen()),
+          MaterialPageRoute(
+            builder: (context) => const CourseManagementScreen(),
+          ),
         );
       }),
       QuickAccessItem(Icons.calendar_today, 'Semesters', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SemesterManagementScreen()),
+          MaterialPageRoute(
+            builder: (context) => const SemesterManagementScreen(),
+          ),
         );
       }),
       QuickAccessItem(Icons.people_outline, 'Students', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const StudentManagementScreen()),
+          MaterialPageRoute(
+            builder: (context) => const StudentManagementScreen(),
+          ),
         );
       }),
       QuickAccessItem(Icons.message_outlined, 'Messages', () {
@@ -633,7 +653,9 @@ class _ModernInstructorMobileHomepageState
       QuickAccessItem(Icons.people_alt_outlined, 'Students', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const StudentManagementScreen()),
+          MaterialPageRoute(
+            builder: (context) => const StudentManagementScreen(),
+          ),
         );
       }),
       QuickAccessItem(Icons.message_outlined, 'Messages', () {
@@ -645,7 +667,9 @@ class _ModernInstructorMobileHomepageState
       QuickAccessItem(Icons.notifications_outlined, 'Notifications', () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const NotificationListScreen()),
+          MaterialPageRoute(
+            builder: (context) => const NotificationListScreen(),
+          ),
         );
       }),
     ];

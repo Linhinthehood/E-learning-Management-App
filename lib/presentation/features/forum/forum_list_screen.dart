@@ -54,10 +54,9 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
     if (query.isEmpty) {
       _loadTopics();
     } else {
-      ref.read(forumTopicProvider.notifier).searchTopics(
-            widget.course.id,
-            query,
-          );
+      ref
+          .read(forumTopicProvider.notifier)
+          .searchTopics(widget.course.id, query);
     }
   }
 
@@ -70,7 +69,9 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
 
     switch (filter) {
       case 'recent':
-        ref.read(forumTopicProvider.notifier).loadRecentTopics(
+        ref
+            .read(forumTopicProvider.notifier)
+            .loadRecentTopics(
               widget.course.id,
               7, // Last 7 days
             );
@@ -167,7 +168,8 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
                 style: GoogleFonts.inter(fontSize: 14),
                 onSubmitted: (_) => _applySearch(),
                 onChanged: (_) {
-                  if (_searchController.text.trim().isEmpty && _searchQuery.isNotEmpty) {
+                  if (_searchController.text.trim().isEmpty &&
+                      _searchQuery.isNotEmpty) {
                     _applySearch();
                   }
                 },
@@ -200,7 +202,9 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
               // Sort by most replies if filter is 'mostReplies'
               final sortedTopics = List<ForumTopicEntity>.from(topics);
               if (_filterOption == 'mostReplies') {
-                sortedTopics.sort((a, b) => b.replyCount.compareTo(a.replyCount));
+                sortedTopics.sort(
+                  (a, b) => b.replyCount.compareTo(a.replyCount),
+                );
               }
 
               if (sortedTopics.isEmpty) {
@@ -443,10 +447,8 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
   void _showTopicDialog(BuildContext context, ForumTopicEntity? topic) {
     showDialog(
       context: context,
-      builder: (context) => TopicFormDialog(
-        course: widget.course,
-        topic: topic,
-      ),
+      builder: (context) =>
+          TopicFormDialog(course: widget.course, topic: topic),
     ).then((success) {
       if (mounted && success == true) {
         _loadTopics();
@@ -454,4 +456,3 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
     });
   }
 }
-

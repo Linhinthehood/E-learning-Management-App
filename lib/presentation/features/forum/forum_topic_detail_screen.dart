@@ -89,26 +89,30 @@ class _ForumTopicDetailScreenState
       createdAt: DateTime.now(),
     );
 
-    ref.read(forumReplyProvider.notifier).createReply(reply).then((_) {
-      _replyController.clear();
-      // Scroll to bottom to show new reply
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    }).catchError((error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error sending reply: ${error.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    });
+    ref
+        .read(forumReplyProvider.notifier)
+        .createReply(reply)
+        .then((_) {
+          _replyController.clear();
+          // Scroll to bottom to show new reply
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        })
+        .catchError((error) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error sending reply: ${error.toString()}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        });
   }
 
   void _deleteTopic(ForumTopicEntity topic) {
@@ -195,7 +199,10 @@ class _ForumTopicDetailScreenState
 
               if (isAuthor || isInstructor) {
                 return PopupMenuButton(
-                  icon: const Icon(Icons.more_vert, color: AppColors.textPrimary),
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: AppColors.textPrimary,
+                  ),
                   itemBuilder: (context) => [
                     if (isAuthor)
                       PopupMenuItem(
@@ -323,9 +330,7 @@ class _ForumTopicDetailScreenState
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.cardBackground,
-                  border: Border(
-                    top: BorderSide(color: AppColors.border),
-                  ),
+                  border: Border(top: BorderSide(color: AppColors.border)),
                 ),
                 child: SafeArea(
                   child: Row(
@@ -344,11 +349,15 @@ class _ForumTopicDetailScreenState
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.border),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.border),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
                             ),
                           ),
                           style: GoogleFonts.inter(fontSize: 14),
@@ -363,7 +372,9 @@ class _ForumTopicDetailScreenState
                         icon: const Icon(Icons.send),
                         color: AppColors.buttonPrimary,
                         style: IconButton.styleFrom(
-                          backgroundColor: AppColors.buttonPrimary.withValues(alpha: 0.1),
+                          backgroundColor: AppColors.buttonPrimary.withValues(
+                            alpha: 0.1,
+                          ),
                           padding: const EdgeInsets.all(12),
                         ),
                       ),
@@ -570,10 +581,8 @@ class _ForumTopicDetailScreenState
   void _showTopicDialog(BuildContext context, ForumTopicEntity topic) {
     showDialog(
       context: context,
-      builder: (context) => TopicFormDialog(
-        course: widget.course,
-        topic: topic,
-      ),
+      builder: (context) =>
+          TopicFormDialog(course: widget.course, topic: topic),
     ).then((success) {
       if (mounted && success == true) {
         // Refresh topic and replies
@@ -583,4 +592,3 @@ class _ForumTopicDetailScreenState
     });
   }
 }
-

@@ -37,12 +37,14 @@ class RightSidebar extends StatelessWidget {
     final sidebarWidth = screenWidth > 1200
         ? 400.0
         : screenWidth > 900
-            ? screenWidth * 0.35
-            : screenWidth * 0.4;
+        ? screenWidth * 0.35
+        : screenWidth * 0.4;
 
     // Determine if we need compact layout
     final isCompact = sidebarWidth < 300;
-    final padding = sidebarWidth < 250 ? 12.0 : (screenWidth < 900 ? 20.0 : 30.0);
+    final padding = sidebarWidth < 250
+        ? 12.0
+        : (screenWidth < 900 ? 20.0 : 30.0);
 
     return Container(
       width: sidebarWidth,
@@ -112,7 +114,11 @@ class RightSidebar extends StatelessWidget {
                     color: AppColors.textSecondary,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.person, color: Colors.white, size: 24),
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
               ],
             )
@@ -121,7 +127,11 @@ class RightSidebar extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(Icons.search, color: AppColors.textSecondary, size: 20),
+                const Icon(
+                  Icons.search,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
                 const Icon(Icons.notifications_outlined, size: 20),
                 Container(
                   width: 32,
@@ -130,7 +140,11 @@ class RightSidebar extends StatelessWidget {
                     color: AppColors.textSecondary,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.person, color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ],
             ),
@@ -298,5 +312,4 @@ class RightSidebar extends StatelessWidget {
       ),
     );
   }
-
 }

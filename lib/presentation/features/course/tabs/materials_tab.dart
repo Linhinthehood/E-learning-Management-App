@@ -9,6 +9,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/view_tracking_provider.dart';
 import '../widgets/material_form_dialog.dart';
 import '../../tracking/material_tracking_screen.dart';
+import '../../../../services/file_download_service.dart';
 
 /// Materials tab - displays and manages materials
 class MaterialsTab extends ConsumerStatefulWidget {
@@ -46,12 +47,11 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
     var filtered = materials.where((material) {
       // Search filter
       if (_searchQuery.isNotEmpty) {
-        final matchesSearch = material.title
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            material.description
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase());
+        final matchesSearch =
+            material.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            material.description.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            );
         if (!matchesSearch) return false;
       }
 
@@ -217,12 +217,9 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
                       ),
-                      items: [
-                        'All',
-                        'Documents',
-                        'Videos',
-                        'Links',
-                      ].map((type) {
+                      items: ['All', 'Documents', 'Videos', 'Links'].map((
+                        type,
+                      ) {
                         return DropdownMenuItem(
                           value: type,
                           child: Text(
@@ -260,20 +257,21 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
                       ),
-                      items: [
-                        'Date (Newest First)',
-                        'Date (Oldest First)',
-                        'Title (A-Z)',
-                        'Title (Z-A)',
-                      ].map((sortOption) {
-                        return DropdownMenuItem(
-                          value: sortOption,
-                          child: Text(
-                            sortOption,
-                            style: GoogleFonts.inter(fontSize: 14),
-                          ),
-                        );
-                      }).toList(),
+                      items:
+                          [
+                            'Date (Newest First)',
+                            'Date (Oldest First)',
+                            'Title (A-Z)',
+                            'Title (Z-A)',
+                          ].map((sortOption) {
+                            return DropdownMenuItem(
+                              value: sortOption,
+                              child: Text(
+                                sortOption,
+                                style: GoogleFonts.inter(fontSize: 14),
+                              ),
+                            );
+                          }).toList(),
                       onChanged: (value) {
                         if (value != null) {
                           setState(() {
@@ -312,7 +310,8 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                               color: AppColors.textSecondary,
                             ),
                           ),
-                          if (_searchQuery.isNotEmpty || _filterType != 'All') ...[
+                          if (_searchQuery.isNotEmpty ||
+                              _filterType != 'All') ...[
                             const SizedBox(height: 12),
                             ElevatedButton(
                               onPressed: () {
@@ -601,24 +600,65 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                 spacing: 8,
                 runSpacing: 8,
                 children: material.files.map((file) {
-                  return ActionChip(
-                    avatar: Icon(
-                      file.isExternalLink
-                          ? Icons.link
-                          : Icons.download,
-                      size: 16,
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
                     ),
-                    label: Text(
-                      file.name,
-                      style: GoogleFonts.inter(fontSize: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
                     ),
-                    backgroundColor: AppColors.background,
-                    onPressed: () => _downloadFile(
-                      context,
-                      ref,
-                      material.id,
-                      file.url,
-                      file.name,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          file.isExternalLink ? Icons.link : Icons.attach_file,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            file.name,
+                            style: GoogleFonts.inter(fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Open button
+                        IconButton(
+                          icon: const Icon(Icons.open_in_new, size: 16),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 24,
+                            minHeight: 24,
+                          ),
+                          onPressed: () => _openFile(
+                            context,
+                            file.url,
+                          ),
+                          tooltip: 'Open file',
+                        ),
+                        // Download button
+                        IconButton(
+                          icon: const Icon(Icons.download, size: 16),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 24,
+                            minHeight: 24,
+                          ),
+                          onPressed: () => _downloadFile(
+                            context,
+                            ref,
+                            material.id,
+                            file.url,
+                            file.name,
+                          ),
+                          tooltip: 'Download file',
+                        ),
+                      ],
                     ),
                   );
                 }).toList(),
@@ -719,6 +759,26 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
     );
   }
 
+  Future<void> _openFile(
+    BuildContext context,
+    String fileUrl,
+  ) async {
+    final downloadService = FileDownloadService();
+    
+    try {
+      await downloadService.openFile(fileUrl: fileUrl);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to open file: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _downloadFile(
     BuildContext context,
     WidgetRef ref,
@@ -726,61 +786,68 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
     String fileUrl,
     String fileName,
   ) async {
+    final downloadService = FileDownloadService();
+    
     try {
       // Track download
       await ref
-          .read(viewTrackingByContentProvider(
-            (contentId: materialId, contentType: 'material'),
-          ).notifier)
+          .read(
+            viewTrackingByContentProvider((
+              contentId: materialId,
+              contentType: 'material',
+            )).notifier,
+          )
           .trackDownload();
 
-      // Show file URL in a dialog for user to access
+      // Show loading
       if (context.mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(
-              'Download File',
-              style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
               children: [
-                Text(
-                  'File: $fileName',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'URL:',
-                  style: GoogleFonts.inter(fontSize: 12),
-                ),
-                const SizedBox(height: 4),
-                SelectableText(
-                  fileUrl,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Colors.blue,
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 ),
+                const SizedBox(width: 12),
+                Text('Downloading $fileName...'),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Close', style: GoogleFonts.inter()),
-              ),
-            ],
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // Download file
+      await downloadService.downloadFile(
+        fileUrl: fileUrl,
+        fileName: fileName,
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File downloaded successfully'),
+            backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (context.mounted) {
+        final errorMessage = e.toString();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(
+              errorMessage.contains('untrusted')
+                  ? 'Cannot download: Cloudinary account needs verification. Use "Open" to view file.'
+                  : 'Failed to download file: ${e.toString()}',
+            ),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }

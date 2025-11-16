@@ -132,7 +132,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
         debugPrint('💾 Saving credentials for remember me');
         await _localDataSource.saveCredentials(email, password);
       } else {
-        debugPrint('🗑️ Clearing any cached credentials (remember me not checked)');
+        debugPrint(
+          '🗑️ Clearing any cached credentials (remember me not checked)',
+        );
         // Clear any existing cached credentials if remember me is not checked
         await _localDataSource.clearCredentials();
       }
@@ -199,9 +201,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
   /// Clear any error state (useful after showing an error message)
   void clearError() {
     // If current state is error, reset to null (not logged in)
-    state.whenOrNull(
-      error: (_, __) => state = const AsyncValue.data(null),
-    );
+    state.whenOrNull(error: (_, __) => state = const AsyncValue.data(null));
   }
 
   /// Refresh current user data

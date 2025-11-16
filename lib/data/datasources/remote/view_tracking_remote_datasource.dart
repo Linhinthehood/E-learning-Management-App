@@ -10,8 +10,8 @@ class ViewTrackingRemoteDataSource {
   ViewTrackingRemoteDataSource({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance;
 
   /// Track a view or download action
   Future<void> trackAction({

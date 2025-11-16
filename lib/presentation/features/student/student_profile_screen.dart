@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../common/styles/colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../../services/image_upload_service.dart';
 
 /// Student Profile Screen
 /// Allows students to view and edit their profile (avatar only)
@@ -20,7 +22,10 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _avatarUrlController = TextEditingController();
   bool _isLoading = false;
+  bool _isUploadingImage = false;
+  double _imageUploadProgress = 0.0;
   String? _errorMessage;
+  final ImageUploadService _imageUploadService = ImageUploadService();
 
   @override
   void initState() {
@@ -40,6 +45,98 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
         });
       }
     });
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    try {
+      // Show source selection dialog
+      final ImageSource? source = await showDialog<ImageSource>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+            'Select Image Source',
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+                onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Camera'),
+                onTap: () => Navigator.of(context).pop(ImageSource.camera),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (source == null) return;
+
+      // Pick image
+      final XFile? imageFile = await _imageUploadService.pickImage(
+        source: source,
+      );
+
+      if (imageFile == null) return;
+
+      final userAsync = ref.read(authProvider);
+      final user = userAsync.value;
+      if (user == null) return;
+
+      setState(() {
+        _isUploadingImage = true;
+        _imageUploadProgress = 0.0;
+        _errorMessage = null;
+      });
+
+      // Upload image
+      final imageUrl = await _imageUploadService.uploadImage(
+        imageFile: imageFile,
+        folder: 'users/avatars',
+        fileName: 'user_${user.uid}',
+        onProgress: (progress) {
+          setState(() {
+            _imageUploadProgress = progress;
+          });
+        },
+      );
+
+      // Update controller with uploaded URL
+      setState(() {
+        _avatarUrlController.text = imageUrl;
+        _isUploadingImage = false;
+        _imageUploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Avatar uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isUploadingImage = false;
+        _imageUploadProgress = 0.0;
+        _errorMessage = 'Failed to upload avatar: ${e.toString()}';
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload avatar: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -152,30 +249,75 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                         Row(
                           children: [
                             // Avatar Display
-                            Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                color: AppColors.background,
-                                borderRadius: BorderRadius.circular(60),
-                                border: Border.all(
-                                  color: AppColors.border,
-                                  width: 2,
+                            Stack(
+                              children: [
+                                Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.background,
+                                    borderRadius: BorderRadius.circular(60),
+                                    border: Border.all(
+                                      color: AppColors.border,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: _avatarUrlController.text.isNotEmpty
+                                      ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            58,
+                                          ),
+                                          child: Image.network(
+                                            _avatarUrlController.text,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, __, ___) =>
+                                                _buildAvatarPlaceholder(),
+                                          ),
+                                        )
+                                      : _buildAvatarPlaceholder(),
                                 ),
-                              ),
-                              child:
-                                  user.avatarUrl != null &&
-                                      user.avatarUrl!.isNotEmpty
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(58),
-                                      child: Image.network(
-                                        user.avatarUrl!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            _buildAvatarPlaceholder(),
+                                // Upload button overlay
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.buttonPrimary,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: AppColors.cardBackground,
+                                        width: 2,
                                       ),
-                                    )
-                                  : _buildAvatarPlaceholder(),
+                                    ),
+                                    child: IconButton(
+                                      icon: _isUploadingImage
+                                          ? SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                value: _imageUploadProgress > 0
+                                                    ? _imageUploadProgress
+                                                    : null,
+                                                valueColor:
+                                                    const AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(Colors.white),
+                                              ),
+                                            )
+                                          : const Icon(
+                                              Icons.camera_alt,
+                                              size: 18,
+                                              color: Colors.white,
+                                            ),
+                                      onPressed: _isUploadingImage || _isLoading
+                                          ? null
+                                          : _pickAndUploadAvatar,
+                                      tooltip: 'Upload avatar',
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(width: 24),
                             // Avatar Info
@@ -193,7 +335,7 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Update your avatar by entering an image URL',
+                                    'Tap the camera icon to upload a new avatar image',
                                     style: GoogleFonts.inter(
                                       fontSize: 14,
                                       color: AppColors.textSecondary,
@@ -340,9 +482,39 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                         ),
                         const SizedBox(height: 24),
 
-                        // Avatar URL Input
+                        // Avatar URL Input (Optional - for manual entry)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: AppColors.border,
+                                thickness: 1,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Text(
+                                'OR ENTER URL MANUALLY',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                color: AppColors.border,
+                                thickness: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
                         Text(
-                          'Avatar URL',
+                          'Avatar URL (Optional)',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -353,8 +525,18 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                         TextFormField(
                           controller: _avatarUrlController,
                           decoration: InputDecoration(
-                            hintText: 'Enter image URL (e.g., https://...)',
-                            prefixIcon: const Icon(Icons.image_outlined),
+                            hintText: 'Enter image URL manually',
+                            prefixIcon: const Icon(Icons.link),
+                            suffixIcon: _avatarUrlController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      setState(() {
+                                        _avatarUrlController.clear();
+                                      });
+                                    },
+                                  )
+                                : null,
                             filled: true,
                             fillColor: AppColors.background,
                             border: OutlineInputBorder(
@@ -384,6 +566,9 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                           style: GoogleFonts.inter(
                             color: AppColors.textPrimary,
                           ),
+                          onChanged: (value) {
+                            setState(() {});
+                          },
                           validator: (value) {
                             if (value != null && value.trim().isNotEmpty) {
                               final url = value.trim();
@@ -406,11 +591,13 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                               color: AppColors.textSecondary,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'Leave empty to remove avatar',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
+                            Expanded(
+                              child: Text(
+                                'Leave empty to remove avatar. You can upload an image using the camera button above or enter a URL manually.',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
                           ],

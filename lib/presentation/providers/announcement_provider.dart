@@ -71,9 +71,13 @@ class AnnouncementNotifier
 
   /// Create a new announcement
   /// Returns the created announcement with the generated ID
-  Future<AnnouncementEntity> createAnnouncement(AnnouncementEntity announcement) async {
+  Future<AnnouncementEntity> createAnnouncement(
+    AnnouncementEntity announcement,
+  ) async {
     try {
-      final createdAnnouncement = await _repository.createAnnouncement(announcement);
+      final createdAnnouncement = await _repository.createAnnouncement(
+        announcement,
+      );
       if (_currentCourseId != null) {
         await loadAnnouncements(_currentCourseId!); // Reload list
       }

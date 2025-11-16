@@ -9,24 +9,25 @@ final commentRepositoryProvider = Provider<CommentRepository>((ref) {
 });
 
 /// Provider for comments state
-final commentProvider = StateNotifierProvider.family<
-    CommentNotifier,
-    AsyncValue<List<CommentEntity>>,
-    String>((ref, announcementId) {
-  return CommentNotifier(
-    ref.read(commentRepositoryProvider),
-    announcementId,
-  );
-});
+final commentProvider =
+    StateNotifierProvider.family<
+      CommentNotifier,
+      AsyncValue<List<CommentEntity>>,
+      String
+    >((ref, announcementId) {
+      return CommentNotifier(
+        ref.read(commentRepositoryProvider),
+        announcementId,
+      );
+    });
 
 /// Comment notifier
-class CommentNotifier
-    extends StateNotifier<AsyncValue<List<CommentEntity>>> {
+class CommentNotifier extends StateNotifier<AsyncValue<List<CommentEntity>>> {
   final CommentRepository _repository;
   final String _announcementId;
 
   CommentNotifier(this._repository, this._announcementId)
-      : super(const AsyncValue.loading()) {
+    : super(const AsyncValue.loading()) {
     loadComments();
   }
 
@@ -62,10 +63,7 @@ class CommentNotifier
     required String content,
   }) async {
     try {
-      await _repository.updateComment(
-        commentId: commentId,
-        content: content,
-      );
+      await _repository.updateComment(commentId: commentId, content: content);
       await loadComments(); // Reload comments after updating
     } catch (e) {
       rethrow;

@@ -5,10 +5,11 @@ import '../../domain/entities/forum_topic_entity.dart';
 import '../../domain/repositories/i_forum_topic_repository.dart';
 
 /// Provider for forum topic remote data source
-final forumTopicRemoteDataSourceProvider =
-    Provider<ForumTopicRemoteDataSource>((ref) {
-  return ForumTopicRemoteDataSourceImpl();
-});
+final forumTopicRemoteDataSourceProvider = Provider<ForumTopicRemoteDataSource>(
+  (ref) {
+    return ForumTopicRemoteDataSourceImpl();
+  },
+);
 
 /// Provider for forum topic repository
 final forumTopicRepositoryProvider = Provider<IForumTopicRepository>((ref) {
@@ -106,19 +107,18 @@ class ForumTopicNotifier
 }
 
 /// Provider for forum topic state notifier
-final forumTopicProvider = StateNotifierProvider<
-    ForumTopicNotifier,
-    AsyncValue<List<ForumTopicEntity>>
->((ref) {
-  return ForumTopicNotifier(ref.read(forumTopicRepositoryProvider));
-});
+final forumTopicProvider =
+    StateNotifierProvider<
+      ForumTopicNotifier,
+      AsyncValue<List<ForumTopicEntity>>
+    >((ref) {
+      return ForumTopicNotifier(ref.read(forumTopicRepositoryProvider));
+    });
 
 /// Provider for fetching a single forum topic by ID
-final forumTopicByIdProvider =
-    FutureProvider.family<ForumTopicEntity?, String>((
-  ref,
-  topicId,
-) async {
-  final repository = ref.read(forumTopicRepositoryProvider);
-  return await repository.getTopicById(topicId);
-});
+final forumTopicByIdProvider = FutureProvider.family<ForumTopicEntity?, String>(
+  (ref, topicId) async {
+    final repository = ref.read(forumTopicRepositoryProvider);
+    return await repository.getTopicById(topicId);
+  },
+);

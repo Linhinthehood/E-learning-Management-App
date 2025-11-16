@@ -29,15 +29,11 @@ class MaterialLocalDataSourceImpl implements MaterialLocalDataSource {
       final cachedData = box.get(_getKey(courseId));
 
       if (cachedData != null && cachedData is List) {
-        return cachedData
-            .map(
-              (item) {
-                final map = Map<String, dynamic>.from(item);
-                final id = map['id'] as String;
-                return MaterialModel.fromJson(map, id);
-              },
-            )
-            .toList();
+        return cachedData.map((item) {
+          final map = Map<String, dynamic>.from(item);
+          final id = map['id'] as String;
+          return MaterialModel.fromJson(map, id);
+        }).toList();
       }
 
       return [];
@@ -47,7 +43,10 @@ class MaterialLocalDataSourceImpl implements MaterialLocalDataSource {
   }
 
   @override
-  Future<void> cacheMaterials(String courseId, List<MaterialModel> materials) async {
+  Future<void> cacheMaterials(
+    String courseId,
+    List<MaterialModel> materials,
+  ) async {
     try {
       final box = await _getBox();
       final materialsJson = materials.map((m) {
@@ -57,7 +56,10 @@ class MaterialLocalDataSourceImpl implements MaterialLocalDataSource {
       }).toList();
       await box.put(_getKey(courseId), materialsJson);
       // Store last sync timestamp
-      await box.put('${_getKey(courseId)}_timestamp', DateTime.now().toIso8601String());
+      await box.put(
+        '${_getKey(courseId)}_timestamp',
+        DateTime.now().toIso8601String(),
+      );
     } catch (e) {
       // Silently fail - caching is not critical
     }

@@ -57,8 +57,10 @@ class ForumTopicRemoteDataSourceImpl implements ForumTopicRemoteDataSource {
   @override
   Future<ForumTopicModel?> getTopicById(String topicId) async {
     try {
-      final docSnapshot =
-          await _firestore.collection('forumTopics').doc(topicId).get();
+      final docSnapshot = await _firestore
+          .collection('forumTopics')
+          .doc(topicId)
+          .get();
 
       if (!docSnapshot.exists) {
         return null;
@@ -73,8 +75,9 @@ class ForumTopicRemoteDataSourceImpl implements ForumTopicRemoteDataSource {
   @override
   Future<ForumTopicModel> createTopic(ForumTopicModel topic) async {
     try {
-      final docRef =
-          await _firestore.collection('forumTopics').add(topic.toJson());
+      final docRef = await _firestore
+          .collection('forumTopics')
+          .add(topic.toJson());
 
       final docSnapshot = await docRef.get();
       return ForumTopicModel.fromJson(docSnapshot.data()!, docSnapshot.id);
@@ -135,9 +138,11 @@ class ForumTopicRemoteDataSourceImpl implements ForumTopicRemoteDataSource {
       // Filter by keyword in memory (case-insensitive search)
       final topics = querySnapshot.docs
           .map((doc) => ForumTopicModel.fromJson(doc.data(), doc.id))
-          .where((topic) =>
-              topic.title.toLowerCase().contains(keyword.toLowerCase()) ||
-              topic.content.toLowerCase().contains(keyword.toLowerCase()))
+          .where(
+            (topic) =>
+                topic.title.toLowerCase().contains(keyword.toLowerCase()) ||
+                topic.content.toLowerCase().contains(keyword.toLowerCase()),
+          )
           .toList();
 
       // Sort by createdAt descending

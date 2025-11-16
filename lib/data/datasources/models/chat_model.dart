@@ -32,7 +32,9 @@ class ChatModel {
       studentId: json['studentId'] as String,
       instructorId: json['instructorId'] as String,
       lastMessage: json['lastMessage'] as String? ?? '',
-      lastMessageTimestamp: (json['lastMessageTimestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      lastMessageTimestamp:
+          (json['lastMessageTimestamp'] as Timestamp?)?.toDate() ??
+          DateTime.now(),
       unreadCountStudent: json['unreadCountStudent'] as int? ?? 0,
       unreadCountInstructor: json['unreadCountInstructor'] as int? ?? 0,
     );

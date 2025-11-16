@@ -50,9 +50,10 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
   List<UserEntity> _filterStudents(List<UserEntity> students) {
     return students.where((student) {
       if (_searchQuery.isNotEmpty) {
-        final matchesSearch = student.displayName
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
+        final matchesSearch =
+            student.displayName.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
             student.email.toLowerCase().contains(_searchQuery.toLowerCase());
         if (!matchesSearch) return false;
       }
@@ -98,8 +99,12 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                         );
 
                         // Refresh groups and enrollments after import
-                        ref.read(groupProvider.notifier).loadGroups(widget.course.id);
-                        ref.read(enrollmentProvider.notifier).loadEnrollments(widget.course.id);
+                        ref
+                            .read(groupProvider.notifier)
+                            .loadGroups(widget.course.id);
+                        ref
+                            .read(enrollmentProvider.notifier)
+                            .loadEnrollments(widget.course.id);
                       },
                       icon: const Icon(Icons.upload_file, size: 20),
                       label: Text(
@@ -282,15 +287,21 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                           .where((e) => e.groupId == group.id)
                           .toList();
                       final groupStudents = students
-                          .where((student) => groupEnrollments
-                              .any((e) => e.studentId == student.uid))
+                          .where(
+                            (student) => groupEnrollments.any(
+                              (e) => e.studentId == student.uid,
+                            ),
+                          )
                           .toList();
 
                       // Apply search filter to group students
-                      final filteredGroupStudents = _filterStudents(groupStudents);
+                      final filteredGroupStudents = _filterStudents(
+                        groupStudents,
+                      );
 
                       // Skip groups with no matching students if search is active
-                      if (_searchQuery.isNotEmpty && filteredGroupStudents.isEmpty) {
+                      if (_searchQuery.isNotEmpty &&
+                          filteredGroupStudents.isEmpty) {
                         return const SizedBox.shrink();
                       }
 
@@ -302,9 +313,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                     },
                   );
                 },
-                loading: () => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, _) => Center(
                   child: Text(
                     'Error loading students',
@@ -312,9 +321,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                   ),
                 ),
               ),
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
                 child: Text(
                   'Error loading enrollments',
@@ -372,7 +379,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
   Future<void> _startChatWithInstructor(BuildContext context) async {
     final userAsync = ref.read(authProvider);
     final user = userAsync.value;
-    
+
     if (user == null || user.role != UserRole.student) {
       return;
     }
@@ -383,9 +390,8 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          builder: (context) =>
+              const Center(child: CircularProgressIndicator()),
         );
       }
 
@@ -395,7 +401,9 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
           .getOrCreateChat(user.uid, widget.course.instructorId);
 
       // Get instructor name
-      final instructorName = await _getInstructorName(widget.course.instructorId);
+      final instructorName = await _getInstructorName(
+        widget.course.instructorId,
+      );
 
       // Close loading
       if (context.mounted) {
@@ -438,7 +446,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
   ) async {
     final userAsync = ref.read(authProvider);
     final user = userAsync.value;
-    
+
     if (user == null || user.role != UserRole.instructor) {
       return;
     }
@@ -449,9 +457,8 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          builder: (context) =>
+              const Center(child: CircularProgressIndicator()),
         );
       }
 
@@ -518,7 +525,9 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                 // Instructor Avatar
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: AppColors.buttonPrimary.withValues(alpha: 0.2),
+                  backgroundColor: AppColors.buttonPrimary.withValues(
+                    alpha: 0.2,
+                  ),
                   child: const Icon(
                     Icons.person,
                     size: 32,
@@ -549,7 +558,9 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.buttonPrimary.withValues(alpha: 0.1),
+                              color: AppColors.buttonPrimary.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -586,7 +597,10 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                 // Message button (only for students)
                 if (isStudent)
                   IconButton(
-                    icon: const Icon(Icons.message, color: AppColors.buttonPrimary),
+                    icon: const Icon(
+                      Icons.message,
+                      color: AppColors.buttonPrimary,
+                    ),
                     onPressed: () => _startChatWithInstructor(context),
                     tooltip: 'Message instructor',
                   ),
@@ -613,11 +627,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
       ),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        childrenPadding: const EdgeInsets.only(
-          left: 20,
-          right: 20,
-          bottom: 16,
-        ),
+        childrenPadding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
         leading: CircleAvatar(
           backgroundColor: AppColors.background,
           child: const Icon(
@@ -716,10 +726,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
 
           // Student Role Badge
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: AppColors.background,
               borderRadius: BorderRadius.circular(8),
@@ -737,7 +744,11 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
           if (isInstructor) ...[
             const SizedBox(width: 8),
             IconButton(
-              icon: const Icon(Icons.message, size: 20, color: AppColors.buttonPrimary),
+              icon: const Icon(
+                Icons.message,
+                size: 20,
+                color: AppColors.buttonPrimary,
+              ),
               onPressed: () => _startChatWithStudent(context, student),
               tooltip: 'Message student',
               padding: EdgeInsets.zero,

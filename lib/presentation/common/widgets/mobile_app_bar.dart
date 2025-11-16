@@ -34,7 +34,8 @@ class MobileAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: (isMobile && showMenuButton)
           ? IconButton(
               icon: const Icon(Icons.menu, color: AppColors.textPrimary),
-              onPressed: onMenuPressed ??
+              onPressed:
+                  onMenuPressed ??
                   () {
                     Scaffold.of(context).openDrawer();
                   },

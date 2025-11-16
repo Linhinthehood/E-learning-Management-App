@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../../presentation/features/course/course_detail_screen.dart';
 import '../../presentation/features/messaging/chat_screen.dart';
@@ -114,9 +113,7 @@ class DeepLinkHandler {
       await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CourseDetailScreen(
-            course: course,
-          ),
+          builder: (context) => CourseDetailScreen(course: course),
         ),
       );
     } catch (e) {
@@ -170,7 +167,8 @@ class DeepLinkHandler {
       // Determine participant info (assume we are the student viewing the chat)
       // In a real app, we'd get the current user ID and determine which participant is "other"
       final participantId = chat.instructorId;
-      const participantName = 'Instructor'; // Simplified - in real app, fetch from user data
+      const participantName =
+          'Instructor'; // Simplified - in real app, fetch from user data
 
       // Navigate to chat screen
       await Navigator.push(

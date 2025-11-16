@@ -60,11 +60,7 @@ class RecentGradesWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.grade,
-                color: AppColors.buttonPrimary,
-                size: 24,
-              ),
+              Icon(Icons.grade, color: AppColors.buttonPrimary, size: 24),
               const SizedBox(width: 12),
               Text(
                 'Recent Grades',
@@ -77,16 +73,20 @@ class RecentGradesWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          ...recentGrades.take(5).map((submission) => _GradeItemWidget(
-                submission: submission,
-                course: courseMap[submission.courseId],
-                onTap: () {
-                  final course = courseMap[submission.courseId];
-                  if (course != null) {
-                    onTap?.call(course, submission.assignmentId);
-                  }
-                },
-              )),
+          ...recentGrades
+              .take(5)
+              .map(
+                (submission) => _GradeItemWidget(
+                  submission: submission,
+                  course: courseMap[submission.courseId],
+                  onTap: () {
+                    final course = courseMap[submission.courseId];
+                    if (course != null) {
+                      onTap?.call(course, submission.assignmentId);
+                    }
+                  },
+                ),
+              ),
         ],
       ),
     );
@@ -134,11 +134,7 @@ class _GradeItemWidget extends StatelessWidget {
                 color: gradeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                Icons.assignment,
-                color: gradeColor,
-                size: 24,
-              ),
+              child: Icon(Icons.assignment, color: gradeColor, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -157,7 +153,9 @@ class _GradeItemWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    DateFormat('MMM dd, yyyy').format(submission.submissionTime),
+                    DateFormat(
+                      'MMM dd, yyyy',
+                    ).format(submission.submissionTime),
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       color: AppColors.textSecondary,
@@ -167,10 +165,7 @@ class _GradeItemWidget extends StatelessWidget {
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: gradeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
@@ -191,4 +186,3 @@ class _GradeItemWidget extends StatelessWidget {
     );
   }
 }
-

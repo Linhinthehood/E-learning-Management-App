@@ -162,21 +162,25 @@ class _ReplyWidgetState extends ConsumerState<ReplyWidget> {
       replyToId: widget.reply.id, // This is a reply to this reply
     );
 
-    ref.read(forumReplyProvider.notifier).createReply(reply).then((_) {
-      widget.onReplyUpdated();
-      setState(() {
-        _showReplyInput = false;
-      });
-    }).catchError((error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error sending reply: ${error.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    });
+    ref
+        .read(forumReplyProvider.notifier)
+        .createReply(reply)
+        .then((_) {
+          widget.onReplyUpdated();
+          setState(() {
+            _showReplyInput = false;
+          });
+        })
+        .catchError((error) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error sending reply: ${error.toString()}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        });
   }
 
   @override
@@ -264,9 +268,16 @@ class _ReplyWidgetState extends ConsumerState<ReplyWidget> {
                             PopupMenuItem(
                               child: const Row(
                                 children: [
-                                  Icon(Icons.delete, size: 16, color: Colors.red),
+                                  Icon(
+                                    Icons.delete,
+                                    size: 16,
+                                    color: Colors.red,
+                                  ),
                                   SizedBox(width: 8),
-                                  Text('Delete', style: TextStyle(color: Colors.red)),
+                                  Text(
+                                    'Delete',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
                                 ],
                               ),
                               onTap: () {
@@ -407,10 +418,7 @@ class _ReplyInputField extends StatefulWidget {
   final Function(String) onSend;
   final VoidCallback onCancel;
 
-  const _ReplyInputField({
-    required this.onSend,
-    required this.onCancel,
-  });
+  const _ReplyInputField({required this.onSend, required this.onCancel});
 
   @override
   State<_ReplyInputField> createState() => _ReplyInputFieldState();
@@ -483,4 +491,3 @@ class _ReplyInputFieldState extends State<_ReplyInputField> {
     );
   }
 }
-

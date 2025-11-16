@@ -103,33 +103,38 @@ class _AnnouncementFormDialogState
         final createdAnnouncement = await ref
             .read(announcementProvider.notifier)
             .createAnnouncement(announcement);
-        
+
         // Send notification to students
         try {
-          final linkTo = 'announcement/${widget.course.id}/${createdAnnouncement.id}';
-          
+          final linkTo =
+              'announcement/${widget.course.id}/${createdAnnouncement.id}';
+
           if (createdAnnouncement.isForAllGroups) {
             // Send to all students in course
-            await ref.read(notificationProvider.notifier).sendToAllStudentsInCourse(
-              widget.course.id,
-              'New Announcement: ${createdAnnouncement.title}',
-              createdAnnouncement.content.length > 100 
-                  ? '${createdAnnouncement.content.substring(0, 100)}...'
-                  : createdAnnouncement.content,
-              linkTo,
-              NotificationEntity.typeAnnouncement,
-            );
+            await ref
+                .read(notificationProvider.notifier)
+                .sendToAllStudentsInCourse(
+                  widget.course.id,
+                  'New Announcement: ${createdAnnouncement.title}',
+                  createdAnnouncement.content.length > 100
+                      ? '${createdAnnouncement.content.substring(0, 100)}...'
+                      : createdAnnouncement.content,
+                  linkTo,
+                  NotificationEntity.typeAnnouncement,
+                );
           } else {
             // Send to specific groups
-            await ref.read(notificationProvider.notifier).sendToGroupStudents(
-              createdAnnouncement.scopedGroupIds,
-              'New Announcement: ${createdAnnouncement.title}',
-              createdAnnouncement.content.length > 100 
-                  ? '${createdAnnouncement.content.substring(0, 100)}...'
-                  : createdAnnouncement.content,
-              linkTo,
-              NotificationEntity.typeAnnouncement,
-            );
+            await ref
+                .read(notificationProvider.notifier)
+                .sendToGroupStudents(
+                  createdAnnouncement.scopedGroupIds,
+                  'New Announcement: ${createdAnnouncement.title}',
+                  createdAnnouncement.content.length > 100
+                      ? '${createdAnnouncement.content.substring(0, 100)}...'
+                      : createdAnnouncement.content,
+                  linkTo,
+                  NotificationEntity.typeAnnouncement,
+                );
           }
         } catch (e) {
           // Log error but don't fail the announcement creation

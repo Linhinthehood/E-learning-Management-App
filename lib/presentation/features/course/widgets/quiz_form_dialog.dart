@@ -150,30 +150,36 @@ class _QuizFormDialogState extends ConsumerState<QuizFormDialog> {
 
       if (widget.quiz == null) {
         // Create new quiz
-        final createdQuiz = await ref.read(quizProvider.notifier).createQuiz(quiz);
-        
+        final createdQuiz = await ref
+            .read(quizProvider.notifier)
+            .createQuiz(quiz);
+
         // Send notification to students
         try {
           final linkTo = 'quiz/${widget.course.id}/${createdQuiz.id}';
-          
+
           if (createdQuiz.scopedGroupIds.isEmpty) {
             // Send to all students in course
-            await ref.read(notificationProvider.notifier).sendToAllStudentsInCourse(
-              widget.course.id,
-              'New Quiz: ${createdQuiz.title}',
-              'A new quiz "${createdQuiz.title}" is now available. Opens: ${_formatDate(createdQuiz.timeOpen)}',
-              linkTo,
-              NotificationEntity.typeQuiz,
-            );
+            await ref
+                .read(notificationProvider.notifier)
+                .sendToAllStudentsInCourse(
+                  widget.course.id,
+                  'New Quiz: ${createdQuiz.title}',
+                  'A new quiz "${createdQuiz.title}" is now available. Opens: ${_formatDate(createdQuiz.timeOpen)}',
+                  linkTo,
+                  NotificationEntity.typeQuiz,
+                );
           } else {
             // Send to specific groups
-            await ref.read(notificationProvider.notifier).sendToGroupStudents(
-              createdQuiz.scopedGroupIds,
-              'New Quiz: ${createdQuiz.title}',
-              'A new quiz "${createdQuiz.title}" is now available. Opens: ${_formatDate(createdQuiz.timeOpen)}',
-              linkTo,
-              NotificationEntity.typeQuiz,
-            );
+            await ref
+                .read(notificationProvider.notifier)
+                .sendToGroupStudents(
+                  createdQuiz.scopedGroupIds,
+                  'New Quiz: ${createdQuiz.title}',
+                  'A new quiz "${createdQuiz.title}" is now available. Opens: ${_formatDate(createdQuiz.timeOpen)}',
+                  linkTo,
+                  NotificationEntity.typeQuiz,
+                );
           }
         } catch (e) {
           // Log error but don't fail the quiz creation
@@ -204,8 +210,18 @@ class _QuizFormDialogState extends ConsumerState<QuizFormDialog> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

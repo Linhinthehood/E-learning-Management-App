@@ -14,7 +14,8 @@ class GroupCsvImportScreen extends ConsumerStatefulWidget {
   const GroupCsvImportScreen({super.key});
 
   @override
-  ConsumerState<GroupCsvImportScreen> createState() => _GroupCsvImportScreenState();
+  ConsumerState<GroupCsvImportScreen> createState() =>
+      _GroupCsvImportScreenState();
 }
 
 class _GroupCsvImportScreenState extends ConsumerState<GroupCsvImportScreen> {
@@ -84,9 +85,9 @@ class _GroupCsvImportScreenState extends ConsumerState<GroupCsvImportScreen> {
                 const SizedBox(width: 12),
                 Text(
                   'How to Import Groups',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -120,17 +121,14 @@ class _GroupCsvImportScreenState extends ConsumerState<GroupCsvImportScreen> {
           children: [
             Text(
               'Default Values (Optional)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'These values will be used if not specified in CSV',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
 
@@ -167,8 +165,8 @@ class _GroupCsvImportScreenState extends ConsumerState<GroupCsvImportScreen> {
                 // Filter courses by selected semester if any
                 final filteredCourses = _selectedSemesterId != null
                     ? courses
-                        .where((c) => c.semesterId == _selectedSemesterId)
-                        .toList()
+                          .where((c) => c.semesterId == _selectedSemesterId)
+                          .toList()
                     : courses;
 
                 return DropdownButtonFormField<String>(
@@ -209,9 +207,9 @@ class _GroupCsvImportScreenState extends ConsumerState<GroupCsvImportScreen> {
           children: [
             Text(
               'CSV Format Requirements',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildFormatItem(
@@ -260,9 +258,7 @@ class _GroupCsvImportScreenState extends ConsumerState<GroupCsvImportScreen> {
             decoration: BoxDecoration(
               color: isRequired ? Colors.red[50] : Colors.grey[200],
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: isRequired ? Colors.red : Colors.grey,
-              ),
+              border: Border.all(color: isRequired ? Colors.red : Colors.grey),
             ),
             child: Text(
               requirement,
@@ -288,10 +284,7 @@ class _GroupCsvImportScreenState extends ConsumerState<GroupCsvImportScreen> {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -342,18 +335,15 @@ class _GroupCsvImportScreenState extends ConsumerState<GroupCsvImportScreen> {
               const SizedBox(height: 16),
               Text(
                 _fileName ?? 'Click to upload CSV file',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 'Supported format: .csv',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],
           ),
@@ -446,10 +436,7 @@ class _GroupCsvImportScreenState extends ConsumerState<GroupCsvImportScreen> {
               title: 'Groups',
               importResult: importResult,
               onConfirm: _importService.processImport,
-              displayColumns: const [
-                'name',
-                'courseId',
-              ],
+              displayColumns: const ['name', 'courseId'],
               extractDisplayData: (data) => {
                 'name': data.name,
                 'courseId': data.courseId,

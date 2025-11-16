@@ -59,11 +59,7 @@ class CourseProgressWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.trending_up,
-                color: AppColors.buttonPrimary,
-                size: 24,
-              ),
+              Icon(Icons.trending_up, color: AppColors.buttonPrimary, size: 24),
               const SizedBox(width: 12),
               Text(
                 'Course Progress',
@@ -77,17 +73,17 @@ class CourseProgressWidget extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ...courseProgress.values.take(5).map((progress) {
-                final course = courseMap[progress.courseId];
-                return _ProgressCard(
-                  progress: progress,
-                  course: course,
-                  onTap: () {
-                    if (course != null) {
-                      onCourseTap?.call(course);
-                    }
-                  },
-                );
-              }),
+            final course = courseMap[progress.courseId];
+            return _ProgressCard(
+              progress: progress,
+              course: course,
+              onTap: () {
+                if (course != null) {
+                  onCourseTap?.call(course);
+                }
+              },
+            );
+          }),
         ],
       ),
     );
@@ -208,11 +204,7 @@ class _ProgressCard extends StatelessWidget {
             // Quiz Progress
             Row(
               children: [
-                Icon(
-                  Icons.quiz,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
+                Icon(Icons.quiz, size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -257,4 +249,3 @@ class _ProgressCard extends StatelessWidget {
     );
   }
 }
-

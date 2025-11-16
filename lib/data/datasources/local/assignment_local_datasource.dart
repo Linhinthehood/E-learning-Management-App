@@ -4,7 +4,10 @@ import '../models/assignment_model.dart';
 /// Local data source for Assignment caching using Hive
 abstract class AssignmentLocalDataSource {
   Future<List<AssignmentModel>> getCachedAssignments(String courseId);
-  Future<void> cacheAssignments(String courseId, List<AssignmentModel> assignments);
+  Future<void> cacheAssignments(
+    String courseId,
+    List<AssignmentModel> assignments,
+  );
   Future<void> clearCache();
   Future<void> clearCacheForCourse(String courseId);
 }
@@ -29,15 +32,11 @@ class AssignmentLocalDataSourceImpl implements AssignmentLocalDataSource {
       final cachedData = box.get(_getKey(courseId));
 
       if (cachedData != null && cachedData is List) {
-        return cachedData
-            .map(
-              (item) {
-                final map = Map<String, dynamic>.from(item);
-                final id = map['id'] as String;
-                return AssignmentModel.fromJson(map, id);
-              },
-            )
-            .toList();
+        return cachedData.map((item) {
+          final map = Map<String, dynamic>.from(item);
+          final id = map['id'] as String;
+          return AssignmentModel.fromJson(map, id);
+        }).toList();
       }
 
       return [];
@@ -47,7 +46,10 @@ class AssignmentLocalDataSourceImpl implements AssignmentLocalDataSource {
   }
 
   @override
-  Future<void> cacheAssignments(String courseId, List<AssignmentModel> assignments) async {
+  Future<void> cacheAssignments(
+    String courseId,
+    List<AssignmentModel> assignments,
+  ) async {
     try {
       final box = await _getBox();
       final assignmentsJson = assignments.map((a) {
@@ -57,7 +59,10 @@ class AssignmentLocalDataSourceImpl implements AssignmentLocalDataSource {
       }).toList();
       await box.put(_getKey(courseId), assignmentsJson);
       // Store last sync timestamp
-      await box.put('${_getKey(courseId)}_timestamp', DateTime.now().toIso8601String());
+      await box.put(
+        '${_getKey(courseId)}_timestamp',
+        DateTime.now().toIso8601String(),
+      );
     } catch (e) {
       // Silently fail - caching is not critical
     }

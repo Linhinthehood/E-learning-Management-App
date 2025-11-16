@@ -6,7 +6,8 @@ class NotificationEntity {
   final String message;
   final bool isRead;
   final DateTime createdAt;
-  final String linkTo; // Deep-link to related content (e.g., "assignment/abc123", "quiz/xyz789")
+  final String
+  linkTo; // Deep-link to related content (e.g., "assignment/abc123", "quiz/xyz789")
   final String type; // announcement, assignment, quiz, grade, reminder, message
 
   const NotificationEntity({

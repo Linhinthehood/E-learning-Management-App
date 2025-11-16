@@ -10,10 +10,7 @@ class CourseRepositoryImpl implements ICourseRepository {
   final CourseRemoteDataSource remoteDataSource;
   final CourseLocalDataSource? localDataSource;
 
-  CourseRepositoryImpl({
-    required this.remoteDataSource,
-    this.localDataSource,
-  });
+  CourseRepositoryImpl({required this.remoteDataSource, this.localDataSource});
 
   @override
   Future<List<CourseEntity>> getCoursesBySemester(String semesterId) async {
@@ -32,7 +29,9 @@ class CourseRepositoryImpl implements ICourseRepository {
     } catch (e) {
       // If remote fails, try to get from cache
       if (localDataSource != null) {
-        final cachedModels = await localDataSource!.getCachedCourses(semesterId);
+        final cachedModels = await localDataSource!.getCachedCourses(
+          semesterId,
+        );
         if (cachedModels.isNotEmpty) {
           return cachedModels.map((model) => model.toEntity()).toList();
         }
@@ -55,14 +54,19 @@ class CourseRepositoryImpl implements ICourseRepository {
 
       // Cache student courses (use student-specific key)
       if (localDataSource != null) {
-        await localDataSource!.cacheCourses('${semesterId}_student_$studentId', courseModels);
+        await localDataSource!.cacheCourses(
+          '${semesterId}_student_$studentId',
+          courseModels,
+        );
       }
 
       return courseModels.map((model) => model.toEntity()).toList();
     } catch (e) {
       // If remote fails, try to get from cache
       if (localDataSource != null) {
-        final cachedModels = await localDataSource!.getCachedCourses('${semesterId}_student_$studentId');
+        final cachedModels = await localDataSource!.getCachedCourses(
+          '${semesterId}_student_$studentId',
+        );
         if (cachedModels.isNotEmpty) {
           return cachedModels.map((model) => model.toEntity()).toList();
         }

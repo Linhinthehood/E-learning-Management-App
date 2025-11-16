@@ -12,6 +12,7 @@ import '../../providers/assignment_submission_provider.dart';
 import '../../providers/enrollment_provider.dart';
 import '../../../utils/services/csv_export_service.dart';
 import '../../../utils/helpers/file_download_helper.dart';
+import '../../../services/file_download_service.dart';
 
 /// Assignment Tracking Screen - shows submission status for all students
 class AssignmentTrackingScreen extends ConsumerStatefulWidget {
@@ -144,9 +145,8 @@ class _AssignmentTrackingScreenState
                           submissions,
                         );
                       },
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (error, stack) => Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -177,9 +177,8 @@ class _AssignmentTrackingScreenState
                       ),
                     );
                   },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                     child: Text(
                       'Error loading students: ${error.toString()}',
@@ -188,9 +187,7 @@ class _AssignmentTrackingScreenState
                   ),
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Text(
                   'Error loading enrollments: ${error.toString()}',
@@ -266,7 +263,7 @@ class _AssignmentTrackingScreenState
     for (var enrollment in enrollments) {
       final student = studentMap[enrollment.studentId];
       final submission = submissionMap[enrollment.studentId];
-      
+
       // Determine status
       String status;
       if (submission == null) {
@@ -277,12 +274,14 @@ class _AssignmentTrackingScreenState
         status = 'Submitted';
       }
 
-      studentTrackingList.add(_StudentSubmissionData(
-        studentId: enrollment.studentId,
-        studentName: student?.displayName ?? 'Unknown',
-        submission: submission,
-        status: status,
-      ));
+      studentTrackingList.add(
+        _StudentSubmissionData(
+          studentId: enrollment.studentId,
+          studentName: student?.displayName ?? 'Unknown',
+          submission: submission,
+          status: status,
+        ),
+      );
     }
 
     // Apply filter
@@ -312,8 +311,9 @@ class _AssignmentTrackingScreenState
           if (a.submission == null && b.submission == null) return 0;
           if (a.submission == null) return 1;
           if (b.submission == null) return -1;
-          return b.submission!.submissionTime
-              .compareTo(a.submission!.submissionTime); // Descending
+          return b.submission!.submissionTime.compareTo(
+            a.submission!.submissionTime,
+          ); // Descending
         default: // 'name'
           return a.studentName.compareTo(b.studentName);
       }
@@ -358,8 +358,8 @@ class _AssignmentTrackingScreenState
     final statusColor = item.status == 'Submitted'
         ? Colors.green
         : item.status == 'Late'
-            ? Colors.orange
-            : AppColors.textSecondary;
+        ? Colors.orange
+        : AppColors.textSecondary;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -367,7 +367,9 @@ class _AssignmentTrackingScreenState
         leading: CircleAvatar(
           backgroundColor: statusColor.withValues(alpha: 0.2),
           child: Icon(
-            hasSubmission ? Icons.assignment_turned_in : Icons.assignment_outlined,
+            hasSubmission
+                ? Icons.assignment_turned_in
+                : Icons.assignment_outlined,
             color: statusColor,
           ),
         ),
@@ -449,6 +451,8 @@ class _AssignmentTrackingScreenState
   }
 
   void _showFilesDialog(List<String> fileUrls) {
+    final downloadService = FileDownloadService();
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -460,10 +464,11 @@ class _AssignmentTrackingScreenState
             itemCount: fileUrls.length,
             itemBuilder: (context, index) {
               final url = fileUrls[index];
+              final fileName = downloadService.getFileNameFromUrl(url);
               return ListTile(
                 leading: const Icon(Icons.insert_drive_file),
                 title: Text(
-                  'File ${index + 1}',
+                  fileName,
                   style: GoogleFonts.inter(),
                 ),
                 subtitle: Text(
@@ -474,16 +479,64 @@ class _AssignmentTrackingScreenState
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                onTap: () {
-                  // TODO: Implement file download/open functionality
-                  // For web: window.open(url)
-                  // For mobile: Use url_launcher package
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('File URL: $url'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.open_in_new, size: 20),
+                      onPressed: () async {
+                        try {
+                          await downloadService.openFile(fileUrl: url);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to open: ${e.toString()}'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      tooltip: 'Open',
                     ),
-                  );
-                },
+                    IconButton(
+                      icon: const Icon(Icons.download, size: 20),
+                      onPressed: () async {
+                        try {
+                          await downloadService.downloadFile(
+                            fileUrl: url,
+                            fileName: fileName,
+                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('File downloaded successfully'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            final errorMessage = e.toString();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  errorMessage.contains('untrusted')
+                                      ? 'Cannot download: Cloudinary account needs verification. Use "Open" to view file.'
+                                      : 'Failed to download: ${e.toString()}',
+                                ),
+                                backgroundColor: Colors.red,
+                                duration: const Duration(seconds: 5),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      tooltip: 'Download',
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -506,8 +559,8 @@ class _AssignmentTrackingScreenState
     final submissionsAsync = ref.read(assignmentSubmissionProvider);
 
     // Check if all data is loaded
-    if (enrollmentsAsync.isLoading || 
-        studentsAsync.isLoading || 
+    if (enrollmentsAsync.isLoading ||
+        studentsAsync.isLoading ||
         submissionsAsync.isLoading) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -520,8 +573,8 @@ class _AssignmentTrackingScreenState
       return;
     }
 
-    if (enrollmentsAsync.hasError || 
-        studentsAsync.hasError || 
+    if (enrollmentsAsync.hasError ||
+        studentsAsync.hasError ||
         submissionsAsync.hasError) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -568,7 +621,8 @@ class _AssignmentTrackingScreenState
       // Generate filename with timestamp
       final dateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
       final timestamp = dateFormat.format(DateTime.now());
-      final filename = 'assignment_${widget.assignment.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
+      final filename =
+          'assignment_${widget.assignment.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
 
       // Download file
       await FileDownloadHelper.downloadCsv(
@@ -603,4 +657,3 @@ class _StudentSubmissionData {
     required this.status,
   });
 }
-

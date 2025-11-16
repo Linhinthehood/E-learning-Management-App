@@ -55,7 +55,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     return semesterAsync.when(
       data: (semesters) {
         // Find the semester for this course
-        final semester = semesters.where((s) => s.id == widget.course.semesterId).firstOrNull;
+        final semester = semesters
+            .where((s) => s.id == widget.course.semesterId)
+            .firstOrNull;
         final bool isReadOnly = semester?.isPast ?? false;
 
         return Scaffold(
@@ -90,7 +92,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                     if (isReadOnly) ...[
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.orange.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
@@ -123,7 +128,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 Tab(text: 'Stream', icon: Icon(Icons.stream, size: 20)),
                 Tab(text: 'Classwork', icon: Icon(Icons.assignment, size: 20)),
                 Tab(text: 'Quizzes', icon: Icon(Icons.quiz, size: 20)),
-                Tab(text: 'Questions', icon: Icon(Icons.library_books, size: 20)),
+                Tab(
+                  text: 'Questions',
+                  icon: Icon(Icons.library_books, size: 20),
+                ),
                 Tab(text: 'Materials', icon: Icon(Icons.folder, size: 20)),
                 Tab(text: 'Forum', icon: Icon(Icons.forum, size: 20)),
                 Tab(text: 'People', icon: Icon(Icons.people, size: 20)),
@@ -144,9 +152,8 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           ),
         );
       },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (_, __) {
         // Default to not read-only if error
         return Scaffold(
@@ -191,7 +198,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 Tab(text: 'Stream', icon: Icon(Icons.stream, size: 20)),
                 Tab(text: 'Classwork', icon: Icon(Icons.assignment, size: 20)),
                 Tab(text: 'Quizzes', icon: Icon(Icons.quiz, size: 20)),
-                Tab(text: 'Questions', icon: Icon(Icons.library_books, size: 20)),
+                Tab(
+                  text: 'Questions',
+                  icon: Icon(Icons.library_books, size: 20),
+                ),
                 Tab(text: 'Materials', icon: Icon(Icons.folder, size: 20)),
                 Tab(text: 'Forum', icon: Icon(Icons.forum, size: 20)),
                 Tab(text: 'People', icon: Icon(Icons.people, size: 20)),

@@ -6,10 +6,11 @@ import '../../domain/repositories/i_forum_reply_repository.dart';
 import './forum_topic_provider.dart';
 
 /// Provider for forum reply remote data source
-final forumReplyRemoteDataSourceProvider =
-    Provider<ForumReplyRemoteDataSource>((ref) {
-  return ForumReplyRemoteDataSourceImpl();
-});
+final forumReplyRemoteDataSourceProvider = Provider<ForumReplyRemoteDataSource>(
+  (ref) {
+    return ForumReplyRemoteDataSourceImpl();
+  },
+);
 
 /// Provider for forum reply repository
 final forumReplyRepositoryProvider = Provider<IForumReplyRepository>((ref) {
@@ -26,7 +27,7 @@ class ForumReplyNotifier
   String? _currentTopicId;
 
   ForumReplyNotifier(this._repository, this._ref)
-      : super(const AsyncValue.loading());
+    : super(const AsyncValue.loading());
 
   /// Load forum replies for a topic
   Future<void> loadReplies(String topicId) async {
@@ -103,22 +104,18 @@ class ForumReplyNotifier
 }
 
 /// Provider for forum reply state notifier
-final forumReplyProvider = StateNotifierProvider<
-    ForumReplyNotifier,
-    AsyncValue<List<ForumReplyEntity>>
->((ref) {
-  return ForumReplyNotifier(
-    ref.read(forumReplyRepositoryProvider),
-    ref,
-  );
-});
+final forumReplyProvider =
+    StateNotifierProvider<
+      ForumReplyNotifier,
+      AsyncValue<List<ForumReplyEntity>>
+    >((ref) {
+      return ForumReplyNotifier(ref.read(forumReplyRepositoryProvider), ref);
+    });
 
 /// Provider for fetching a single forum reply by ID
-final forumReplyByIdProvider =
-    FutureProvider.family<ForumReplyEntity?, String>((
-  ref,
-  replyId,
-) async {
-  final repository = ref.read(forumReplyRepositoryProvider);
-  return await repository.getReplyById(replyId);
-});
+final forumReplyByIdProvider = FutureProvider.family<ForumReplyEntity?, String>(
+  (ref, replyId) async {
+    final repository = ref.read(forumReplyRepositoryProvider);
+    return await repository.getReplyById(replyId);
+  },
+);

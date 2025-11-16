@@ -2,16 +2,13 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Connectivity status enum
-enum ConnectivityStatus {
-  online,
-  offline,
-}
+enum ConnectivityStatus { online, offline }
 
 /// Provider for connectivity status
 final connectivityStatusProvider =
     StateNotifierProvider<ConnectivityStatusNotifier, ConnectivityStatus>(
-  (ref) => ConnectivityStatusNotifier(),
-);
+      (ref) => ConnectivityStatusNotifier(),
+    );
 
 /// Notifier that monitors network connectivity
 class ConnectivityStatusNotifier extends StateNotifier<ConnectivityStatus> {

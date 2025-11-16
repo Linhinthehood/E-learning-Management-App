@@ -31,4 +31,3 @@ class _ForumTabState extends ConsumerState<ForumTab> {
     return ForumListScreen(course: widget.course);
   }
 }
-

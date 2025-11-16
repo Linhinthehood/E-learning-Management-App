@@ -39,9 +39,12 @@ class _MaterialTrackingScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(enrollmentProvider.notifier).loadEnrollments(widget.course.id);
       ref
-          .read(viewTrackingByContentProvider(
-            (contentId: widget.material.id, contentType: 'material'),
-          ).notifier)
+          .read(
+            viewTrackingByContentProvider((
+              contentId: widget.material.id,
+              contentType: 'material',
+            )).notifier,
+          )
           .loadTracking();
     });
   }
@@ -50,9 +53,12 @@ class _MaterialTrackingScreenState
   Widget build(BuildContext context) {
     final enrollmentsAsync = ref.watch(enrollmentProvider);
     final studentsAsync = ref.watch(studentsProvider);
-    final trackingAsync = ref.watch(viewTrackingByContentProvider(
-      (contentId: widget.material.id, contentType: 'material'),
-    ));
+    final trackingAsync = ref.watch(
+      viewTrackingByContentProvider((
+        contentId: widget.material.id,
+        contentType: 'material',
+      )),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -122,9 +128,8 @@ class _MaterialTrackingScreenState
                           trackings,
                         );
                       },
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (error, stack) => Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -145,12 +150,12 @@ class _MaterialTrackingScreenState
                             ElevatedButton(
                               onPressed: () {
                                 ref
-                                    .read(viewTrackingByContentProvider(
-                                      (
+                                    .read(
+                                      viewTrackingByContentProvider((
                                         contentId: widget.material.id,
-                                        contentType: 'material'
-                                      ),
-                                    ).notifier)
+                                        contentType: 'material',
+                                      )).notifier,
+                                    )
                                     .loadTracking();
                               },
                               child: const Text('Retry'),
@@ -160,9 +165,8 @@ class _MaterialTrackingScreenState
                       ),
                     );
                   },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                     child: Text(
                       'Error loading students: ${error.toString()}',
@@ -171,9 +175,7 @@ class _MaterialTrackingScreenState
                   ),
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Text(
                   'Error loading enrollments: ${error.toString()}',
@@ -232,11 +234,13 @@ class _MaterialTrackingScreenState
     for (var enrollment in enrollments) {
       final student = studentMap[enrollment.studentId];
       final tracking = downloadMap[enrollment.studentId];
-      studentTrackingList.add(_StudentTrackingData(
-        studentId: enrollment.studentId,
-        studentName: student?.displayName ?? 'Unknown',
-        tracking: tracking,
-      ));
+      studentTrackingList.add(
+        _StudentTrackingData(
+          studentId: enrollment.studentId,
+          studentName: student?.displayName ?? 'Unknown',
+          tracking: tracking,
+        ),
+      );
     }
 
     // Apply filter
@@ -269,8 +273,8 @@ class _MaterialTrackingScreenState
               _filter == 'downloaded'
                   ? 'No students have downloaded this material'
                   : _filter == 'not_downloaded'
-                      ? 'All students have downloaded this material'
-                      : 'No students enrolled',
+                  ? 'All students have downloaded this material'
+                  : 'No students enrolled',
               style: GoogleFonts.inter(
                 color: AppColors.textSecondary,
                 fontSize: 16,
@@ -330,14 +334,8 @@ class _MaterialTrackingScreenState
                 ),
               ),
         trailing: hasDownloaded
-            ? Icon(
-                Icons.check_circle,
-                color: Colors.green,
-              )
-            : Icon(
-                Icons.circle_outlined,
-                color: AppColors.textSecondary,
-              ),
+            ? Icon(Icons.check_circle, color: Colors.green)
+            : Icon(Icons.circle_outlined, color: AppColors.textSecondary),
       ),
     );
   }
@@ -347,13 +345,16 @@ class _MaterialTrackingScreenState
     // Get data from providers
     final enrollmentsAsync = ref.read(enrollmentProvider);
     final studentsAsync = ref.read(studentsProvider);
-    final trackingAsync = ref.read(viewTrackingByContentProvider(
-      (contentId: widget.material.id, contentType: 'material'),
-    ));
+    final trackingAsync = ref.read(
+      viewTrackingByContentProvider((
+        contentId: widget.material.id,
+        contentType: 'material',
+      )),
+    );
 
     // Check if all data is loaded
-    if (enrollmentsAsync.isLoading || 
-        studentsAsync.isLoading || 
+    if (enrollmentsAsync.isLoading ||
+        studentsAsync.isLoading ||
         trackingAsync.isLoading) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -366,8 +367,8 @@ class _MaterialTrackingScreenState
       return;
     }
 
-    if (enrollmentsAsync.hasError || 
-        studentsAsync.hasError || 
+    if (enrollmentsAsync.hasError ||
+        studentsAsync.hasError ||
         trackingAsync.hasError) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -401,7 +402,8 @@ class _MaterialTrackingScreenState
       // Generate filename with timestamp
       final dateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
       final timestamp = dateFormat.format(DateTime.now());
-      final filename = 'material_${widget.material.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
+      final filename =
+          'material_${widget.material.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
 
       // Download file
       await FileDownloadHelper.downloadCsv(
@@ -434,4 +436,3 @@ class _StudentTrackingData {
     this.tracking,
   });
 }
-

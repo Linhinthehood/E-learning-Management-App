@@ -12,10 +12,10 @@ class CsvExportService {
   static final DateFormat _dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
 
   /// Export assignment submissions to CSV
-  /// 
+  ///
   /// Returns CSV content as String
   /// Format: Student Name, Student Email, Status, Attempt Number, Grade, Submission Time, Files
-  /// 
+  ///
   /// Exports all enrolled students, including those who haven't submitted
   static String exportAssignmentSubmissions({
     required List<EnrollmentEntity> enrollments,
@@ -96,10 +96,10 @@ class CsvExportService {
   }
 
   /// Export quiz attempts to CSV
-  /// 
+  ///
   /// Returns CSV content as String
   /// Format: Student Name, Student Email, Status, Score, Time Taken (minutes), Attempts, Completion Time
-  /// 
+  ///
   /// Exports all enrolled students, including those who haven't attempted
   static String exportQuizResults({
     required List<EnrollmentEntity> enrollments,
@@ -126,8 +126,7 @@ class CsvExportService {
     for (var attempt in attempts) {
       if (attempt.isCompleted) {
         final existing = attemptMap[attempt.studentId];
-        if (existing == null ||
-            (attempt.score ?? 0) > (existing.score ?? 0)) {
+        if (existing == null || (attempt.score ?? 0) > (existing.score ?? 0)) {
           attemptMap[attempt.studentId] = attempt;
         }
       }
@@ -192,10 +191,10 @@ class CsvExportService {
   }
 
   /// Export announcement views to CSV
-  /// 
+  ///
   /// Returns CSV content as String
   /// Format: Student Name, Student Email, Action, Viewed At
-  /// 
+  ///
   /// Exports all enrolled students, including those who haven't viewed
   static String exportAnnouncementViews({
     required List<EnrollmentEntity> enrollments,
@@ -203,12 +202,7 @@ class CsvExportService {
     required Map<String, UserEntity> studentMap,
   }) {
     final csvData = <List<dynamic>>[
-      [
-        'Student Name',
-        'Student Email',
-        'Action',
-        'Viewed At',
-      ],
+      ['Student Name', 'Student Email', 'Action', 'Viewed At'],
     ];
 
     // Create a map of studentId -> view tracking (latest view)
@@ -216,8 +210,7 @@ class CsvExportService {
     for (var view in views) {
       if (view.isView) {
         final existing = viewMap[view.studentId];
-        if (existing == null ||
-            view.timestamp.isAfter(existing.timestamp)) {
+        if (existing == null || view.timestamp.isAfter(existing.timestamp)) {
           viewMap[view.studentId] = view;
         }
       }
@@ -232,19 +225,9 @@ class CsvExportService {
 
       if (view != null) {
         final viewedAt = _dateFormat.format(view.timestamp);
-        csvData.add([
-          studentName,
-          studentEmail,
-          'Viewed',
-          viewedAt,
-        ]);
+        csvData.add([studentName, studentEmail, 'Viewed', viewedAt]);
       } else {
-        csvData.add([
-          studentName,
-          studentEmail,
-          'Not Viewed',
-          'N/A',
-        ]);
+        csvData.add([studentName, studentEmail, 'Not Viewed', 'N/A']);
       }
     }
 
@@ -252,10 +235,10 @@ class CsvExportService {
   }
 
   /// Export material downloads to CSV
-  /// 
+  ///
   /// Returns CSV content as String
   /// Format: Student Name, Student Email, Action, Downloaded At
-  /// 
+  ///
   /// Exports all enrolled students, including those who haven't downloaded
   static String exportMaterialDownloads({
     required List<EnrollmentEntity> enrollments,
@@ -263,12 +246,7 @@ class CsvExportService {
     required Map<String, UserEntity> studentMap,
   }) {
     final csvData = <List<dynamic>>[
-      [
-        'Student Name',
-        'Student Email',
-        'Action',
-        'Downloaded At',
-      ],
+      ['Student Name', 'Student Email', 'Action', 'Downloaded At'],
     ];
 
     // Create a map of studentId -> download tracking (latest download)
@@ -292,23 +270,12 @@ class CsvExportService {
 
       if (download != null) {
         final downloadedAt = _dateFormat.format(download.timestamp);
-        csvData.add([
-          studentName,
-          studentEmail,
-          'Downloaded',
-          downloadedAt,
-        ]);
+        csvData.add([studentName, studentEmail, 'Downloaded', downloadedAt]);
       } else {
-        csvData.add([
-          studentName,
-          studentEmail,
-          'Not Downloaded',
-          'N/A',
-        ]);
+        csvData.add([studentName, studentEmail, 'Not Downloaded', 'N/A']);
       }
     }
 
     return const ListToCsvConverter().convert(csvData);
   }
 }
-

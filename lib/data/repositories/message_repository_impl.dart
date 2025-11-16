@@ -65,7 +65,9 @@ class MessageRepositoryImpl implements IMessageRepository {
   @override
   Stream<List<MessageEntity>> listenToMessages(String chatId) {
     try {
-      return remoteDataSource.listenToMessages(chatId).map(
+      return remoteDataSource
+          .listenToMessages(chatId)
+          .map(
             (messageModels) =>
                 messageModels.map((model) => model.toEntity()).toList(),
           );

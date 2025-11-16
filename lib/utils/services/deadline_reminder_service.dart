@@ -50,10 +50,15 @@ class DeadlineReminderService {
   }
 
   /// Check and send assignment deadline reminders
-  Future<void> _checkAssignmentReminders(String courseId, String studentId) async {
+  Future<void> _checkAssignmentReminders(
+    String courseId,
+    String studentId,
+  ) async {
     try {
       // Get all assignments for the course
-      final assignments = await assignmentRepository.getAssignmentsByCourse(courseId);
+      final assignments = await assignmentRepository.getAssignmentsByCourse(
+        courseId,
+      );
 
       final now = DateTime.now();
       final reminderWindow = now.add(const Duration(hours: 24));
@@ -81,7 +86,9 @@ class DeadlineReminderService {
         }
       }
     } catch (e) {
-      debugPrint('Error checking assignment reminders for course $courseId: $e');
+      debugPrint(
+        'Error checking assignment reminders for course $courseId: $e',
+      );
     }
   }
 
@@ -132,7 +139,8 @@ class DeadlineReminderService {
         id: '', // Firestore will generate
         studentId: studentId,
         title: 'Assignment Deadline Reminder',
-        message: 'Reminder: Assignment "${assignment.title}" is due in $hoursRemaining hours!',
+        message:
+            'Reminder: Assignment "${assignment.title}" is due in $hoursRemaining hours!',
         isRead: false,
         createdAt: DateTime.now(),
         linkTo: 'assignment/$courseId/${assignment.id}',
@@ -140,7 +148,9 @@ class DeadlineReminderService {
       );
 
       await notificationRepository.createNotification(notification);
-      debugPrint('Sent assignment reminder for ${assignment.title} to student $studentId');
+      debugPrint(
+        'Sent assignment reminder for ${assignment.title} to student $studentId',
+      );
     } catch (e) {
       debugPrint('Error sending assignment reminder: $e');
     }
@@ -160,7 +170,8 @@ class DeadlineReminderService {
         id: '', // Firestore will generate
         studentId: studentId,
         title: 'Quiz Deadline Reminder',
-        message: 'Reminder: Quiz "${quiz.title}" closes in $hoursRemaining hours!',
+        message:
+            'Reminder: Quiz "${quiz.title}" closes in $hoursRemaining hours!',
         isRead: false,
         createdAt: DateTime.now(),
         linkTo: 'quiz/$courseId/${quiz.id}',
@@ -204,11 +215,11 @@ class DeadlineReminderService {
           .collection('deadlineReminders')
           .doc('${studentId}_${itemType}_$itemId')
           .set({
-        'studentId': studentId,
-        'itemId': itemId,
-        'itemType': itemType,
-        'sentAt': FieldValue.serverTimestamp(),
-      });
+            'studentId': studentId,
+            'itemId': itemId,
+            'itemType': itemType,
+            'sentAt': FieldValue.serverTimestamp(),
+          });
     } catch (e) {
       debugPrint('Error marking reminder as sent: $e');
     }

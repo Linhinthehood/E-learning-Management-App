@@ -26,8 +26,7 @@ class QuizTrackingScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<QuizTrackingScreen> createState() =>
-      _QuizTrackingScreenState();
+  ConsumerState<QuizTrackingScreen> createState() => _QuizTrackingScreenState();
 }
 
 class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
@@ -138,9 +137,8 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
                           attempts,
                         );
                       },
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (error, stack) => Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -171,9 +169,8 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
                       ),
                     );
                   },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                     child: Text(
                       'Error loading students: ${error.toString()}',
@@ -182,9 +179,7 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
                   ),
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Text(
                   'Error loading enrollments: ${error.toString()}',
@@ -250,8 +245,7 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
     for (var attempt in attempts) {
       if (attempt.isCompleted) {
         final existing = attemptMap[attempt.studentId];
-        if (existing == null ||
-            (attempt.score ?? 0) > (existing.score ?? 0)) {
+        if (existing == null || (attempt.score ?? 0) > (existing.score ?? 0)) {
           attemptMap[attempt.studentId] = attempt;
         }
       }
@@ -272,13 +266,15 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
       final attemptsCount = attemptCounts[enrollment.studentId] ?? 0;
       final status = attempt != null ? 'Completed' : 'Not Started';
 
-      studentTrackingList.add(_StudentQuizData(
-        studentId: enrollment.studentId,
-        studentName: student?.displayName ?? 'Unknown',
-        attempt: attempt,
-        attemptsCount: attemptsCount,
-        status: status,
-      ));
+      studentTrackingList.add(
+        _StudentQuizData(
+          studentId: enrollment.studentId,
+          studentName: student?.displayName ?? 'Unknown',
+          attempt: attempt,
+          attemptsCount: attemptsCount,
+          status: status,
+        ),
+      );
     }
 
     // Apply filter
@@ -341,8 +337,9 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
   Widget _buildStudentQuizCard(_StudentQuizData item) {
     final hasAttempt = item.attempt != null;
     final dateFormat = DateFormat('MMM dd, yyyy HH:mm');
-    final statusColor =
-        item.status == 'Completed' ? Colors.green : AppColors.textSecondary;
+    final statusColor = item.status == 'Completed'
+        ? Colors.green
+        : AppColors.textSecondary;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -437,10 +434,8 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
   void _showAnswerDetail(QuizAttemptEntity attempt) {
     showDialog(
       context: context,
-      builder: (context) => QuizAnswerDetailDialog(
-        quiz: widget.quiz,
-        attempt: attempt,
-      ),
+      builder: (context) =>
+          QuizAnswerDetailDialog(quiz: widget.quiz, attempt: attempt),
     );
   }
 
@@ -452,8 +447,8 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
     final attemptsAsync = ref.read(quizAttemptProvider);
 
     // Check if all data is loaded
-    if (enrollmentsAsync.isLoading || 
-        studentsAsync.isLoading || 
+    if (enrollmentsAsync.isLoading ||
+        studentsAsync.isLoading ||
         attemptsAsync.isLoading) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -466,8 +461,8 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
       return;
     }
 
-    if (enrollmentsAsync.hasError || 
-        studentsAsync.hasError || 
+    if (enrollmentsAsync.hasError ||
+        studentsAsync.hasError ||
         attemptsAsync.hasError) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -492,9 +487,7 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
       }
 
       // Get max score from attempts (use first attempt's maxScore, or default to 100)
-      final maxScore = attempts.isNotEmpty 
-          ? attempts.first.maxScore 
-          : 100.0;
+      final maxScore = attempts.isNotEmpty ? attempts.first.maxScore : 100.0;
 
       // Generate CSV content
       final csvContent = CsvExportService.exportQuizResults(
@@ -507,7 +500,8 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
       // Generate filename with timestamp
       final dateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
       final timestamp = dateFormat.format(DateTime.now());
-      final filename = 'quiz_${widget.quiz.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
+      final filename =
+          'quiz_${widget.quiz.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
 
       // Download file
       await FileDownloadHelper.downloadCsv(
@@ -544,4 +538,3 @@ class _StudentQuizData {
     required this.status,
   });
 }
-

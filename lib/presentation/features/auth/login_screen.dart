@@ -137,9 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     // Logo
                     Container(
-                      width: MediaQuery.of(context).size.width < 600
-                          ? 80
-                          : 100,
+                      width: MediaQuery.of(context).size.width < 600 ? 80 : 100,
                       height: MediaQuery.of(context).size.width < 600
                           ? 80
                           : 100,
@@ -356,7 +354,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         },
                                         activeColor: AppColors.buttonPrimary,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -377,7 +377,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,
                                     minimumSize: const Size(0, 30),
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   child: Text(
                                     'Forgot password?',

@@ -65,14 +65,10 @@ class _NotificationListScreenState
     if (user == null || user.role != UserRole.student) return;
 
     try {
-      await ref
-          .read(notificationProvider.notifier)
-          .markAllAsRead(user.uid);
+      await ref.read(notificationProvider.notifier).markAllAsRead(user.uid);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('All notifications marked as read'),
-          ),
+          const SnackBar(content: Text('All notifications marked as read')),
         );
       }
     } catch (e) {
@@ -90,7 +86,7 @@ class _NotificationListScreenState
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(authProvider);
-    
+
     return userAsync.when(
       data: (user) {
         if (user == null || user.role != UserRole.student) {
@@ -100,7 +96,10 @@ class _NotificationListScreenState
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.textPrimary,
+                ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Text(
@@ -118,7 +117,9 @@ class _NotificationListScreenState
           );
         }
 
-        final notificationsAsync = ref.watch(notificationStreamProvider(user.uid));
+        final notificationsAsync = ref.watch(
+          notificationStreamProvider(user.uid),
+        );
 
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -148,7 +149,10 @@ class _NotificationListScreenState
             children: [
               // Filter chips and Mark all as read
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     FilterChip(
@@ -191,7 +195,9 @@ class _NotificationListScreenState
                             Icon(
                               Icons.notifications_none,
                               size: 64,
-                              color: AppColors.textSecondary.withValues(alpha: 0.5),
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -220,7 +226,9 @@ class _NotificationListScreenState
                     }
 
                     // Group notifications by date
-                    final groupedNotifications = _groupNotificationsByDate(filteredNotifications);
+                    final groupedNotifications = _groupNotificationsByDate(
+                      filteredNotifications,
+                    );
 
                     return RefreshIndicator(
                       onRefresh: () async {
@@ -236,7 +244,9 @@ class _NotificationListScreenState
                             children: [
                               // Date header
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 child: Text(
                                   group['date'] as String,
                                   style: GoogleFonts.inter(
@@ -247,43 +257,55 @@ class _NotificationListScreenState
                                 ),
                               ),
                               // Notifications for this date
-                              ...(group['notifications'] as List<NotificationEntity>)
-                                  .map((notification) => NotificationCard(
-                                        notification: notification,
-                                        onTap: () async {
-                                          // Mark as read
-                                          if (!notification.isRead) {
-                                            await ref
-                                                .read(notificationProvider.notifier)
-                                                .markAsRead(notification.id);
-                                          }
+                              ...(group['notifications']
+                                      as List<NotificationEntity>)
+                                  .map(
+                                    (notification) => NotificationCard(
+                                      notification: notification,
+                                      onTap: () async {
+                                        // Mark as read
+                                        if (!notification.isRead) {
+                                          await ref
+                                              .read(
+                                                notificationProvider.notifier,
+                                              )
+                                              .markAsRead(notification.id);
+                                        }
 
-                                          // Handle deep link
-                                          if (context.mounted) {
-                                            await DeepLinkHandler.handleDeepLink(
-                                              context,
-                                              notification.linkTo,
+                                        // Handle deep link
+                                        if (context.mounted) {
+                                          await DeepLinkHandler.handleDeepLink(
+                                            context,
+                                            notification.linkTo,
+                                          );
+                                        }
+                                      },
+                                      onDelete: () {
+                                        ref
+                                            .read(notificationProvider.notifier)
+                                            .deleteNotification(
+                                              notification.id,
                                             );
-                                          }
-                                        },
-                                        onDelete: () {
-                                          ref
-                                              .read(notificationProvider.notifier)
-                                              .deleteNotification(notification.id);
-                                        },
-                                      )),
+                                      },
+                                    ),
+                                  ),
                             ],
                           );
                         },
                       ),
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'Error loading notifications',
@@ -312,9 +334,8 @@ class _NotificationListScreenState
           ),
         );
       },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (error, stack) => Scaffold(
         body: Center(
           child: Text(
@@ -364,10 +385,14 @@ class _NotificationListScreenState
         return b.compareTo(a); // For other dates, sort descending
       });
 
-    return sortedKeys.map((key) => {
-      'date': key,
-      'notifications': grouped[key]!..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
-      }).toList();
+    return sortedKeys
+        .map(
+          (key) => {
+            'date': key,
+            'notifications': grouped[key]!
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
+          },
+        )
+        .toList();
   }
 }
-

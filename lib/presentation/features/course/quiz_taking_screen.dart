@@ -15,11 +15,7 @@ class QuizTakingScreen extends ConsumerStatefulWidget {
   final QuizEntity quiz;
   final QuizAttemptEntity? existingAttempt; // Resume if in progress
 
-  const QuizTakingScreen({
-    super.key,
-    required this.quiz,
-    this.existingAttempt,
-  });
+  const QuizTakingScreen({super.key, required this.quiz, this.existingAttempt});
 
   @override
   ConsumerState<QuizTakingScreen> createState() => _QuizTakingScreenState();
@@ -99,9 +95,7 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
         if (widget.quiz.shuffleQuestions) {
           bankQuestions.shuffle();
         }
-        allQuestions.addAll(
-          bankQuestions.take(section.numQuestions),
-        );
+        allQuestions.addAll(bankQuestions.take(section.numQuestions));
       } else if (section.usesSpecificQuestions &&
           section.specificQuestionIds != null) {
         // Load specific questions
@@ -132,10 +126,7 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
         .countStudentAttempts(widget.quiz.id, user.uid);
 
     // Calculate max score
-    final maxScore = _questions.fold<double>(
-      0,
-      (sum, q) => sum + q.points,
-    );
+    final maxScore = _questions.fold<double>(0, (sum, q) => sum + q.points);
 
     final attempt = QuizAttemptEntity(
       id: '',
@@ -284,10 +275,7 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
         return answerList.toString() == correctList.toString();
       case QuestionType.shortAnswer:
         // Case-insensitive comparison, trim whitespace
-        return answer
-                .toString()
-                .trim()
-                .toLowerCase() ==
+        return answer.toString().trim().toLowerCase() ==
             question.correctAnswer.toString().trim().toLowerCase();
     }
   }
@@ -446,9 +434,7 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
                 color: AppColors.cardBackground,
-                border: Border(
-                  top: BorderSide(color: AppColors.border),
-                ),
+                border: Border(top: BorderSide(color: AppColors.border)),
               ),
               child: Row(
                 children: [
@@ -482,7 +468,8 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
                       onPressed: _isSubmitting
                           ? null
                           : () {
-                              if (_currentQuestionIndex < _questions.length - 1) {
+                              if (_currentQuestionIndex <
+                                  _questions.length - 1) {
                                 setState(() {
                                   _currentQuestionIndex++;
                                 });
@@ -551,8 +538,9 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: _getDifficultyColor(question.difficulty)
-                        .withValues(alpha: 0.1),
+                    color: _getDifficultyColor(
+                      question.difficulty,
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -612,7 +600,10 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
     }
   }
 
-  Widget _buildMultipleChoiceOptions(QuestionEntity question, dynamic currentAnswer) {
+  Widget _buildMultipleChoiceOptions(
+    QuestionEntity question,
+    dynamic currentAnswer,
+  ) {
     final options = widget.quiz.shuffleAnswers
         ? (List<String>.from(question.options)..shuffle())
         : question.options;
@@ -650,8 +641,7 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
                     // ignore: deprecated_member_use
                     groupValue: currentAnswer,
                     // ignore: deprecated_member_use
-                    onChanged: (value) =>
-                        _answerQuestion(question.id, value),
+                    onChanged: (value) => _answerQuestion(question.id, value),
                     activeColor: AppColors.buttonPrimary,
                   ),
                   const SizedBox(width: 12),
@@ -673,7 +663,10 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
     );
   }
 
-  Widget _buildTrueFalseOptions(QuestionEntity question, dynamic currentAnswer) {
+  Widget _buildTrueFalseOptions(
+    QuestionEntity question,
+    dynamic currentAnswer,
+  ) {
     return Column(
       children: [
         _buildTrueFalseOption(question, 'True', currentAnswer),
@@ -688,7 +681,8 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
     String option,
     dynamic currentAnswer,
   ) {
-    final isSelected = currentAnswer?.toString().toLowerCase() == option.toLowerCase();
+    final isSelected =
+        currentAnswer?.toString().toLowerCase() == option.toLowerCase();
 
     return InkWell(
       onTap: () => _answerQuestion(question.id, option),
@@ -731,7 +725,10 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
     );
   }
 
-  Widget _buildMultipleResponseOptions(QuestionEntity question, dynamic currentAnswer) {
+  Widget _buildMultipleResponseOptions(
+    QuestionEntity question,
+    dynamic currentAnswer,
+  ) {
     final selectedIndices = currentAnswer is List
         ? List<int>.from(currentAnswer)
         : <int>[];
@@ -819,8 +816,13 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
     );
   }
 
-  Widget _buildShortAnswerField(QuestionEntity question, dynamic currentAnswer) {
-    final controller = TextEditingController(text: currentAnswer?.toString() ?? '');
+  Widget _buildShortAnswerField(
+    QuestionEntity question,
+    dynamic currentAnswer,
+  ) {
+    final controller = TextEditingController(
+      text: currentAnswer?.toString() ?? '',
+    );
 
     return TextField(
       controller: controller,
@@ -868,8 +870,7 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
   }
 
   Future<void> _confirmSubmit() async {
-    final unansweredCount =
-        _questions.length - _answers.length;
+    final unansweredCount = _questions.length - _answers.length;
 
     final confirmed = await showDialog<bool>(
       context: context,

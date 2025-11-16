@@ -36,7 +36,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             // Main Content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 40,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -197,7 +200,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  List<CourseProgressData> _buildCourseProgressList(InstructorDashboardData data) {
+  List<CourseProgressData> _buildCourseProgressList(
+    InstructorDashboardData data,
+  ) {
     final courseProgressList = <CourseProgressData>[];
     final colors = [
       const Color(0xFF6366F1), // Indigo
@@ -244,11 +249,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         }
       }
 
-      courseProgressList.add(CourseProgressData(
-        name: course.name,
-        progress: progress.clamp(0.0, 1.0),
-        color: colors[colorIndex % colors.length],
-      ));
+      courseProgressList.add(
+        CourseProgressData(
+          name: course.name,
+          progress: progress.clamp(0.0, 1.0),
+          color: colors[colorIndex % colors.length],
+        ),
+      );
 
       colorIndex++;
     }

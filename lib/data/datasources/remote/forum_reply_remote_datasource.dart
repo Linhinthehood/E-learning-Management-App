@@ -54,8 +54,10 @@ class ForumReplyRemoteDataSourceImpl implements ForumReplyRemoteDataSource {
   @override
   Future<ForumReplyModel?> getReplyById(String replyId) async {
     try {
-      final docSnapshot =
-          await _firestore.collection('forumReplies').doc(replyId).get();
+      final docSnapshot = await _firestore
+          .collection('forumReplies')
+          .doc(replyId)
+          .get();
 
       if (!docSnapshot.exists) {
         return null;
@@ -70,8 +72,9 @@ class ForumReplyRemoteDataSourceImpl implements ForumReplyRemoteDataSource {
   @override
   Future<ForumReplyModel> createReply(ForumReplyModel reply) async {
     try {
-      final docRef =
-          await _firestore.collection('forumReplies').add(reply.toJson());
+      final docRef = await _firestore
+          .collection('forumReplies')
+          .add(reply.toJson());
 
       final docSnapshot = await docRef.get();
       return ForumReplyModel.fromJson(docSnapshot.data()!, docSnapshot.id);

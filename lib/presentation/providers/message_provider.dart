@@ -10,7 +10,9 @@ import '../../domain/repositories/i_notification_repository.dart';
 import './chat_provider.dart';
 
 /// Provider for message remote data source
-final messageRemoteDataSourceProvider = Provider<MessageRemoteDataSource>((ref) {
+final messageRemoteDataSourceProvider = Provider<MessageRemoteDataSource>((
+  ref,
+) {
   return MessageRemoteDataSourceImpl();
 });
 
@@ -24,10 +26,10 @@ final messageRepositoryProvider = Provider<IMessageRepository>((ref) {
 /// Provider for notification repository (for message notifications)
 final notificationRepositoryForMessageProvider =
     Provider<INotificationRepository>((ref) {
-  return NotificationRepositoryImpl(
-    remoteDataSource: NotificationRemoteDataSourceImpl(),
-  );
-});
+      return NotificationRepositoryImpl(
+        remoteDataSource: NotificationRemoteDataSourceImpl(),
+      );
+    });
 
 /// Message state notifier - manages messages for a chat
 class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
@@ -37,7 +39,7 @@ class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
   String? _currentChatId;
 
   MessageNotifier(this._repository, this._notificationRepository, this._ref)
-      : super(const AsyncValue.loading());
+    : super(const AsyncValue.loading());
 
   /// Load messages for a chat
   Future<void> loadMessages(String chatId) async {
@@ -57,14 +59,18 @@ class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
       await _repository.sendMessage(message);
 
       // Update chat metadata with last message
-      await _ref.read(chatRepositoryProvider).updateChatMetadata(
+      await _ref
+          .read(chatRepositoryProvider)
+          .updateChatMetadata(
             message.chatId,
             message.content,
             message.timestamp,
           );
 
       // Increment unread count for recipient
-      final chat = await _ref.read(chatRepositoryProvider).getChatById(message.chatId);
+      final chat = await _ref
+          .read(chatRepositoryProvider)
+          .getChatById(message.chatId);
       if (chat != null) {
         final recipientId = message.senderId == chat.studentId
             ? chat.instructorId
@@ -74,7 +80,8 @@ class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
             .incrementUnreadCount(message.chatId, recipientId);
 
         // Send notification if instructor sends message to student
-        if (message.senderId == chat.instructorId && recipientId == chat.studentId) {
+        if (message.senderId == chat.instructorId &&
+            recipientId == chat.studentId) {
           await _sendMessageNotification(chat.studentId, message.chatId);
         }
       }
@@ -139,32 +146,33 @@ class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
 }
 
 /// Provider for message state notifier
-final messageProvider = StateNotifierProvider<
-    MessageNotifier,
-    AsyncValue<List<MessageEntity>>
->((ref) {
-  return MessageNotifier(
-    ref.read(messageRepositoryProvider),
-    ref.read(notificationRepositoryForMessageProvider),
-    ref,
-  );
-});
+final messageProvider =
+    StateNotifierProvider<MessageNotifier, AsyncValue<List<MessageEntity>>>((
+      ref,
+    ) {
+      return MessageNotifier(
+        ref.read(messageRepositoryProvider),
+        ref.read(notificationRepositoryForMessageProvider),
+        ref,
+      );
+    });
 
 /// Provider for real-time message stream
-final messageStreamProvider = StreamProvider.family<List<MessageEntity>, String>((
-  ref,
-  chatId,
-) {
-  final repository = ref.read(messageRepositoryProvider);
-  return repository.listenToMessages(chatId);
-});
+final messageStreamProvider =
+    StreamProvider.family<List<MessageEntity>, String>((ref, chatId) {
+      final repository = ref.read(messageRepositoryProvider);
+      return repository.listenToMessages(chatId);
+    });
 
 /// Provider for unread message count
 final unreadMessageCountProvider =
     FutureProvider.family<int, ({String chatId, String userId})>((
-  ref,
-  params,
-) async {
-  final repository = ref.read(messageRepositoryProvider);
-  return await repository.getUnreadMessageCount(params.chatId, params.userId);
-});
+      ref,
+      params,
+    ) async {
+      final repository = ref.read(messageRepositoryProvider);
+      return await repository.getUnreadMessageCount(
+        params.chatId,
+        params.userId,
+      );
+    });

@@ -39,7 +39,7 @@ class CourseCsvImportService {
   final FirebaseFirestore _firestore;
 
   CourseCsvImportService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Required columns for course CSV
   static const List<String> requiredColumns = [
@@ -190,7 +190,10 @@ class CourseCsvImportService {
     int sessions = 15;
     final sessionsStr = row['sessions']?.toString().trim() ?? '';
     if (sessionsStr.isNotEmpty) {
-      final numericError = CsvImportService.validateNumeric(sessionsStr, 'Sessions');
+      final numericError = CsvImportService.validateNumeric(
+        sessionsStr,
+        'Sessions',
+      );
       if (numericError != null) {
         errors.add(numericError);
       } else {
@@ -242,7 +245,10 @@ class CourseCsvImportService {
   /// Verify semester exists
   Future<bool> _verifySemesterExists(String semesterId) async {
     try {
-      final doc = await _firestore.collection('semesters').doc(semesterId).get();
+      final doc = await _firestore
+          .collection('semesters')
+          .doc(semesterId)
+          .get();
       return doc.exists;
     } catch (e) {
       return false;

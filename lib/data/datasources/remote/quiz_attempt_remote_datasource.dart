@@ -7,7 +7,7 @@ class QuizAttemptRemoteDatasource {
   final FirebaseFirestore _firestore;
 
   QuizAttemptRemoteDatasource({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Create a new attempt
   Future<String> createAttempt(QuizAttemptModel attempt) async {
@@ -136,10 +136,7 @@ class QuizAttemptRemoteDatasource {
   }
 
   /// Update an attempt
-  Future<void> updateAttempt(
-    String attemptId,
-    QuizAttemptModel attempt,
-  ) async {
+  Future<void> updateAttempt(String attemptId, QuizAttemptModel attempt) async {
     try {
       await _firestore
           .collection('quizAttempts')
@@ -153,10 +150,7 @@ class QuizAttemptRemoteDatasource {
   /// Delete an attempt
   Future<void> deleteAttempt(String attemptId) async {
     try {
-      await _firestore
-          .collection('quizAttempts')
-          .doc(attemptId)
-          .delete();
+      await _firestore.collection('quizAttempts').doc(attemptId).delete();
     } catch (e) {
       throw Exception('Failed to delete quiz attempt: ${e.toString()}');
     }

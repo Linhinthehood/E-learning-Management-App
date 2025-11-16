@@ -90,226 +90,238 @@ class Statistics {
 /// Repository Providers
 final assignmentRepositoryForDashboardProvider =
     Provider<IAssignmentRepository>((ref) {
-  return AssignmentRepositoryImpl(
-    remoteDataSource: AssignmentRemoteDataSourceImpl(),
-  );
-});
+      return AssignmentRepositoryImpl(
+        remoteDataSource: AssignmentRemoteDataSourceImpl(),
+      );
+    });
 
 final quizRepositoryForDashboardProvider = Provider<IQuizRepository>((ref) {
-  return QuizRepositoryImpl(
-    remoteDataSource: QuizRemoteDataSourceImpl(),
-  );
+  return QuizRepositoryImpl(remoteDataSource: QuizRemoteDataSourceImpl());
 });
 
 final assignmentSubmissionRepositoryForDashboardProvider =
     Provider<IAssignmentSubmissionRepository>((ref) {
-  return AssignmentSubmissionRepositoryImpl(
-    remoteDatasource: AssignmentSubmissionRemoteDatasource(),
-  );
-});
+      return AssignmentSubmissionRepositoryImpl(
+        remoteDatasource: AssignmentSubmissionRemoteDatasource(),
+      );
+    });
 
 final quizAttemptRepositoryForDashboardProvider =
     Provider<IQuizAttemptRepository>((ref) {
-  return QuizAttemptRepositoryImpl(
-    remoteDatasource: QuizAttemptRemoteDatasource(),
-  );
-});
+      return QuizAttemptRepositoryImpl(
+        remoteDatasource: QuizAttemptRemoteDatasource(),
+      );
+    });
 
 final courseRepositoryForDashboardProvider = Provider<ICourseRepository>((ref) {
-  return CourseRepositoryImpl(
-    remoteDataSource: CourseRemoteDataSourceImpl(),
-  );
+  return CourseRepositoryImpl(remoteDataSource: CourseRemoteDataSourceImpl());
 });
 
 final enrollmentRepositoryForDashboardProvider =
     Provider<IEnrollmentRepository>((ref) {
-  return EnrollmentRepositoryImpl(
-    remoteDataSource: EnrollmentRemoteDataSourceImpl(),
-  );
-});
+      return EnrollmentRepositoryImpl(
+        remoteDataSource: EnrollmentRemoteDataSourceImpl(),
+      );
+    });
 
 /// Student Dashboard Provider
-final studentDashboardProvider = FutureProvider.family<
-    StudentDashboardData,
-    StudentDashboardParams>((ref, params) async {
-  final assignmentRepo = ref.read(assignmentRepositoryForDashboardProvider);
-  final quizRepo = ref.read(quizRepositoryForDashboardProvider);
-  final submissionRepo =
-      ref.read(assignmentSubmissionRepositoryForDashboardProvider);
-  final attemptRepo = ref.read(quizAttemptRepositoryForDashboardProvider);
-  final courseRepo = ref.read(courseRepositoryForDashboardProvider);
-  final enrollmentRepo = ref.read(enrollmentRepositoryForDashboardProvider);
+final studentDashboardProvider =
+    FutureProvider.family<StudentDashboardData, StudentDashboardParams>((
+      ref,
+      params,
+    ) async {
+      final assignmentRepo = ref.read(assignmentRepositoryForDashboardProvider);
+      final quizRepo = ref.read(quizRepositoryForDashboardProvider);
+      final submissionRepo = ref.read(
+        assignmentSubmissionRepositoryForDashboardProvider,
+      );
+      final attemptRepo = ref.read(quizAttemptRepositoryForDashboardProvider);
+      final courseRepo = ref.read(courseRepositoryForDashboardProvider);
+      final enrollmentRepo = ref.read(enrollmentRepositoryForDashboardProvider);
 
-  // Get student's courses
-  final enrollments = await enrollmentRepo.getEnrollmentsByStudent(
-    params.studentId,
-    params.semesterId,
-  );
+      // Get student's courses
+      final enrollments = await enrollmentRepo.getEnrollmentsByStudent(
+        params.studentId,
+        params.semesterId,
+      );
 
-  final courseIds = enrollments.map((e) => e.courseId).toList();
-  if (courseIds.isEmpty) {
-    return StudentDashboardData(
-      upcomingAssignments: [],
-      upcomingQuizzes: [],
-      recentGrades: [],
-      courseProgress: {},
-      courseMap: {},
-      statistics: Statistics(
-        totalCourses: 0,
-        pendingAssignments: 0,
-        upcomingQuizzes: 0,
-        overallAverage: 0.0,
-      ),
-    );
-  }
+      final courseIds = enrollments.map((e) => e.courseId).toList();
+      if (courseIds.isEmpty) {
+        return StudentDashboardData(
+          upcomingAssignments: [],
+          upcomingQuizzes: [],
+          recentGrades: [],
+          courseProgress: {},
+          courseMap: {},
+          statistics: Statistics(
+            totalCourses: 0,
+            pendingAssignments: 0,
+            upcomingQuizzes: 0,
+            overallAverage: 0.0,
+          ),
+        );
+      }
 
-  // Get all courses and create course map
-  final courseMap = <String, CourseEntity>{};
-  for (final courseId in courseIds) {
-    final course = await courseRepo.getCourseById(courseId);
-    if (course != null) {
-      courseMap[courseId] = course;
-    }
-  }
+      // Get all courses and create course map
+      final courseMap = <String, CourseEntity>{};
+      for (final courseId in courseIds) {
+        final course = await courseRepo.getCourseById(courseId);
+        if (course != null) {
+          courseMap[courseId] = course;
+        }
+      }
 
-  // Get all assignments and quizzes for student's courses
-  final allAssignments = <AssignmentEntity>[];
-  final allQuizzes = <QuizEntity>[];
+      // Get all assignments and quizzes for student's courses
+      final allAssignments = <AssignmentEntity>[];
+      final allQuizzes = <QuizEntity>[];
 
-  for (final courseId in courseIds) {
-    final assignments = await assignmentRepo.getAssignmentsByCourse(courseId);
-    allAssignments.addAll(assignments);
+      for (final courseId in courseIds) {
+        final assignments = await assignmentRepo.getAssignmentsByCourse(
+          courseId,
+        );
+        allAssignments.addAll(assignments);
 
-    final quizzes = await quizRepo.getQuizzesByCourse(courseId);
-    allQuizzes.addAll(quizzes);
-  }
+        final quizzes = await quizRepo.getQuizzesByCourse(courseId);
+        allQuizzes.addAll(quizzes);
+      }
 
-  // Get student's submissions and attempts
-  final allSubmissions =
-      await submissionRepo.getAllStudentSubmissions(params.studentId);
-  final allAttempts =
-      await attemptRepo.getAllStudentAttempts(params.studentId);
+      // Get student's submissions and attempts
+      final allSubmissions = await submissionRepo.getAllStudentSubmissions(
+        params.studentId,
+      );
+      final allAttempts = await attemptRepo.getAllStudentAttempts(
+        params.studentId,
+      );
 
-  // Filter upcoming assignments (deadline within next 7 days and not submitted)
-  final now = DateTime.now();
-  final sevenDaysFromNow = now.add(const Duration(days: 7));
-  final submittedAssignmentIds =
-      allSubmissions.map((s) => s.assignmentId).toSet();
+      // Filter upcoming assignments (deadline within next 7 days and not submitted)
+      final now = DateTime.now();
+      final sevenDaysFromNow = now.add(const Duration(days: 7));
+      final submittedAssignmentIds = allSubmissions
+          .map((s) => s.assignmentId)
+          .toSet();
 
-  final upcomingAssignments = allAssignments.where((assignment) {
-    final isUpcoming = assignment.deadline.isAfter(now) &&
-        assignment.deadline.isBefore(sevenDaysFromNow);
-    final notSubmitted = !submittedAssignmentIds.contains(assignment.id);
-    return isUpcoming && notSubmitted;
-  }).toList()
-    ..sort((a, b) => a.deadline.compareTo(b.deadline));
+      final upcomingAssignments = allAssignments.where((assignment) {
+        final isUpcoming =
+            assignment.deadline.isAfter(now) &&
+            assignment.deadline.isBefore(sevenDaysFromNow);
+        final notSubmitted = !submittedAssignmentIds.contains(assignment.id);
+        return isUpcoming && notSubmitted;
+      }).toList()..sort((a, b) => a.deadline.compareTo(b.deadline));
 
-  // Filter upcoming quizzes (opens within next 7 days or closes within next 7 days)
-  final upcomingQuizzes = allQuizzes.where((quiz) {
-    final opensSoon = quiz.timeOpen.isAfter(now) &&
-        quiz.timeOpen.isBefore(sevenDaysFromNow);
-    final closesSoon = quiz.timeClose.isAfter(now) &&
-        quiz.timeClose.isBefore(sevenDaysFromNow);
-    final isOpen = quiz.isOpen;
-    return (opensSoon || closesSoon || isOpen) && !quiz.isClosed;
-  }).toList()
-    ..sort((a, b) => a.timeOpen.compareTo(b.timeOpen));
+      // Filter upcoming quizzes (opens within next 7 days or closes within next 7 days)
+      final upcomingQuizzes = allQuizzes.where((quiz) {
+        final opensSoon =
+            quiz.timeOpen.isAfter(now) &&
+            quiz.timeOpen.isBefore(sevenDaysFromNow);
+        final closesSoon =
+            quiz.timeClose.isAfter(now) &&
+            quiz.timeClose.isBefore(sevenDaysFromNow);
+        final isOpen = quiz.isOpen;
+        return (opensSoon || closesSoon || isOpen) && !quiz.isClosed;
+      }).toList()..sort((a, b) => a.timeOpen.compareTo(b.timeOpen));
 
-  // Get recent grades (graded submissions from last 30 days)
-  final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-  final recentGrades = allSubmissions
-      .where((s) => s.grade != null && s.submissionTime.isAfter(thirtyDaysAgo))
-      .toList()
-    ..sort((a, b) => b.submissionTime.compareTo(a.submissionTime));
+      // Get recent grades (graded submissions from last 30 days)
+      final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+      final recentGrades =
+          allSubmissions
+              .where(
+                (s) =>
+                    s.grade != null && s.submissionTime.isAfter(thirtyDaysAgo),
+              )
+              .toList()
+            ..sort((a, b) => b.submissionTime.compareTo(a.submissionTime));
 
-  // Calculate course progress
-  final courseProgress = <String, CourseProgress>{};
+      // Calculate course progress
+      final courseProgress = <String, CourseProgress>{};
 
-  for (final courseId in courseIds) {
-    final course = courseMap[courseId];
-    if (course == null) continue;
+      for (final courseId in courseIds) {
+        final course = courseMap[courseId];
+        if (course == null) continue;
 
-    final courseAssignments =
-        allAssignments.where((a) => a.courseId == courseId).toList();
-    final courseQuizzes =
-        allQuizzes.where((q) => q.courseId == courseId).toList();
+        final courseAssignments = allAssignments
+            .where((a) => a.courseId == courseId)
+            .toList();
+        final courseQuizzes = allQuizzes
+            .where((q) => q.courseId == courseId)
+            .toList();
 
-    final courseSubmissions = allSubmissions
-        .where((s) => s.courseId == courseId)
-        .toList();
-    final courseAttempts =
-        allAttempts.where((a) => a.courseId == courseId).toList();
+        final courseSubmissions = allSubmissions
+            .where((s) => s.courseId == courseId)
+            .toList();
+        final courseAttempts = allAttempts
+            .where((a) => a.courseId == courseId)
+            .toList();
 
-    final submittedAssignmentIds =
-        courseSubmissions.map((s) => s.assignmentId).toSet();
-    final completedQuizIds = courseAttempts
-        .where((a) => a.isCompleted)
-        .map((a) => a.quizId)
-        .toSet();
+        final submittedAssignmentIds = courseSubmissions
+            .map((s) => s.assignmentId)
+            .toSet();
+        final completedQuizIds = courseAttempts
+            .where((a) => a.isCompleted)
+            .map((a) => a.quizId)
+            .toSet();
 
-    final gradedSubmissions =
-        courseSubmissions.where((s) => s.grade != null).toList();
-    final averageGrade = gradedSubmissions.isEmpty
-        ? 0.0
-        : gradedSubmissions.map((s) => s.grade!).reduce((a, b) => a + b) /
-            gradedSubmissions.length;
+        final gradedSubmissions = courseSubmissions
+            .where((s) => s.grade != null)
+            .toList();
+        final averageGrade = gradedSubmissions.isEmpty
+            ? 0.0
+            : gradedSubmissions.map((s) => s.grade!).reduce((a, b) => a + b) /
+                  gradedSubmissions.length;
 
-    courseProgress[courseId] = CourseProgress(
-      courseId: courseId,
-      courseName: course.name,
-      totalAssignments: courseAssignments.length,
-      submittedAssignments: submittedAssignmentIds.length,
-      totalQuizzes: courseQuizzes.length,
-      completedQuizzes: completedQuizIds.length,
-      averageGrade: averageGrade,
-    );
-  }
+        courseProgress[courseId] = CourseProgress(
+          courseId: courseId,
+          courseName: course.name,
+          totalAssignments: courseAssignments.length,
+          submittedAssignments: submittedAssignmentIds.length,
+          totalQuizzes: courseQuizzes.length,
+          completedQuizzes: completedQuizIds.length,
+          averageGrade: averageGrade,
+        );
+      }
 
-  // Calculate statistics
-  final pendingAssignmentsCount = allAssignments
-      .where((a) =>
-          !a.isClosed &&
-          !submittedAssignmentIds.contains(a.id) &&
-          a.deadline.isAfter(now))
-      .length;
+      // Calculate statistics
+      final pendingAssignmentsCount = allAssignments
+          .where(
+            (a) =>
+                !a.isClosed &&
+                !submittedAssignmentIds.contains(a.id) &&
+                a.deadline.isAfter(now),
+          )
+          .length;
 
-  final upcomingQuizzesCount = upcomingQuizzes.length;
+      final upcomingQuizzesCount = upcomingQuizzes.length;
 
-  final allGradedSubmissions =
-      allSubmissions.where((s) => s.grade != null).toList();
-  final overallAverage = allGradedSubmissions.isEmpty
-      ? 0.0
-      : allGradedSubmissions
-              .map((s) => s.grade!)
-              .reduce((a, b) => a + b) /
-          allGradedSubmissions.length;
+      final allGradedSubmissions = allSubmissions
+          .where((s) => s.grade != null)
+          .toList();
+      final overallAverage = allGradedSubmissions.isEmpty
+          ? 0.0
+          : allGradedSubmissions.map((s) => s.grade!).reduce((a, b) => a + b) /
+                allGradedSubmissions.length;
 
-  final statistics = Statistics(
-    totalCourses: courseIds.length,
-    pendingAssignments: pendingAssignmentsCount,
-    upcomingQuizzes: upcomingQuizzesCount,
-    overallAverage: overallAverage,
-  );
+      final statistics = Statistics(
+        totalCourses: courseIds.length,
+        pendingAssignments: pendingAssignmentsCount,
+        upcomingQuizzes: upcomingQuizzesCount,
+        overallAverage: overallAverage,
+      );
 
-  return StudentDashboardData(
-    upcomingAssignments: upcomingAssignments.take(5).toList(),
-    upcomingQuizzes: upcomingQuizzes.take(5).toList(),
-    recentGrades: recentGrades.take(10).toList(),
-    courseProgress: courseProgress,
-    courseMap: courseMap,
-    statistics: statistics,
-  );
-});
+      return StudentDashboardData(
+        upcomingAssignments: upcomingAssignments.take(5).toList(),
+        upcomingQuizzes: upcomingQuizzes.take(5).toList(),
+        recentGrades: recentGrades.take(10).toList(),
+        courseProgress: courseProgress,
+        courseMap: courseMap,
+        statistics: statistics,
+      );
+    });
 
 /// Parameters for student dashboard
 class StudentDashboardParams {
   final String studentId;
   final String semesterId;
 
-  StudentDashboardParams({
-    required this.studentId,
-    required this.semesterId,
-  });
+  StudentDashboardParams({required this.studentId, required this.semesterId});
 
   @override
   bool operator ==(Object other) =>
@@ -322,4 +334,3 @@ class StudentDashboardParams {
   @override
   int get hashCode => studentId.hashCode ^ semesterId.hashCode;
 }
-

@@ -2,9 +2,9 @@ import 'package:csv/csv.dart';
 
 /// Represents the status of a CSV row during import preview
 enum CsvRowStatus {
-  willBeAdded,    // New record, will be imported
-  alreadyExists,  // Duplicate detected, will be skipped
-  invalidData,    // Validation error, cannot import
+  willBeAdded, // New record, will be imported
+  alreadyExists, // Duplicate detected, will be skipped
+  invalidData, // Validation error, cannot import
 }
 
 /// Represents a single row in the CSV import preview
@@ -82,7 +82,9 @@ class CsvImportService {
       }
 
       // Get headers (first row)
-      final List<String> headers = csvData.first.map((e) => e.toString().trim()).toList();
+      final List<String> headers = csvData.first
+          .map((e) => e.toString().trim())
+          .toList();
 
       // Validate required columns
       for (final column in requiredColumns) {
@@ -97,7 +99,8 @@ class CsvImportService {
         final rowNumber = i + 1; // Row number in spreadsheet (1-indexed)
 
         // Skip empty rows
-        if (rowData.isEmpty || rowData.every((cell) => cell.toString().trim().isEmpty)) {
+        if (rowData.isEmpty ||
+            rowData.every((cell) => cell.toString().trim().isEmpty)) {
           continue;
         }
 
@@ -110,13 +113,15 @@ class CsvImportService {
         // Check if duplicate
         final isDuplicate = await checkDuplicate(rowMap);
         if (isDuplicate) {
-          rows.add(CsvImportRow<T>(
-            rowNumber: rowNumber,
-            data: null,
-            status: CsvRowStatus.alreadyExists,
-            errorMessage: 'This record already exists in the system',
-            rawData: rowMap,
-          ));
+          rows.add(
+            CsvImportRow<T>(
+              rowNumber: rowNumber,
+              data: null,
+              status: CsvRowStatus.alreadyExists,
+              errorMessage: 'This record already exists in the system',
+              rawData: rowMap,
+            ),
+          );
           duplicateCount++;
           continue;
         }
@@ -125,32 +130,38 @@ class CsvImportService {
         try {
           final T? validatedData = await validateRow(rowMap);
           if (validatedData != null) {
-            rows.add(CsvImportRow<T>(
-              rowNumber: rowNumber,
-              data: validatedData,
-              status: CsvRowStatus.willBeAdded,
-              errorMessage: null,
-              rawData: rowMap,
-            ));
+            rows.add(
+              CsvImportRow<T>(
+                rowNumber: rowNumber,
+                data: validatedData,
+                status: CsvRowStatus.willBeAdded,
+                errorMessage: null,
+                rawData: rowMap,
+              ),
+            );
             validCount++;
           } else {
-            rows.add(CsvImportRow<T>(
-              rowNumber: rowNumber,
-              data: null,
-              status: CsvRowStatus.invalidData,
-              errorMessage: 'Validation failed: Invalid data format',
-              rawData: rowMap,
-            ));
+            rows.add(
+              CsvImportRow<T>(
+                rowNumber: rowNumber,
+                data: null,
+                status: CsvRowStatus.invalidData,
+                errorMessage: 'Validation failed: Invalid data format',
+                rawData: rowMap,
+              ),
+            );
             invalidCount++;
           }
         } catch (e) {
-          rows.add(CsvImportRow<T>(
-            rowNumber: rowNumber,
-            data: null,
-            status: CsvRowStatus.invalidData,
-            errorMessage: 'Validation error: ${e.toString()}',
-            rawData: rowMap,
-          ));
+          rows.add(
+            CsvImportRow<T>(
+              rowNumber: rowNumber,
+              data: null,
+              status: CsvRowStatus.invalidData,
+              errorMessage: 'Validation error: ${e.toString()}',
+              rawData: rowMap,
+            ),
+          );
           invalidCount++;
         }
       }
@@ -197,7 +208,9 @@ class CsvImportService {
           addedCount++;
         } catch (e) {
           errorCount++;
-          errors.add('Row ${row.rowNumber}: Failed to import - ${e.toString()}');
+          errors.add(
+            'Row ${row.rowNumber}: Failed to import - ${e.toString()}',
+          );
         }
       }
     }
@@ -241,7 +254,9 @@ class CsvImportService {
   }
 
   /// Validate string length
-  static String? validateLength(String? value, String fieldName, {
+  static String? validateLength(
+    String? value,
+    String fieldName, {
     int? min,
     int? max,
   }) {
@@ -268,7 +283,8 @@ class CsvImportService {
       return null; // Use validateRequired for required checks
     }
 
-    if (int.tryParse(value.trim()) == null && double.tryParse(value.trim()) == null) {
+    if (int.tryParse(value.trim()) == null &&
+        double.tryParse(value.trim()) == null) {
       return '$fieldName must be a valid number';
     }
 

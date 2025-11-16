@@ -224,29 +224,34 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
         final createdAssignment = await ref
             .read(assignmentProvider.notifier)
             .createAssignment(assignment);
-        
+
         // Send notification to students
         try {
-          final linkTo = 'assignment/${widget.course.id}/${createdAssignment.id}';
-          
+          final linkTo =
+              'assignment/${widget.course.id}/${createdAssignment.id}';
+
           if (createdAssignment.isForAllGroups) {
             // Send to all students in course
-            await ref.read(notificationProvider.notifier).sendToAllStudentsInCourse(
-              widget.course.id,
-              'New Assignment: ${createdAssignment.title}',
-              'A new assignment "${createdAssignment.title}" has been posted. Deadline: ${_formatDate(createdAssignment.deadline)}',
-              linkTo,
-              NotificationEntity.typeAssignment,
-            );
+            await ref
+                .read(notificationProvider.notifier)
+                .sendToAllStudentsInCourse(
+                  widget.course.id,
+                  'New Assignment: ${createdAssignment.title}',
+                  'A new assignment "${createdAssignment.title}" has been posted. Deadline: ${_formatDate(createdAssignment.deadline)}',
+                  linkTo,
+                  NotificationEntity.typeAssignment,
+                );
           } else {
             // Send to specific groups
-            await ref.read(notificationProvider.notifier).sendToGroupStudents(
-              createdAssignment.scopedGroupIds,
-              'New Assignment: ${createdAssignment.title}',
-              'A new assignment "${createdAssignment.title}" has been posted. Deadline: ${_formatDate(createdAssignment.deadline)}',
-              linkTo,
-              NotificationEntity.typeAssignment,
-            );
+            await ref
+                .read(notificationProvider.notifier)
+                .sendToGroupStudents(
+                  createdAssignment.scopedGroupIds,
+                  'New Assignment: ${createdAssignment.title}',
+                  'A new assignment "${createdAssignment.title}" has been posted. Deadline: ${_formatDate(createdAssignment.deadline)}',
+                  linkTo,
+                  NotificationEntity.typeAssignment,
+                );
           }
         } catch (e) {
           // Log error but don't fail the assignment creation
@@ -279,8 +284,18 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

@@ -6,7 +6,8 @@ class GroupImportData {
   final String name;
   final String courseId;
   final String semesterId;
-  final List<String>? studentIds; // Optional: comma-separated student emails or IDs
+  final List<String>?
+  studentIds; // Optional: comma-separated student emails or IDs
 
   GroupImportData({
     required this.name,
@@ -30,13 +31,10 @@ class GroupCsvImportService {
   final FirebaseFirestore _firestore;
 
   GroupCsvImportService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Required columns for group CSV
-  static const List<String> requiredColumns = [
-    'name',
-    'courseId',
-  ];
+  static const List<String> requiredColumns = ['name', 'courseId'];
 
   /// Optional columns for group CSV
   static const List<String> optionalColumns = [
@@ -47,12 +45,7 @@ class GroupCsvImportService {
   /// Generate CSV template for groups
   static String generateTemplate() {
     return CsvImportService.generateTemplate(
-      columns: [
-        'name',
-        'courseId',
-        'semesterId',
-        'studentEmails',
-      ],
+      columns: ['name', 'courseId', 'semesterId', 'studentEmails'],
       sampleData: [
         [
           'Group 1',
@@ -227,7 +220,10 @@ class GroupCsvImportService {
   /// Verify semester exists
   Future<bool> _verifySemesterExists(String semesterId) async {
     try {
-      final doc = await _firestore.collection('semesters').doc(semesterId).get();
+      final doc = await _firestore
+          .collection('semesters')
+          .doc(semesterId)
+          .get();
       return doc.exists;
     } catch (e) {
       return false;

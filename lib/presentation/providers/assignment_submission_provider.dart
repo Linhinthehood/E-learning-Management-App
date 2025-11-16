@@ -42,9 +42,17 @@ final assignmentSubmissionProvider =
       AsyncValue<List<AssignmentSubmissionEntity>>
     >((ref) {
       final repository = ref.watch(assignmentSubmissionRepositoryProvider);
-      final notificationRepo = ref.watch(notificationRepositoryForSubmissionProvider);
-      final assignmentRepo = ref.watch(assignmentRepositoryForSubmissionProvider);
-      return AssignmentSubmissionNotifier(repository, notificationRepo, assignmentRepo);
+      final notificationRepo = ref.watch(
+        notificationRepositoryForSubmissionProvider,
+      );
+      final assignmentRepo = ref.watch(
+        assignmentRepositoryForSubmissionProvider,
+      );
+      return AssignmentSubmissionNotifier(
+        repository,
+        notificationRepo,
+        assignmentRepo,
+      );
     });
 
 /// State notifier for assignment submissions
@@ -124,7 +132,8 @@ class AssignmentSubmissionNotifier
         id: '', // Firestore will generate
         studentId: submission.studentId,
         title: 'Submission Confirmed',
-        message: 'Your submission for "${assignment.title}" has been received successfully.',
+        message:
+            'Your submission for "${assignment.title}" has been received successfully.',
         isRead: false,
         createdAt: DateTime.now(),
         linkTo: 'assignment/${submission.courseId}/${submission.assignmentId}',
@@ -182,7 +191,8 @@ class AssignmentSubmissionNotifier
         id: '', // Firestore will generate
         studentId: submission.studentId,
         title: 'Assignment Graded',
-        message: 'Your assignment "${assignment.title}" has been graded. Score: ${submission.grade?.toStringAsFixed(1)}',
+        message:
+            'Your assignment "${assignment.title}" has been graded. Score: ${submission.grade?.toStringAsFixed(1)}',
         isRead: false,
         createdAt: DateTime.now(),
         linkTo: 'assignment/${submission.courseId}/${submission.assignmentId}',

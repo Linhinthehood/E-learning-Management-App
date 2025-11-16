@@ -47,7 +47,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           .toList();
 
       // Sort by last message timestamp descending (newest first)
-      chats.sort((a, b) => b.lastMessageTimestamp.compareTo(a.lastMessageTimestamp));
+      chats.sort(
+        (a, b) => b.lastMessageTimestamp.compareTo(a.lastMessageTimestamp),
+      );
 
       return chats;
     } catch (e) {
@@ -58,8 +60,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   @override
   Future<ChatModel?> getChatById(String chatId) async {
     try {
-      final docSnapshot =
-          await _firestore.collection('chats').doc(chatId).get();
+      final docSnapshot = await _firestore
+          .collection('chats')
+          .doc(chatId)
+          .get();
 
       if (!docSnapshot.exists) {
         return null;
@@ -72,7 +76,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<ChatModel> getOrCreateChat(String studentId, String instructorId) async {
+  Future<ChatModel> getOrCreateChat(
+    String studentId,
+    String instructorId,
+  ) async {
     try {
       // Create composite ID
       final chatId = '${studentId}_$instructorId';
@@ -171,7 +178,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       for (var chat in chats) {
         if (userId == chat.studentId && chat.unreadCountStudent > 0) {
           unreadCount++;
-        } else if (userId == chat.instructorId && chat.unreadCountInstructor > 0) {
+        } else if (userId == chat.instructorId &&
+            chat.unreadCountInstructor > 0) {
           unreadCount++;
         }
       }

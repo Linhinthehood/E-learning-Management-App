@@ -63,10 +63,7 @@ class QuizAttemptRepositoryImpl implements IQuizAttemptRepository {
     String studentId,
   ) async {
     try {
-      final model = await _remoteDatasource.getLatestAttempt(
-        quizId,
-        studentId,
-      );
+      final model = await _remoteDatasource.getLatestAttempt(quizId, studentId);
       return model?.toEntity();
     } catch (e) {
       throw Exception('Failed to get latest attempt: ${e.toString()}');
@@ -109,7 +106,9 @@ class QuizAttemptRepositoryImpl implements IQuizAttemptRepository {
   }
 
   @override
-  Future<List<QuizAttemptEntity>> getAllStudentAttempts(String studentId) async {
+  Future<List<QuizAttemptEntity>> getAllStudentAttempts(
+    String studentId,
+  ) async {
     try {
       final models = await _remoteDatasource.getAllStudentAttempts(studentId);
       return models.map((model) => model.toEntity()).toList();

@@ -32,6 +32,9 @@ dependencies:
   intl: ^0.19.0
   file_picker: ^8.1.6
   connectivity_plus: ^6.1.2
+  image_picker: ^1.1.2
+  http: ^1.2.2
+  url_launcher: ^6.3.1
 
   # CSV Export
   csv: ^5.0.0

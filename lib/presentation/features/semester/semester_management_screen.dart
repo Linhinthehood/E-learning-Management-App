@@ -31,9 +31,8 @@ class _SemesterManagementScreenState
     var filtered = semesters.where((semester) {
       // Search filter
       if (_searchQuery.isNotEmpty) {
-        final matchesSearch = semester.name
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
+        final matchesSearch =
+            semester.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
             semester.code.toLowerCase().contains(_searchQuery.toLowerCase());
         if (!matchesSearch) return false;
       }
@@ -185,22 +184,23 @@ class _SemesterManagementScreenState
                   borderSide: const BorderSide(color: AppColors.border),
                 ),
               ),
-              items: [
-                'Start Date (Newest)',
-                'Start Date (Oldest)',
-                'Name (A-Z)',
-                'Name (Z-A)',
-                'Duration (Short-Long)',
-                'Duration (Long-Short)',
-              ].map((sortOption) {
-                return DropdownMenuItem(
-                  value: sortOption,
-                  child: Text(
-                    sortOption,
-                    style: GoogleFonts.inter(fontSize: 14),
-                  ),
-                );
-              }).toList(),
+              items:
+                  [
+                    'Start Date (Newest)',
+                    'Start Date (Oldest)',
+                    'Name (A-Z)',
+                    'Name (Z-A)',
+                    'Duration (Short-Long)',
+                    'Duration (Long-Short)',
+                  ].map((sortOption) {
+                    return DropdownMenuItem(
+                      value: sortOption,
+                      child: Text(
+                        sortOption,
+                        style: GoogleFonts.inter(fontSize: 14),
+                      ),
+                    );
+                  }).toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
@@ -231,7 +231,9 @@ class _SemesterManagementScreenState
                           Icon(
                             Icons.search_off,
                             size: 80,
-                            color: AppColors.textSecondary.withValues(alpha: 0.3),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                           const SizedBox(height: 24),
                           Text(

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../domain/entities/course_entity.dart';
 import '../../../../domain/entities/semester_entity.dart';
 import '../../../common/styles/colors.dart';
 import '../../../providers/course_provider.dart';
 import '../../../providers/semester_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../../services/image_upload_service.dart';
 
 /// Dialog for creating or editing a course
 class CourseFormDialog extends ConsumerStatefulWidget {
@@ -26,6 +28,9 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
   SemesterEntity? _selectedSemester;
   int _selectedSessions = 10;
   bool _isLoading = false;
+  bool _isUploadingImage = false;
+  double _imageUploadProgress = 0.0;
+  final ImageUploadService _imageUploadService = ImageUploadService();
 
   @override
   void initState() {
@@ -75,6 +80,94 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
         }
       }
     });
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    try {
+      // Show source selection dialog
+      final ImageSource? source = await showDialog<ImageSource>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+            'Select Image Source',
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+                onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Camera'),
+                onTap: () => Navigator.of(context).pop(ImageSource.camera),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (source == null) return;
+
+      // Pick image
+      final XFile? imageFile = await _imageUploadService.pickImage(
+        source: source,
+      );
+
+      if (imageFile == null) return;
+
+      setState(() {
+        _isUploadingImage = true;
+        _imageUploadProgress = 0.0;
+      });
+
+      // Upload image
+      final imageUrl = await _imageUploadService.uploadImage(
+        imageFile: imageFile,
+        folder: 'courses/cover',
+        fileName: widget.course?.id != null
+            ? 'course_${widget.course!.id}'
+            : null,
+        onProgress: (progress) {
+          setState(() {
+            _imageUploadProgress = progress;
+          });
+        },
+      );
+
+      // Update controller with uploaded URL
+      setState(() {
+        _coverImageUrlController.text = imageUrl;
+        _isUploadingImage = false;
+        _imageUploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Image uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isUploadingImage = false;
+        _imageUploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload image: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _saveCourse() async {
@@ -386,9 +479,9 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Cover Image URL (optional)
+                // Cover Image Section
                 Text(
-                  'Cover Image URL (Optional)',
+                  'Cover Image (Optional)',
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -396,10 +489,116 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
                   ),
                 ),
                 const SizedBox(height: 8),
+                // Image Preview
+                if (_coverImageUrlController.text.isNotEmpty) ...[
+                  Container(
+                    height: 200,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        _coverImageUrlController.text,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: AppColors.background,
+                          child: const Center(
+                            child: Icon(Icons.broken_image, size: 48),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                // Upload Image Button
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _isUploadingImage || _isLoading
+                            ? null
+                            : _pickAndUploadImage,
+                        icon: _isUploadingImage
+                            ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  value: _imageUploadProgress > 0
+                                      ? _imageUploadProgress
+                                      : null,
+                                ),
+                              )
+                            : const Icon(Icons.upload, size: 20),
+                        label: Text(
+                          _isUploadingImage ? 'Uploading...' : 'Upload Image',
+                          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          side: const BorderSide(
+                            color: AppColors.buttonPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (_coverImageUrlController.text.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: _isUploadingImage || _isLoading
+                            ? null
+                            : () {
+                                setState(() {
+                                  _coverImageUrlController.clear();
+                                });
+                              },
+                        icon: const Icon(Icons.delete_outline),
+                        color: Colors.red,
+                        tooltip: 'Remove image',
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Or enter URL manually
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(color: AppColors.border, thickness: 1),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(color: AppColors.border, thickness: 1),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Manual URL Input
                 TextFormField(
                   controller: _coverImageUrlController,
                   decoration: InputDecoration(
-                    hintText: 'https://example.com/image.jpg',
+                    hintText: 'Enter image URL manually',
+                    prefixIcon: const Icon(Icons.link),
                     filled: true,
                     fillColor: AppColors.background,
                     border: OutlineInputBorder(
@@ -418,6 +617,9 @@ class _CourseFormDialogState extends ConsumerState<CourseFormDialog> {
                       ),
                     ),
                   ),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
                 ),
                 const SizedBox(height: 32),
                 // Buttons

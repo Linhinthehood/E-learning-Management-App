@@ -35,13 +35,10 @@ class StudentCsvImportService {
   final FirebaseFirestore _firestore;
 
   StudentCsvImportService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Required columns for student CSV
-  static const List<String> requiredColumns = [
-    'email',
-    'displayName',
-  ];
+  static const List<String> requiredColumns = ['email', 'displayName'];
 
   /// Optional columns for student CSV
   static const List<String> optionalColumns = [
@@ -53,13 +50,7 @@ class StudentCsvImportService {
   /// Generate CSV template for students
   static String generateTemplate() {
     return CsvImportService.generateTemplate(
-      columns: [
-        'email',
-        'displayName',
-        'phone',
-        'studentId',
-        'password',
-      ],
+      columns: ['email', 'displayName', 'phone', 'studentId', 'password'],
       sampleData: [
         [
           'john.doe@example.com',
@@ -108,7 +99,10 @@ class StudentCsvImportService {
 
     // Validate display name (required)
     final displayName = row['displayName']?.toString().trim() ?? '';
-    final nameError = CsvImportService.validateRequired(displayName, 'Display Name');
+    final nameError = CsvImportService.validateRequired(
+      displayName,
+      'Display Name',
+    );
     if (nameError != null) {
       errors.add(nameError);
     } else {
@@ -237,7 +231,8 @@ class StudentCsvImportService {
       'updatedAt': FieldValue.serverTimestamp(),
       // Note: Password should be hashed and handled via Firebase Auth
       // Storing it here is just for demonstration
-      '_tempPassword': data.password, // Temporary, should be removed in production
+      '_tempPassword':
+          data.password, // Temporary, should be removed in production
     });
   }
 

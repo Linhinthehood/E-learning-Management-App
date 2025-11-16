@@ -5,7 +5,8 @@ class ForumReplyEntity {
   final String content;
   final String authorId; // Can be instructor or student
   final DateTime createdAt;
-  final String? replyToId; // Optional: for threaded replies (reply to another reply)
+  final String?
+  replyToId; // Optional: for threaded replies (reply to another reply)
 
   const ForumReplyEntity({
     required this.id,

@@ -45,9 +45,8 @@ class _CourseManagementScreenState
     var filtered = courses.where((course) {
       // Search filter
       if (_searchQuery.isNotEmpty) {
-        final matchesSearch = course.name
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
+        final matchesSearch =
+            course.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
             course.code.toLowerCase().contains(_searchQuery.toLowerCase());
         if (!matchesSearch) return false;
       }
@@ -156,7 +155,9 @@ class _CourseManagementScreenState
 
                         // Refresh course list after import
                         if (_selectedSemester != null) {
-                          ref.read(courseProvider.notifier).loadCourses(_selectedSemester!.id);
+                          ref
+                              .read(courseProvider.notifier)
+                              .loadCourses(_selectedSemester!.id);
                         }
                       },
                       icon: const Icon(Icons.upload_file, size: 20),
@@ -282,22 +283,23 @@ class _CourseManagementScreenState
                     borderSide: const BorderSide(color: AppColors.border),
                   ),
                 ),
-                items: [
-                  'Name (A-Z)',
-                  'Name (Z-A)',
-                  'Code (A-Z)',
-                  'Code (Z-A)',
-                  'Sessions (Low-High)',
-                  'Sessions (High-Low)',
-                ].map((sortOption) {
-                  return DropdownMenuItem(
-                    value: sortOption,
-                    child: Text(
-                      sortOption,
-                      style: GoogleFonts.inter(fontSize: 14),
-                    ),
-                  );
-                }).toList(),
+                items:
+                    [
+                      'Name (A-Z)',
+                      'Name (Z-A)',
+                      'Code (A-Z)',
+                      'Code (Z-A)',
+                      'Sessions (Low-High)',
+                      'Sessions (High-Low)',
+                    ].map((sortOption) {
+                      return DropdownMenuItem(
+                        value: sortOption,
+                        child: Text(
+                          sortOption,
+                          style: GoogleFonts.inter(fontSize: 14),
+                        ),
+                      );
+                    }).toList(),
                 onChanged: (value) {
                   if (value != null) {
                     setState(() {

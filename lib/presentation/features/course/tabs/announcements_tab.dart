@@ -12,6 +12,7 @@ import '../../../providers/comment_provider.dart';
 import '../../../providers/view_tracking_provider.dart';
 import '../widgets/announcement_form_dialog.dart';
 import '../../tracking/announcement_tracking_screen.dart';
+import '../../../../services/file_download_service.dart';
 
 /// Announcements tab - displays and manages announcements
 class AnnouncementsTab extends ConsumerStatefulWidget {
@@ -50,16 +51,18 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
   }
 
   List<AnnouncementEntity> _applyFiltersAndSort(
-      List<AnnouncementEntity> announcements) {
+    List<AnnouncementEntity> announcements,
+  ) {
     var filtered = announcements.where((announcement) {
       // Search filter
       if (_searchQuery.isNotEmpty) {
-        final matchesSearch = announcement.title
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            announcement.content
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase());
+        final matchesSearch =
+            announcement.title.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
+            announcement.content.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            );
         if (!matchesSearch) return false;
       }
       return true;
@@ -195,20 +198,21 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                     borderSide: const BorderSide(color: AppColors.border),
                   ),
                 ),
-                items: [
-                  'Date (Newest)',
-                  'Date (Oldest)',
-                  'Title (A-Z)',
-                  'Title (Z-A)',
-                ].map((sortOption) {
-                  return DropdownMenuItem(
-                    value: sortOption,
-                    child: Text(
-                      sortOption,
-                      style: GoogleFonts.inter(fontSize: 14),
-                    ),
-                  );
-                }).toList(),
+                items:
+                    [
+                      'Date (Newest)',
+                      'Date (Oldest)',
+                      'Title (A-Z)',
+                      'Title (Z-A)',
+                    ].map((sortOption) {
+                      return DropdownMenuItem(
+                        value: sortOption,
+                        child: Text(
+                          sortOption,
+                          style: GoogleFonts.inter(fontSize: 14),
+                        ),
+                      );
+                    }).toList(),
                 onChanged: (value) {
                   if (value != null) {
                     setState(() {
@@ -255,50 +259,50 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                       ),
                     )
                   : filteredAnnouncements.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.search_off,
-                                size: 64,
-                                color: AppColors.textSecondary.withValues(
-                                  alpha: 0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No announcements found',
-                                style: GoogleFonts.inter(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Try adjusting your search',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          itemCount: filteredAnnouncements.length,
-                          itemBuilder: (context, index) {
-                            final announcement = filteredAnnouncements[index];
-                            return _buildAnnouncementCard(
-                              context,
-                              ref,
-                              announcement,
-                              groupsAsync,
-                            );
-                          },
-                        ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No announcements found',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Try adjusting your search',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      itemCount: filteredAnnouncements.length,
+                      itemBuilder: (context, index) {
+                        final announcement = filteredAnnouncements[index];
+                        return _buildAnnouncementCard(
+                          context,
+                          ref,
+                          announcement,
+                          groupsAsync,
+                        );
+                      },
+                    ),
             ),
           ],
         );
@@ -352,9 +356,12 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
     if (user != null && !isAuthor) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
-            .read(viewTrackingByContentProvider(
-              (contentId: announcement.id, contentType: 'announcement'),
-            ).notifier)
+            .read(
+              viewTrackingByContentProvider((
+                contentId: announcement.id,
+                contentType: 'announcement',
+              )).notifier,
+            )
             .trackView();
       });
     }
@@ -438,10 +445,11 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                             if (mounted && navigatorContext.mounted) {
                               Navigator.of(navigatorContext).push(
                                 MaterialPageRoute(
-                                  builder: (context) => AnnouncementTrackingScreen(
-                                    course: widget.course,
-                                    announcement: announcement,
-                                  ),
+                                  builder: (context) =>
+                                      AnnouncementTrackingScreen(
+                                        course: widget.course,
+                                        announcement: announcement,
+                                      ),
                                 ),
                               );
                             }
@@ -492,13 +500,62 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                 spacing: 8,
                 runSpacing: 8,
                 children: announcement.attachments.map((attachment) {
-                  return Chip(
-                    avatar: const Icon(Icons.attach_file, size: 16),
-                    label: Text(
-                      attachment.split('/').last,
-                      style: GoogleFonts.inter(fontSize: 12),
+                  final fileName = attachment.split('/').last;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
                     ),
-                    backgroundColor: AppColors.background,
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.attach_file, size: 16),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            fileName,
+                            style: GoogleFonts.inter(fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Open button
+                        IconButton(
+                          icon: const Icon(Icons.open_in_new, size: 16),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 24,
+                            minHeight: 24,
+                          ),
+                          onPressed: () => _openFile(
+                            context,
+                            attachment,
+                          ),
+                          tooltip: 'Open file',
+                        ),
+                        // Download button
+                        IconButton(
+                          icon: const Icon(Icons.download, size: 16),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 24,
+                            minHeight: 24,
+                          ),
+                          onPressed: () => _downloadFile(
+                            context,
+                            attachment,
+                            fileName,
+                          ),
+                          tooltip: 'Download file',
+                        ),
+                      ],
+                    ),
                   );
                 }).toList(),
               ),
@@ -588,12 +645,14 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                 )
               : Column(
                   children: comments
-                      .map((comment) => _buildCommentItem(
-                            context,
-                            ref,
-                            comment,
-                            announcement.id,
-                          ))
+                      .map(
+                        (comment) => _buildCommentItem(
+                          context,
+                          ref,
+                          comment,
+                          announcement.id,
+                        ),
+                      )
                       .toList(),
                 ),
           loading: () => const Padding(
@@ -608,10 +667,7 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
               'Error loading comments',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: Colors.red,
-              ),
+              style: GoogleFonts.inter(fontSize: 12, color: Colors.red),
             ),
           ),
         ),
@@ -798,7 +854,9 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
     String content,
   ) async {
     try {
-      await ref.read(commentProvider(announcementId).notifier).addComment(content);
+      await ref
+          .read(commentProvider(announcementId).notifier)
+          .addComment(content);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -818,11 +876,13 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
     String announcementId,
   ) async {
     try {
-      await ref.read(commentProvider(announcementId).notifier).deleteComment(commentId);
+      await ref
+          .read(commentProvider(announcementId).notifier)
+          .deleteComment(commentId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Comment deleted')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Comment deleted')));
       }
     } catch (e) {
       if (context.mounted) {
@@ -934,5 +994,87 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
         ],
       ),
     );
+  }
+
+  Future<void> _openFile(
+    BuildContext context,
+    String fileUrl,
+  ) async {
+    final downloadService = FileDownloadService();
+    
+    try {
+      await downloadService.openFile(fileUrl: fileUrl);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to open file: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _downloadFile(
+    BuildContext context,
+    String fileUrl,
+    String fileName,
+  ) async {
+    final downloadService = FileDownloadService();
+    
+    try {
+      // Show loading
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text('Downloading $fileName...'),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+
+      await downloadService.downloadFile(
+        fileUrl: fileUrl,
+        fileName: fileName,
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File downloaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        final errorMessage = e.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              errorMessage.contains('untrusted')
+                  ? 'Cannot download: Cloudinary account needs verification. Use "Open" to view file.'
+                  : 'Failed to download file: ${e.toString()}',
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
   }
 }

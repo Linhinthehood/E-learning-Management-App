@@ -8,7 +8,7 @@ import 'file_download_helper_stub.dart'
 /// File Download Helper for downloading files on web and mobile
 class FileDownloadHelper {
   /// Download CSV file with given content and filename
-  /// 
+  ///
   /// On web: Uses browser download
   /// On mobile: Saves to Downloads folder
   static Future<void> downloadCsv({
@@ -34,4 +34,3 @@ class FileDownloadHelper {
     }
   }
 }
-

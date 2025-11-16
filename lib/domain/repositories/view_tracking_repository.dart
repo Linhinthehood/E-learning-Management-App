@@ -16,9 +16,7 @@ abstract class ViewTrackingRepository {
   );
 
   /// Get tracking records for a specific student
-  Future<List<ViewTrackingEntity>> getTrackingByStudentId(
-    String studentId,
-  );
+  Future<List<ViewTrackingEntity>> getTrackingByStudentId(String studentId);
 
   /// Check if a student has viewed specific content
   Future<bool> hasStudentViewed(

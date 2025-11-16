@@ -7,13 +7,15 @@ import '../../../utils/services/course_csv_import_service.dart';
 import '../../providers/semester_provider.dart';
 import 'csv_import_preview_screen.dart';
 import '../../providers/auth_provider.dart';
+
 /// Course CSV Import Screen
 /// Allows instructors to bulk import courses from CSV file
 class CourseCsvImportScreen extends ConsumerStatefulWidget {
   const CourseCsvImportScreen({super.key});
 
   @override
-  ConsumerState<CourseCsvImportScreen> createState() => _CourseCsvImportScreenState();
+  ConsumerState<CourseCsvImportScreen> createState() =>
+      _CourseCsvImportScreenState();
 }
 
 class _CourseCsvImportScreenState extends ConsumerState<CourseCsvImportScreen> {
@@ -57,7 +59,7 @@ class _CourseCsvImportScreenState extends ConsumerState<CourseCsvImportScreen> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 800),
-            child: Column( 
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Instructions card
@@ -100,9 +102,9 @@ class _CourseCsvImportScreenState extends ConsumerState<CourseCsvImportScreen> {
                 const SizedBox(width: 12),
                 Text(
                   'How to Import Courses',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -132,17 +134,14 @@ class _CourseCsvImportScreenState extends ConsumerState<CourseCsvImportScreen> {
           children: [
             Text(
               'Default Values (Optional)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'These values will be used if not specified in CSV',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
 
@@ -198,9 +197,9 @@ class _CourseCsvImportScreenState extends ConsumerState<CourseCsvImportScreen> {
           children: [
             Text(
               'CSV Format Requirements',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildFormatItem(
@@ -267,9 +266,7 @@ class _CourseCsvImportScreenState extends ConsumerState<CourseCsvImportScreen> {
             decoration: BoxDecoration(
               color: isRequired ? Colors.red[50] : Colors.grey[200],
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: isRequired ? Colors.red : Colors.grey,
-              ),
+              border: Border.all(color: isRequired ? Colors.red : Colors.grey),
             ),
             child: Text(
               requirement,
@@ -295,10 +292,7 @@ class _CourseCsvImportScreenState extends ConsumerState<CourseCsvImportScreen> {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -349,18 +343,15 @@ class _CourseCsvImportScreenState extends ConsumerState<CourseCsvImportScreen> {
               const SizedBox(height: 16),
               Text(
                 _fileName ?? 'Click to upload CSV file',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 'Supported format: .csv',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],
           ),
@@ -453,11 +444,7 @@ class _CourseCsvImportScreenState extends ConsumerState<CourseCsvImportScreen> {
               title: 'Courses',
               importResult: importResult,
               onConfirm: _importService.processImport,
-              displayColumns: const [
-                'code',
-                'name',
-                'sessions',
-              ],
+              displayColumns: const ['code', 'name', 'sessions'],
               extractDisplayData: (data) => {
                 'code': data.code,
                 'name': data.name,

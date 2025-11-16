@@ -38,10 +38,7 @@ class _StudentDashboardState extends ConsumerState<StudentDashboard> {
   ];
 
   // Screen titles for mobile app bar
-  final List<String> _screenTitles = [
-    'My Courses',
-    'Profile',
-  ];
+  final List<String> _screenTitles = ['My Courses', 'Profile'];
 
   void _onItemTapped(int index) async {
     if (index == 2) {
@@ -174,7 +171,9 @@ class _StudentDashboardState extends ConsumerState<StudentDashboard> {
         data: (user) {
           if (user == null) return null;
 
-          final unreadChatCountAsync = ref.watch(unreadChatCountProvider(user.uid));
+          final unreadChatCountAsync = ref.watch(
+            unreadChatCountProvider(user.uid),
+          );
           final unreadNotificationCountAsync = ref.watch(
             unreadNotificationCountProvider(user.uid),
           );
@@ -193,12 +192,16 @@ class _StudentDashboardState extends ConsumerState<StudentDashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const NotificationListScreen(),
+                            builder: (context) =>
+                                const NotificationListScreen(),
                           ),
                         );
                       },
                       backgroundColor: AppColors.buttonPrimary,
-                      child: const Icon(Icons.notifications, color: Colors.white),
+                      child: const Icon(
+                        Icons.notifications,
+                        color: Colors.white,
+                      ),
                     ),
                     if (unreadNotificationCount > 0)
                       Positioned(

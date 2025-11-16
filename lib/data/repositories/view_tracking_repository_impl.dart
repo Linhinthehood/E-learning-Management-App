@@ -6,10 +6,8 @@ import '../datasources/remote/view_tracking_remote_datasource.dart';
 class ViewTrackingRepositoryImpl implements ViewTrackingRepository {
   final ViewTrackingRemoteDataSource _remoteDataSource;
 
-  ViewTrackingRepositoryImpl({
-    ViewTrackingRemoteDataSource? remoteDataSource,
-  }) : _remoteDataSource =
-            remoteDataSource ?? ViewTrackingRemoteDataSource();
+  ViewTrackingRepositoryImpl({ViewTrackingRemoteDataSource? remoteDataSource})
+    : _remoteDataSource = remoteDataSource ?? ViewTrackingRemoteDataSource();
 
   @override
   Future<void> trackAction({

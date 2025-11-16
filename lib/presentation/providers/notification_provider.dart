@@ -7,8 +7,8 @@ import '../../domain/repositories/i_notification_repository.dart';
 /// Provider for notification remote data source
 final notificationRemoteDataSourceProvider =
     Provider<NotificationRemoteDataSource>((ref) {
-  return NotificationRemoteDataSourceImpl();
-});
+      return NotificationRemoteDataSourceImpl();
+    });
 
 /// Provider for notification repository
 final notificationRepositoryProvider = Provider<INotificationRepository>((ref) {
@@ -30,8 +30,9 @@ class NotificationNotifier
     _currentStudentId = studentId;
     state = const AsyncValue.loading();
     try {
-      final notifications =
-          await _repository.getNotificationsByStudent(studentId);
+      final notifications = await _repository.getNotificationsByStudent(
+        studentId,
+      );
       state = AsyncValue.data(notifications);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -43,8 +44,7 @@ class NotificationNotifier
     _currentStudentId = studentId;
     state = const AsyncValue.loading();
     try {
-      final notifications =
-          await _repository.getUnreadNotifications(studentId);
+      final notifications = await _repository.getUnreadNotifications(studentId);
       state = AsyncValue.data(notifications);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -150,22 +150,23 @@ class NotificationNotifier
 }
 
 /// Provider for notification state notifier
-final notificationProvider = StateNotifierProvider<
-    NotificationNotifier,
-    AsyncValue<List<NotificationEntity>>
->((ref) {
-  return NotificationNotifier(ref.read(notificationRepositoryProvider));
-});
+final notificationProvider =
+    StateNotifierProvider<
+      NotificationNotifier,
+      AsyncValue<List<NotificationEntity>>
+    >((ref) {
+      return NotificationNotifier(ref.read(notificationRepositoryProvider));
+    });
 
 /// Provider for fetching a single notification by ID
 final notificationByIdProvider =
     FutureProvider.family<NotificationEntity?, String>((
-  ref,
-  notificationId,
-) async {
-  final repository = ref.read(notificationRepositoryProvider);
-  return await repository.getNotificationById(notificationId);
-});
+      ref,
+      notificationId,
+    ) async {
+      final repository = ref.read(notificationRepositoryProvider);
+      return await repository.getNotificationById(notificationId);
+    });
 
 /// Provider for unread notification count
 final unreadNotificationCountProvider = FutureProvider.family<int, String>((
@@ -178,10 +179,7 @@ final unreadNotificationCountProvider = FutureProvider.family<int, String>((
 
 /// Provider for real-time notification stream
 final notificationStreamProvider =
-    StreamProvider.family<List<NotificationEntity>, String>((
-  ref,
-  studentId,
-) {
-  final repository = ref.read(notificationRepositoryProvider);
-  return repository.listenToNotifications(studentId);
-});
+    StreamProvider.family<List<NotificationEntity>, String>((ref, studentId) {
+      final repository = ref.read(notificationRepositoryProvider);
+      return repository.listenToNotifications(studentId);
+    });

@@ -8,9 +8,6 @@ class FileDownloadHelperImpl {
     required String filename,
     required BuildContext context,
   }) async {
-    throw UnsupportedError(
-      'File download not supported on this platform',
-    );
+    throw UnsupportedError('File download not supported on this platform');
   }
 }
-

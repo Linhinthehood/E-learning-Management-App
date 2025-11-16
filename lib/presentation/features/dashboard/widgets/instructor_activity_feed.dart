@@ -65,10 +65,10 @@ class InstructorActivityFeed extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          ...activities.map((activity) => _ActivityItem(
-                activity: activity,
-                courseMap: courseMap,
-              )),
+          ...activities.map(
+            (activity) =>
+                _ActivityItem(activity: activity, courseMap: courseMap),
+          ),
         ],
       ),
     );
@@ -79,10 +79,7 @@ class _ActivityItem extends StatelessWidget {
   final RecentActivity activity;
   final Map<String, CourseEntity> courseMap;
 
-  const _ActivityItem({
-    required this.activity,
-    required this.courseMap,
-  });
+  const _ActivityItem({required this.activity, required this.courseMap});
 
   IconData _getIcon() {
     switch (activity.type) {
@@ -210,9 +207,7 @@ class _ActivityItem extends StatelessWidget {
                           text: activity.studentName,
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
-                        TextSpan(
-                          text: ' ${_getTypeLabel()} ',
-                        ),
+                        TextSpan(text: ' ${_getTypeLabel()} '),
                         TextSpan(
                           text: activity.title,
                           style: const TextStyle(fontWeight: FontWeight.w600),
@@ -252,11 +247,7 @@ class _ActivityItem extends StatelessWidget {
                       ),
                       if (activity.grade != null) ...[
                         const SizedBox(width: 12),
-                        Icon(
-                          Icons.grade,
-                          size: 14,
-                          color: Colors.green,
-                        ),
+                        Icon(Icons.grade, size: 14, color: Colors.green),
                         const SizedBox(width: 4),
                         Text(
                           activity.grade!,
@@ -273,11 +264,7 @@ class _ActivityItem extends StatelessWidget {
               ),
             ),
             // Arrow
-            Icon(
-              Icons.chevron_right,
-              color: AppColors.textSecondary,
-              size: 20,
-            ),
+            Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
           ],
         ),
       ),

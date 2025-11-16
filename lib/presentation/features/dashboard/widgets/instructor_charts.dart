@@ -69,7 +69,11 @@ class InstructorCharts extends StatelessWidget {
                   color: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.bar_chart, color: Colors.blue, size: 20),
+                child: const Icon(
+                  Icons.bar_chart,
+                  color: Colors.blue,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Text(
@@ -92,8 +96,8 @@ class InstructorCharts extends StatelessWidget {
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (group) {
-                        return Colors.blueGrey; 
-                      },
+                      return Colors.blueGrey;
+                    },
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final data = submissionData[groupIndex];
                       return BarTooltipItem(
@@ -104,7 +108,8 @@ class InstructorCharts extends StatelessWidget {
                         ),
                         children: [
                           TextSpan(
-                            text: '${data.submitted}/${data.totalStudents} submitted\n',
+                            text:
+                                '${data.submitted}/${data.totalStudents} submitted\n',
                             style: GoogleFonts.inter(
                               color: Colors.white70,
                               fontSize: 12,
@@ -133,8 +138,7 @@ class InstructorCharts extends StatelessWidget {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
-                              submissionData[value.toInt()]
-                                  .assignmentTitle
+                              submissionData[value.toInt()].assignmentTitle
                                   .split(' ')
                                   .first,
                               style: GoogleFonts.inter(
@@ -178,10 +182,7 @@ class InstructorCharts extends StatelessWidget {
                   drawVerticalLine: false,
                   horizontalInterval: 25,
                   getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: AppColors.borderLight,
-                      strokeWidth: 1,
-                    );
+                    return FlLine(color: AppColors.borderLight, strokeWidth: 1);
                   },
                 ),
                 borderData: FlBorderData(show: false),
@@ -237,7 +238,11 @@ class InstructorCharts extends StatelessWidget {
                   color: Colors.purple.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.analytics, color: Colors.purple, size: 20),
+                child: const Icon(
+                  Icons.analytics,
+                  color: Colors.purple,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Text(
@@ -260,7 +265,7 @@ class InstructorCharts extends StatelessWidget {
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (group) {
-                      return Colors.deepPurple; 
+                      return Colors.deepPurple;
                     },
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final data = quizScoreData[groupIndex];
@@ -301,8 +306,7 @@ class InstructorCharts extends StatelessWidget {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
-                              quizScoreData[value.toInt()]
-                                  .quizTitle
+                              quizScoreData[value.toInt()].quizTitle
                                   .split(' ')
                                   .first,
                               style: GoogleFonts.inter(
@@ -346,10 +350,7 @@ class InstructorCharts extends StatelessWidget {
                   drawVerticalLine: false,
                   horizontalInterval: 25,
                   getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: AppColors.borderLight,
-                      strokeWidth: 1,
-                    );
+                    return FlLine(color: AppColors.borderLight, strokeWidth: 1);
                   },
                 ),
                 borderData: FlBorderData(show: false),

@@ -39,9 +39,12 @@ class _AnnouncementTrackingScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(enrollmentProvider.notifier).loadEnrollments(widget.course.id);
       ref
-          .read(viewTrackingByContentProvider(
-            (contentId: widget.announcement.id, contentType: 'announcement'),
-          ).notifier)
+          .read(
+            viewTrackingByContentProvider((
+              contentId: widget.announcement.id,
+              contentType: 'announcement',
+            )).notifier,
+          )
           .loadTracking();
     });
   }
@@ -50,9 +53,12 @@ class _AnnouncementTrackingScreenState
   Widget build(BuildContext context) {
     final enrollmentsAsync = ref.watch(enrollmentProvider);
     final studentsAsync = ref.watch(studentsProvider);
-    final trackingAsync = ref.watch(viewTrackingByContentProvider(
-      (contentId: widget.announcement.id, contentType: 'announcement'),
-    ));
+    final trackingAsync = ref.watch(
+      viewTrackingByContentProvider((
+        contentId: widget.announcement.id,
+        contentType: 'announcement',
+      )),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -122,9 +128,8 @@ class _AnnouncementTrackingScreenState
                           trackings,
                         );
                       },
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (error, stack) => Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -145,12 +150,12 @@ class _AnnouncementTrackingScreenState
                             ElevatedButton(
                               onPressed: () {
                                 ref
-                                    .read(viewTrackingByContentProvider(
-                                      (
+                                    .read(
+                                      viewTrackingByContentProvider((
                                         contentId: widget.announcement.id,
-                                        contentType: 'announcement'
-                                      ),
-                                    ).notifier)
+                                        contentType: 'announcement',
+                                      )).notifier,
+                                    )
                                     .loadTracking();
                               },
                               child: const Text('Retry'),
@@ -160,9 +165,8 @@ class _AnnouncementTrackingScreenState
                       ),
                     );
                   },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                     child: Text(
                       'Error loading students: ${error.toString()}',
@@ -171,9 +175,7 @@ class _AnnouncementTrackingScreenState
                   ),
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Text(
                   'Error loading enrollments: ${error.toString()}',
@@ -232,11 +234,13 @@ class _AnnouncementTrackingScreenState
     for (var enrollment in enrollments) {
       final student = studentMap[enrollment.studentId];
       final tracking = trackingMap[enrollment.studentId];
-      studentTrackingList.add(_StudentTrackingData(
-        studentId: enrollment.studentId,
-        studentName: student?.displayName ?? 'Unknown',
-        tracking: tracking,
-      ));
+      studentTrackingList.add(
+        _StudentTrackingData(
+          studentId: enrollment.studentId,
+          studentName: student?.displayName ?? 'Unknown',
+          tracking: tracking,
+        ),
+      );
     }
 
     // Apply filter
@@ -269,8 +273,8 @@ class _AnnouncementTrackingScreenState
               _filter == 'viewed'
                   ? 'No students have viewed this announcement'
                   : _filter == 'not_viewed'
-                      ? 'All students have viewed this announcement'
-                      : 'No students enrolled',
+                  ? 'All students have viewed this announcement'
+                  : 'No students enrolled',
               style: GoogleFonts.inter(
                 color: AppColors.textSecondary,
                 fontSize: 16,
@@ -346,14 +350,8 @@ class _AnnouncementTrackingScreenState
                 ),
               ),
         trailing: hasViewed
-            ? Icon(
-                Icons.visibility,
-                color: Colors.green,
-              )
-            : Icon(
-                Icons.visibility_off,
-                color: AppColors.textSecondary,
-              ),
+            ? Icon(Icons.visibility, color: Colors.green)
+            : Icon(Icons.visibility_off, color: AppColors.textSecondary),
       ),
     );
   }
@@ -363,13 +361,16 @@ class _AnnouncementTrackingScreenState
     // Get data from providers
     final enrollmentsAsync = ref.read(enrollmentProvider);
     final studentsAsync = ref.read(studentsProvider);
-    final trackingAsync = ref.read(viewTrackingByContentProvider(
-      (contentId: widget.announcement.id, contentType: 'announcement'),
-    ));
+    final trackingAsync = ref.read(
+      viewTrackingByContentProvider((
+        contentId: widget.announcement.id,
+        contentType: 'announcement',
+      )),
+    );
 
     // Check if all data is loaded
-    if (enrollmentsAsync.isLoading || 
-        studentsAsync.isLoading || 
+    if (enrollmentsAsync.isLoading ||
+        studentsAsync.isLoading ||
         trackingAsync.isLoading) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -382,8 +383,8 @@ class _AnnouncementTrackingScreenState
       return;
     }
 
-    if (enrollmentsAsync.hasError || 
-        studentsAsync.hasError || 
+    if (enrollmentsAsync.hasError ||
+        studentsAsync.hasError ||
         trackingAsync.hasError) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -417,7 +418,8 @@ class _AnnouncementTrackingScreenState
       // Generate filename with timestamp
       final dateFormat = DateFormat('yyyy-MM-dd_HH-mm-ss');
       final timestamp = dateFormat.format(DateTime.now());
-      final filename = 'announcement_${widget.announcement.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
+      final filename =
+          'announcement_${widget.announcement.title.replaceAll(RegExp(r'[^\w\s-]'), '_')}_$timestamp.csv';
 
       // Download file
       await FileDownloadHelper.downloadCsv(
@@ -450,4 +452,3 @@ class _StudentTrackingData {
     this.tracking,
   });
 }
-

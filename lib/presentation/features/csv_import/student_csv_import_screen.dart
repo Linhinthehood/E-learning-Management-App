@@ -72,9 +72,9 @@ class _StudentCsvImportScreenState extends State<StudentCsvImportScreen> {
                 const SizedBox(width: 12),
                 Text(
                   'How to Import Students',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -103,9 +103,9 @@ class _StudentCsvImportScreenState extends State<StudentCsvImportScreen> {
           children: [
             Text(
               'CSV Format Requirements',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildFormatItem(
@@ -160,9 +160,7 @@ class _StudentCsvImportScreenState extends State<StudentCsvImportScreen> {
             decoration: BoxDecoration(
               color: isRequired ? Colors.red[50] : Colors.grey[200],
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: isRequired ? Colors.red : Colors.grey,
-              ),
+              border: Border.all(color: isRequired ? Colors.red : Colors.grey),
             ),
             child: Text(
               requirement,
@@ -188,10 +186,7 @@ class _StudentCsvImportScreenState extends State<StudentCsvImportScreen> {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -242,18 +237,15 @@ class _StudentCsvImportScreenState extends State<StudentCsvImportScreen> {
               const SizedBox(height: 16),
               Text(
                 _fileName ?? 'Click to upload CSV file',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 'Supported format: .csv',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],
           ),

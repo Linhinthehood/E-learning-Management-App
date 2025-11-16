@@ -19,16 +19,10 @@ abstract class IForumTopicRepository {
   Future<void> deleteTopic(String topicId);
 
   /// Search forum topics by keyword
-  Future<List<ForumTopicEntity>> searchTopics(
-    String courseId,
-    String keyword,
-  );
+  Future<List<ForumTopicEntity>> searchTopics(String courseId, String keyword);
 
   /// Get recent forum topics (last N days)
-  Future<List<ForumTopicEntity>> getRecentTopics(
-    String courseId,
-    int days,
-  );
+  Future<List<ForumTopicEntity>> getRecentTopics(String courseId, int days);
 
   /// Increment reply count for a topic
   Future<void> incrementReplyCount(String topicId);

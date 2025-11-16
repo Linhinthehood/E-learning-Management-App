@@ -104,12 +104,10 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatEntity>>> {
 }
 
 /// Provider for chat state notifier
-final chatProvider = StateNotifierProvider<
-    ChatNotifier,
-    AsyncValue<List<ChatEntity>>
->((ref) {
-  return ChatNotifier(ref.read(chatRepositoryProvider));
-});
+final chatProvider =
+    StateNotifierProvider<ChatNotifier, AsyncValue<List<ChatEntity>>>((ref) {
+      return ChatNotifier(ref.read(chatRepositoryProvider));
+    });
 
 /// Provider for fetching a single chat by ID
 final chatByIdProvider = FutureProvider.family<ChatEntity?, String>((

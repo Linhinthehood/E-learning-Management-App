@@ -6,9 +6,8 @@ import '../datasources/remote/comment_remote_datasource.dart';
 class CommentRepositoryImpl implements CommentRepository {
   final CommentRemoteDataSource _remoteDataSource;
 
-  CommentRepositoryImpl({
-    CommentRemoteDataSource? remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource ?? CommentRemoteDataSource();
+  CommentRepositoryImpl({CommentRemoteDataSource? remoteDataSource})
+    : _remoteDataSource = remoteDataSource ?? CommentRemoteDataSource();
 
   @override
   Future<List<CommentEntity>> getCommentsByAnnouncementId(

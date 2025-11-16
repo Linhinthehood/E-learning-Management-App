@@ -7,10 +7,7 @@ import '../../../providers/instructor_dashboard_provider.dart';
 class InstructorStatisticsCards extends StatelessWidget {
   final InstructorStatistics statistics;
 
-  const InstructorStatisticsCards({
-    super.key,
-    required this.statistics,
-  });
+  const InstructorStatisticsCards({super.key, required this.statistics});
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +63,8 @@ class InstructorStatisticsCards extends StatelessWidget {
                     child: _StatCard(
                       icon: Icons.check_circle,
                       title: 'Submission Rate',
-                      value: '${statistics.averageSubmissionRate.toStringAsFixed(1)}%',
+                      value:
+                          '${statistics.averageSubmissionRate.toStringAsFixed(1)}%',
                       color: Colors.teal,
                     ),
                   ),
@@ -75,7 +73,8 @@ class InstructorStatisticsCards extends StatelessWidget {
                     child: _StatCard(
                       icon: Icons.trending_up,
                       title: 'Avg Quiz Score',
-                      value: '${statistics.averageQuizScore.toStringAsFixed(1)}%',
+                      value:
+                          '${statistics.averageQuizScore.toStringAsFixed(1)}%',
                       color: Colors.pink,
                     ),
                   ),
@@ -128,7 +127,8 @@ class InstructorStatisticsCards extends StatelessWidget {
               child: _StatCard(
                 icon: Icons.check_circle,
                 title: 'Submission Rate',
-                value: '${statistics.averageSubmissionRate.toStringAsFixed(1)}%',
+                value:
+                    '${statistics.averageSubmissionRate.toStringAsFixed(1)}%',
                 color: Colors.teal,
               ),
             ),

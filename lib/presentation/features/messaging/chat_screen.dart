@@ -77,30 +77,34 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       isRead: false,
     );
 
-    ref.read(messageProvider.notifier).sendMessage(message).then((_) {
-      _messageController.clear();
-      // Scroll to bottom after sending
-      if (_scrollController.hasClients) {
-        Future.delayed(const Duration(milliseconds: 100), () {
+    ref
+        .read(messageProvider.notifier)
+        .sendMessage(message)
+        .then((_) {
+          _messageController.clear();
+          // Scroll to bottom after sending
           if (_scrollController.hasClients) {
-            _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
+            Future.delayed(const Duration(milliseconds: 100), () {
+              if (_scrollController.hasClients) {
+                _scrollController.animateTo(
+                  _scrollController.position.maxScrollExtent,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+              }
+            });
+          }
+        })
+        .catchError((error) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error sending message: ${error.toString()}'),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         });
-      }
-    }).catchError((error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error sending message: ${error.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    });
   }
 
   void _scrollToBottom() {
@@ -178,9 +182,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: userAsync.when(
         data: (user) {
           if (user == null) {
-            return const Center(
-              child: Text('Please log in to view messages'),
-            );
+            return const Center(child: Text('Please log in to view messages'));
           }
 
           return Column(
@@ -205,7 +207,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             Icon(
                               Icons.chat_bubble_outline,
                               size: 64,
-                              color: AppColors.textSecondary.withValues(alpha: 0.5),
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -239,12 +243,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       itemBuilder: (context, index) {
                         final message = messages[index];
                         final isSent = message.senderId == user.uid;
-                        final showAvatar = index == 0 ||
+                        final showAvatar =
+                            index == 0 ||
                             (index > 0 &&
-                                messages[index - 1].senderId != message.senderId);
+                                messages[index - 1].senderId !=
+                                    message.senderId);
 
                         // Show date separator if needed
-                        final showDateSeparator = index == 0 ||
+                        final showDateSeparator =
+                            index == 0 ||
                             (index > 0 &&
                                 !_isSameDay(
                                   messages[index - 1].timestamp,
@@ -255,7 +262,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           children: [
                             if (showDateSeparator)
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 child: Center(
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
@@ -280,19 +289,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               message: message,
                               isSent: isSent,
                               showAvatar: showAvatar && !isSent,
-                              participantName: isSent ? null : widget.participantName,
+                              participantName: isSent
+                                  ? null
+                                  : widget.participantName,
                             ),
                           ],
                         );
                       },
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'Error loading messages',
@@ -317,9 +333,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.cardBackground,
-                  border: Border(
-                    top: BorderSide(color: AppColors.border),
-                  ),
+                  border: Border(top: BorderSide(color: AppColors.border)),
                 ),
                 child: SafeArea(
                   child: Row(
@@ -338,11 +352,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.border),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.border),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
                             ),
                           ),
                           style: GoogleFonts.inter(fontSize: 14),
@@ -357,7 +375,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         icon: const Icon(Icons.send),
                         color: AppColors.buttonPrimary,
                         style: IconButton.styleFrom(
-                          backgroundColor: AppColors.buttonPrimary.withValues(alpha: 0.1),
+                          backgroundColor: AppColors.buttonPrimary.withValues(
+                            alpha: 0.1,
+                          ),
                           padding: const EdgeInsets.all(12),
                         ),
                       ),
@@ -400,4 +420,3 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 }
-

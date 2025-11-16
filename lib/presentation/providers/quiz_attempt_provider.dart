@@ -12,16 +12,18 @@ final quizAttemptRepositoryProvider = Provider<IQuizAttemptRepository>((ref) {
 });
 
 /// Provider for quiz attempts state
-final quizAttemptProvider = StateNotifierProvider<
-    QuizAttemptNotifier,
-    AsyncValue<List<QuizAttemptEntity>>
->((ref) {
-  final repository = ref.watch(quizAttemptRepositoryProvider);
-  return QuizAttemptNotifier(repository);
-});
+final quizAttemptProvider =
+    StateNotifierProvider<
+      QuizAttemptNotifier,
+      AsyncValue<List<QuizAttemptEntity>>
+    >((ref) {
+      final repository = ref.watch(quizAttemptRepositoryProvider);
+      return QuizAttemptNotifier(repository);
+    });
 
 /// State notifier for quiz attempts
-class QuizAttemptNotifier extends StateNotifier<AsyncValue<List<QuizAttemptEntity>>> {
+class QuizAttemptNotifier
+    extends StateNotifier<AsyncValue<List<QuizAttemptEntity>>> {
   final IQuizAttemptRepository _repository;
 
   QuizAttemptNotifier(this._repository) : super(const AsyncValue.data([]));
