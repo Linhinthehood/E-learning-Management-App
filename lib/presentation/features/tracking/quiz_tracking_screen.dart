@@ -10,6 +10,7 @@ import '../../../domain/entities/enrollment_entity.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../providers/quiz_attempt_provider.dart';
 import '../../providers/enrollment_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../../utils/services/csv_export_service.dart';
 import '../../../utils/helpers/file_download_helper.dart';
 import 'widgets/quiz_answer_detail_dialog.dart';
@@ -240,29 +241,44 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
       studentMap[student.uid] = student;
     }
 
-    // Create a map of studentId -> best attempt (highest score)
-    final attemptMap = <String, QuizAttemptEntity>{};
+    // Create a map of studentId -> all attempts (for instructor)
+    final allAttemptsMap = <String, List<QuizAttemptEntity>>{};
     for (var attempt in attempts) {
-      if (attempt.isCompleted) {
-        final existing = attemptMap[attempt.studentId];
+      if (!allAttemptsMap.containsKey(attempt.studentId)) {
+        allAttemptsMap[attempt.studentId] = [];
+      }
+      allAttemptsMap[attempt.studentId]!.add(attempt);
+    }
+
+    // Sort attempts by startTime descending (newest first)
+    for (var studentId in allAttemptsMap.keys) {
+      allAttemptsMap[studentId]!.sort(
+        (a, b) => b.startTime.compareTo(a.startTime),
+      );
+    }
+
+    // Create a map of studentId -> best attempt (highest score) for display
+    final bestAttemptMap = <String, QuizAttemptEntity>{};
+    for (var attempt in attempts) {
+      if (attempt.isCompleted && attempt.score != null) {
+        final existing = bestAttemptMap[attempt.studentId];
         if (existing == null || (attempt.score ?? 0) > (existing.score ?? 0)) {
-          attemptMap[attempt.studentId] = attempt;
+          bestAttemptMap[attempt.studentId] = attempt;
         }
       }
     }
 
     // Get all attempt counts per student
     final attemptCounts = <String, int>{};
-    for (var attempt in attempts) {
-      attemptCounts[attempt.studentId] =
-          (attemptCounts[attempt.studentId] ?? 0) + 1;
+    for (var studentId in allAttemptsMap.keys) {
+      attemptCounts[studentId] = allAttemptsMap[studentId]!.length;
     }
 
     // Build student tracking list
     final studentTrackingList = <_StudentQuizData>[];
     for (var enrollment in enrollments) {
       final student = studentMap[enrollment.studentId];
-      final attempt = attemptMap[enrollment.studentId];
+      final attempt = bestAttemptMap[enrollment.studentId];
       final attemptsCount = attemptCounts[enrollment.studentId] ?? 0;
       final status = attempt != null ? 'Completed' : 'Not Started';
 
@@ -273,6 +289,7 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
           attempt: attempt,
           attemptsCount: attemptsCount,
           status: status,
+          allAttempts: allAttemptsMap[enrollment.studentId] ?? [],
         ),
       );
     }
@@ -419,12 +436,50 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
                 ),
               ),
         trailing: hasAttempt
-            ? IconButton(
-                icon: const Icon(Icons.visibility),
-                onPressed: () {
-                  _showAnswerDetail(item.attempt!);
-                },
-                tooltip: 'View answers',
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Show attempts count if multiple attempts
+                  if (item.allAttempts.length > 1)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.buttonPrimary.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${item.allAttempts.length} attempts',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.buttonPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.visibility),
+                    onPressed: () {
+                      // For instructor: show dialog with all attempts
+                      // For student: show only best attempt
+                      final user = ref.read(authProvider).value;
+                      if (user?.role == UserRole.instructor &&
+                          item.allAttempts.length > 1) {
+                        _showAllAttemptsDialog(item);
+                      } else {
+                        _showAnswerDetail(item.attempt!);
+                      }
+                    },
+                    tooltip: item.allAttempts.length > 1
+                        ? 'View all attempts'
+                        : 'View answers',
+                  ),
+                ],
               )
             : null,
       ),
@@ -436,6 +491,184 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
       context: context,
       builder: (context) =>
           QuizAnswerDetailDialog(quiz: widget.quiz, attempt: attempt),
+    );
+  }
+
+  void _showAllAttemptsDialog(_StudentQuizData item) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: AppColors.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.8,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'All Quiz Attempts',
+                          style: GoogleFonts.inter(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.studentName,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: item.allAttempts.length,
+                  itemBuilder: (context, index) {
+                    final attempt = item.allAttempts[index];
+                    final isBest = attempt.id == item.attempt?.id;
+                    final dateFormat = DateFormat('MMM dd, yyyy HH:mm');
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      color: isBest
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : null,
+                      child: ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isBest
+                                ? Colors.green
+                                : AppColors.buttonPrimary.withValues(
+                                    alpha: 0.2,
+                                  ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${attempt.attemptNumber}',
+                            style: GoogleFonts.inter(
+                              color: isBest
+                                  ? Colors.white
+                                  : AppColors.buttonPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          'Attempt ${attempt.attemptNumber}',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            Text(
+                              'Started: ${dateFormat.format(attempt.startTime)}',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            if (attempt.endTime != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                'Completed: ${dateFormat.format(attempt.endTime!)}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                            if (attempt.score != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Score: ${attempt.score!.toStringAsFixed(1)}/${attempt.maxScore.toStringAsFixed(1)} (${attempt.percentage!.toStringAsFixed(1)}%)',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: AppColors.buttonPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                            if (attempt.durationMinutes != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                'Duration: ${attempt.durationMinutes} minutes',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isBest)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  'Best',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.visibility),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showAnswerDetail(attempt);
+                              },
+                              tooltip: 'View answers',
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -526,9 +759,10 @@ class _QuizTrackingScreenState extends ConsumerState<QuizTrackingScreen> {
 class _StudentQuizData {
   final String studentId;
   final String studentName;
-  final QuizAttemptEntity? attempt;
+  final QuizAttemptEntity? attempt; // Best attempt
   final int attemptsCount;
   final String status;
+  final List<QuizAttemptEntity> allAttempts; // All attempts for instructor
 
   _StudentQuizData({
     required this.studentId,
@@ -536,5 +770,6 @@ class _StudentQuizData {
     this.attempt,
     required this.attemptsCount,
     required this.status,
+    required this.allAttempts,
   });
 }

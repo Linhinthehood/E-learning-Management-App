@@ -533,10 +533,7 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                             minWidth: 24,
                             minHeight: 24,
                           ),
-                          onPressed: () => _openFile(
-                            context,
-                            attachment,
-                          ),
+                          onPressed: () => _openFile(context, attachment),
                           tooltip: 'Open file',
                         ),
                         // Download button
@@ -547,11 +544,8 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                             minWidth: 24,
                             minHeight: 24,
                           ),
-                          onPressed: () => _downloadFile(
-                            context,
-                            attachment,
-                            fileName,
-                          ),
+                          onPressed: () =>
+                              _downloadFile(context, attachment, fileName),
                           tooltip: 'Download file',
                         ),
                       ],
@@ -996,12 +990,9 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
     );
   }
 
-  Future<void> _openFile(
-    BuildContext context,
-    String fileUrl,
-  ) async {
+  Future<void> _openFile(BuildContext context, String fileUrl) async {
     final downloadService = FileDownloadService();
-    
+
     try {
       await downloadService.openFile(fileUrl: fileUrl);
     } catch (e) {
@@ -1022,7 +1013,7 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
     String fileName,
   ) async {
     final downloadService = FileDownloadService();
-    
+
     try {
       // Show loading
       if (context.mounted) {
@@ -1047,10 +1038,7 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
         );
       }
 
-      await downloadService.downloadFile(
-        fileUrl: fileUrl,
-        fileName: fileName,
-      );
+      await downloadService.downloadFile(fileUrl: fileUrl, fileName: fileName);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

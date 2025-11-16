@@ -645,7 +645,7 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
               FutureBuilder<QuizAttemptEntity?>(
                 future: ref
                     .read(quizAttemptProvider.notifier)
-                    .getLatestAttempt(quiz.id, currentUserId),
+                    .getBestAttempt(quiz.id, currentUserId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
@@ -656,7 +656,7 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                     );
                   }
 
-                  final latestAttempt = snapshot.data;
+                  final bestAttempt = snapshot.data;
 
                   return FutureBuilder<int>(
                     future: ref
@@ -671,12 +671,47 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Attempt status
-                          _buildAttemptStatus(
-                            latestAttempt,
-                            attemptCount,
-                            quiz,
-                          ),
+                          // Attempt status (showing best score)
+                          _buildAttemptStatus(bestAttempt, attemptCount, quiz),
+                          // Show attempts count if multiple attempts
+                          if (attemptCount > 1) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.buttonPrimary.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.repeat,
+                                    size: 16,
+                                    color: AppColors.buttonPrimary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Total attempts: $attemptCount',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: AppColors.buttonPrimary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '(Best score shown above)',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 12),
 
                           // Take quiz button
@@ -694,7 +729,7 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                                 label: Text(
                                   attemptCount == 0
                                       ? 'Start Quiz'
-                                      : latestAttempt?.isInProgress == true
+                                      : bestAttempt?.isInProgress == true
                                       ? 'Continue Quiz'
                                       : 'Start Attempt ${attemptCount + 1}',
                                   style: GoogleFonts.inter(

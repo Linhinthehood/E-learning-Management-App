@@ -45,7 +45,7 @@ class ImageUploadService {
   ///
   /// CLOUDINARY_URL format (chỉ cần khi dùng signed upload):
   /// CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
-  /// 
+  ///
   /// QUAN TRỌNG: Preset này dành cho IMAGES
   /// Tạo preset riêng: Dashboard -> Settings -> Upload -> Add upload preset
   /// - Preset name: "e-learning-images"

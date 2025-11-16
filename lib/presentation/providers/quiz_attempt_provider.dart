@@ -126,4 +126,39 @@ class QuizAttemptNotifier
       rethrow;
     }
   }
+
+  /// Get best attempt (highest score) for a student
+  Future<QuizAttemptEntity?> getBestAttempt(
+    String quizId,
+    String studentId,
+  ) async {
+    try {
+      final attempts = await _repository.getStudentAttempts(quizId, studentId);
+      if (attempts.isEmpty) return null;
+
+      // Filter completed attempts with scores
+      final completedAttempts = attempts
+          .where((a) => a.isCompleted && a.score != null)
+          .toList();
+
+      if (completedAttempts.isEmpty) {
+        // If no completed attempts, return latest attempt
+        return attempts.first;
+      }
+
+      // Find attempt with highest score
+      QuizAttemptEntity? bestAttempt;
+      double bestScore = -1;
+      for (final attempt in completedAttempts) {
+        if (attempt.score! > bestScore) {
+          bestScore = attempt.score!;
+          bestAttempt = attempt;
+        }
+      }
+
+      return bestAttempt;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

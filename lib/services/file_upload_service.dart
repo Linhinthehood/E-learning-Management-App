@@ -22,7 +22,7 @@ class FileUploadService {
   /// - Access control: Public (QUAN TRỌNG!)
   /// - Format: Để trống
   /// - Allowed formats: pdf,doc,docx,xls,xlsx,ppt,pptx (tùy chọn)
-  /// 
+  ///
   /// LƯU Ý: Code sẽ tự động dùng endpoint /raw/upload và resource_type='raw'
   /// để upload file như raw file, không cần preset có Type: Raw
   static const String _cloudinaryUploadPreset = "e-learning-files";
@@ -155,33 +155,32 @@ class FileUploadService {
         // QUAN TRỌNG: Đảm bảo URL đúng format cho raw files
         // Cloudinary raw files URL format: https://res.cloudinary.com/{cloud_name}/raw/upload/{public_id}
         // Với raw files, URL không nên có transformation
-        
+
         if (downloadUrl.contains('/raw/upload/')) {
           // Parse URL để đảm bảo đúng format
           final uri = Uri.parse(downloadUrl);
           final pathSegments = uri.pathSegments;
-          
+
           // Tìm vị trí các segments quan trọng
           final cloudinaryIndex = pathSegments.indexOf('cloudinary');
           final rawIndex = pathSegments.indexOf('raw');
           final uploadIndex = pathSegments.indexOf('upload');
-          
-          if (cloudinaryIndex != -1 && 
-              rawIndex != -1 && 
+
+          if (cloudinaryIndex != -1 &&
+              rawIndex != -1 &&
               uploadIndex != -1 &&
-              cloudinaryIndex < rawIndex && 
+              cloudinaryIndex < rawIndex &&
               rawIndex < uploadIndex) {
-            
             // Lấy cloud name
             final cloudName = pathSegments[cloudinaryIndex + 1];
-            
+
             // Lấy public_id (tất cả segments sau 'upload')
             final publicIdParts = pathSegments.sublist(uploadIndex + 1);
-            
+
             // Loại bỏ version segment nếu có (format: v1234567890)
             // Version segment thường ngay sau 'upload'
             final cleanPublicIdParts = <String>[];
-            
+
             for (int i = 0; i < publicIdParts.length; i++) {
               final segment = publicIdParts[i];
               // Bỏ qua version segment (v1234567890)
@@ -189,19 +188,20 @@ class FileUploadService {
                 continue;
               }
               // Bỏ qua transformation segments (f_auto, q_auto, etc.)
-              if (segment.startsWith('f_') || 
-                  segment.startsWith('q_') || 
-                  segment.startsWith('w_') || 
+              if (segment.startsWith('f_') ||
+                  segment.startsWith('q_') ||
+                  segment.startsWith('w_') ||
                   segment.startsWith('h_')) {
                 continue;
               }
               cleanPublicIdParts.add(segment);
             }
-            
+
             // Rebuild URL với format đúng: /raw/upload/{public_id}
             final publicId = cleanPublicIdParts.join('/');
-            downloadUrl = 'https://res.cloudinary.com/$cloudName/raw/upload/$publicId';
-            
+            downloadUrl =
+                'https://res.cloudinary.com/$cloudName/raw/upload/$publicId';
+
             // Đảm bảo có extension nếu original filename có
             if (fileName.contains('.') && !publicId.contains('.')) {
               final extension = fileName.split('.').last;
@@ -219,7 +219,7 @@ class FileUploadService {
             final error = errorData['error'];
             final errorMessage = error['message']?.toString() ?? '';
             final errorCode = error['code']?.toString() ?? '';
-            
+
             throw Exception(
               'Cloudinary upload failed: $errorMessage (Code: $errorCode)',
             );
@@ -227,7 +227,7 @@ class FileUploadService {
         } catch (e) {
           // If parsing fails, use original error
         }
-        
+
         throw Exception(
           'Cloudinary upload failed: ${response.statusCode} - ${response.body}',
         );

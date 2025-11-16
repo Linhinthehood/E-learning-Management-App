@@ -31,6 +31,8 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
   Timer? _timer;
   DateTime? _endTime;
   Duration _remainingTime = Duration.zero;
+  // Map to store TextEditingControllers for short answer questions
+  final Map<String, TextEditingController> _shortAnswerControllers = {};
 
   @override
   void initState() {
@@ -41,6 +43,11 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    // Dispose all short answer controllers
+    for (var controller in _shortAnswerControllers.values) {
+      controller.dispose();
+    }
+    _shortAnswerControllers.clear();
     super.dispose();
   }
 
@@ -820,13 +827,38 @@ class _QuizTakingScreenState extends ConsumerState<QuizTakingScreen> {
     QuestionEntity question,
     dynamic currentAnswer,
   ) {
-    final controller = TextEditingController(
-      text: currentAnswer?.toString() ?? '',
-    );
+    // Get or create controller for this question
+    if (!_shortAnswerControllers.containsKey(question.id)) {
+      _shortAnswerControllers[question.id] = TextEditingController(
+        text: currentAnswer?.toString() ?? '',
+      );
+    } else {
+      // Update controller text if answer changed externally
+      final controller = _shortAnswerControllers[question.id]!;
+      final currentText = currentAnswer?.toString() ?? '';
+      if (controller.text != currentText) {
+        controller.text = currentText;
+        // Move cursor to end
+        controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: currentText.length),
+        );
+      }
+    }
+
+    final controller = _shortAnswerControllers[question.id]!;
 
     return TextField(
+      key: ValueKey(
+        'short_answer_${question.id}',
+      ), // Key to help Flutter track widget
       controller: controller,
-      onChanged: (value) => _answerQuestion(question.id, value),
+      onChanged: (value) {
+        _answerQuestion(question.id, value);
+        // Ensure cursor stays at end
+        controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: value.length),
+        );
+      },
       maxLines: 3,
       decoration: InputDecoration(
         filled: true,

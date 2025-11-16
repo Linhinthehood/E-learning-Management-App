@@ -10,15 +10,10 @@ class FileDownloadService {
   /// Open file in browser/app (view only, no download)
   /// For web: opens in new tab
   /// For mobile: opens URL in browser
-  Future<void> openFile({
-    required String fileUrl,
-  }) async {
+  Future<void> openFile({required String fileUrl}) async {
     try {
       final uri = Uri.parse(fileUrl);
-      await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       throw Exception('Failed to open file: ${e.toString()}');
     }
@@ -36,10 +31,7 @@ class FileDownloadService {
         // Web: trigger browser download by opening URL
         // Browser will handle the download
         final uri = Uri.parse(fileUrl);
-        await launchUrl(
-          uri,
-          mode: LaunchMode.externalApplication,
-        );
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         // Mobile/Desktop: download to local storage
         await _downloadFileMobile(fileUrl, fileName);
@@ -47,7 +39,7 @@ class FileDownloadService {
     } catch (e) {
       // Check if it's a Cloudinary untrusted account error
       final errorMessage = e.toString().toLowerCase();
-      if (errorMessage.contains('untrusted') || 
+      if (errorMessage.contains('untrusted') ||
           errorMessage.contains('customer_untrusted')) {
         throw Exception(
           'Cloudinary account is untrusted. '
@@ -60,10 +52,7 @@ class FileDownloadService {
   }
 
   /// Download file on mobile/desktop
-  Future<void> _downloadFileMobile(
-    String fileUrl,
-    String fileName,
-  ) async {
+  Future<void> _downloadFileMobile(String fileUrl, String fileName) async {
     try {
       // Get download directory
       final directory = await getApplicationDocumentsDirectory();
@@ -82,14 +71,14 @@ class FileDownloadService {
         // Try to parse error response
         try {
           final errorData = json.decode(response.body);
-          if (errorData is Map && 
+          if (errorData is Map &&
               errorData.containsKey('error') &&
               errorData['error'] is Map) {
             final error = errorData['error'] as Map;
             final errorCode = error['code']?.toString() ?? '';
             final errorMessage = error['message']?.toString() ?? '';
-            
-            if (errorCode.contains('untrusted') || 
+
+            if (errorCode.contains('untrusted') ||
                 errorMessage.toLowerCase().contains('untrusted')) {
               throw Exception(
                 'Cloudinary account is untrusted. '
@@ -101,7 +90,7 @@ class FileDownloadService {
         } catch (e) {
           // If parsing fails, continue with generic error
         }
-        
+
         throw Exception('Failed to download file: HTTP ${response.statusCode}');
       }
 

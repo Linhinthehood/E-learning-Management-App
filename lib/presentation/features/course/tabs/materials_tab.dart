@@ -635,10 +635,7 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                             minWidth: 24,
                             minHeight: 24,
                           ),
-                          onPressed: () => _openFile(
-                            context,
-                            file.url,
-                          ),
+                          onPressed: () => _openFile(context, file.url),
                           tooltip: 'Open file',
                         ),
                         // Download button
@@ -759,12 +756,9 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
     );
   }
 
-  Future<void> _openFile(
-    BuildContext context,
-    String fileUrl,
-  ) async {
+  Future<void> _openFile(BuildContext context, String fileUrl) async {
     final downloadService = FileDownloadService();
-    
+
     try {
       await downloadService.openFile(fileUrl: fileUrl);
     } catch (e) {
@@ -787,7 +781,7 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
     String fileName,
   ) async {
     final downloadService = FileDownloadService();
-    
+
     try {
       // Track download
       await ref
@@ -823,10 +817,7 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
       }
 
       // Download file
-      await downloadService.downloadFile(
-        fileUrl: fileUrl,
-        fileName: fileName,
-      );
+      await downloadService.downloadFile(fileUrl: fileUrl, fileName: fileName);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

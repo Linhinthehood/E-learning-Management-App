@@ -452,7 +452,7 @@ class _AssignmentTrackingScreenState
 
   void _showFilesDialog(List<String> fileUrls) {
     final downloadService = FileDownloadService();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -467,10 +467,7 @@ class _AssignmentTrackingScreenState
               final fileName = downloadService.getFileNameFromUrl(url);
               return ListTile(
                 leading: const Icon(Icons.insert_drive_file),
-                title: Text(
-                  fileName,
-                  style: GoogleFonts.inter(),
-                ),
+                title: Text(fileName, style: GoogleFonts.inter()),
                 subtitle: Text(
                   url,
                   style: GoogleFonts.inter(
@@ -491,7 +488,9 @@ class _AssignmentTrackingScreenState
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Failed to open: ${e.toString()}'),
+                                content: Text(
+                                  'Failed to open: ${e.toString()}',
+                                ),
                                 backgroundColor: Colors.red,
                               ),
                             );
