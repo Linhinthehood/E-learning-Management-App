@@ -6,6 +6,7 @@ import '../../../domain/entities/semester_entity.dart';
 import '../../common/styles/colors.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/semester_provider.dart';
+import '../csv_import/course_csv_import_screen.dart';
 import 'widgets/course_form_dialog.dart';
 import 'widgets/enrollment_management_dialog.dart';
 import 'course_detail_screen.dart';
@@ -94,38 +95,78 @@ class _CourseManagementScreenState
                     ),
                   ],
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    if (_selectedSemester == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please select a semester first'),
-                          backgroundColor: Colors.red,
+                Row(
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        // Navigate to CSV import screen and wait for result
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CourseCsvImportScreen(),
+                          ),
+                        );
+
+                        // Refresh course list after import
+                        if (_selectedSemester != null) {
+                          ref.read(courseProvider.notifier).loadCourses(_selectedSemester!.id);
+                        }
+                      },
+                      icon: const Icon(Icons.upload_file, size: 20),
+                      label: Text(
+                        'Import CSV',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
-                      );
-                      return;
-                    }
-                    _showCourseDialog(null);
-                  },
-                  icon: const Icon(Icons.add),
-                  label: Text(
-                    'Add Course',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.buttonPrimary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        side: BorderSide(color: AppColors.buttonPrimary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonPrimary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        if (_selectedSemester == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please select a semester first'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+                        _showCourseDialog(null);
+                      },
+                      icon: const Icon(Icons.add),
+                      label: Text(
+                        'Add Course',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.buttonPrimary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),

@@ -6,6 +6,7 @@ import '../../providers/student_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../messaging/chat_screen.dart';
+import '../csv_import/student_csv_import_screen.dart';
 import 'widgets/student_form_dialog.dart';
 
 class StudentManagementScreen extends ConsumerWidget {
@@ -47,27 +48,65 @@ class StudentManagementScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                ElevatedButton.icon(
-                  onPressed: () => _showStudentDialog(context, ref),
-                  icon: const Icon(Icons.add, size: 20),
-                  label: Text(
-                    'Add Student',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                Row(
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        // Navigate to CSV import screen and wait for result
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const StudentCsvImportScreen(),
+                          ),
+                        );
+
+                        // Refresh student list after import
+                        ref.invalidate(studentProvider);
+                      },
+                      icon: const Icon(Icons.upload_file, size: 20),
+                      label: Text(
+                        'Import CSV',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.buttonPrimary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        side: BorderSide(color: AppColors.buttonPrimary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonPrimary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: () => _showStudentDialog(context, ref),
+                      icon: const Icon(Icons.add, size: 20),
+                      label: Text(
+                        'Add Student',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.buttonPrimary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),

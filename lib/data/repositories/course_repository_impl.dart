@@ -1,23 +1,42 @@
 import '../../domain/entities/course_entity.dart';
 import '../../domain/repositories/i_course_repository.dart';
 import '../datasources/remote/course_remote_datasource.dart';
+import '../datasources/local/course_local_datasource.dart';
 import '../datasources/models/course_model.dart';
 
 /// Implementation of ICourseRepository
 /// This class decides when to use remote or local data sources
 class CourseRepositoryImpl implements ICourseRepository {
   final CourseRemoteDataSource remoteDataSource;
+  final CourseLocalDataSource? localDataSource;
 
-  CourseRepositoryImpl({required this.remoteDataSource});
+  CourseRepositoryImpl({
+    required this.remoteDataSource,
+    this.localDataSource,
+  });
 
   @override
   Future<List<CourseEntity>> getCoursesBySemester(String semesterId) async {
     try {
+      // Try to get from remote first
       final courseModels = await remoteDataSource.getCoursesBySemester(
         semesterId,
       );
+
+      // Cache the data for offline use
+      if (localDataSource != null) {
+        await localDataSource!.cacheCourses(semesterId, courseModels);
+      }
+
       return courseModels.map((model) => model.toEntity()).toList();
     } catch (e) {
+      // If remote fails, try to get from cache
+      if (localDataSource != null) {
+        final cachedModels = await localDataSource!.getCachedCourses(semesterId);
+        if (cachedModels.isNotEmpty) {
+          return cachedModels.map((model) => model.toEntity()).toList();
+        }
+      }
       rethrow;
     }
   }
@@ -28,12 +47,26 @@ class CourseRepositoryImpl implements ICourseRepository {
     String semesterId,
   ) async {
     try {
+      // Try to get from remote first
       final courseModels = await remoteDataSource.getStudentCourses(
         studentId,
         semesterId,
       );
+
+      // Cache student courses (use student-specific key)
+      if (localDataSource != null) {
+        await localDataSource!.cacheCourses('${semesterId}_student_$studentId', courseModels);
+      }
+
       return courseModels.map((model) => model.toEntity()).toList();
     } catch (e) {
+      // If remote fails, try to get from cache
+      if (localDataSource != null) {
+        final cachedModels = await localDataSource!.getCachedCourses('${semesterId}_student_$studentId');
+        if (cachedModels.isNotEmpty) {
+          return cachedModels.map((model) => model.toEntity()).toList();
+        }
+      }
       rethrow;
     }
   }

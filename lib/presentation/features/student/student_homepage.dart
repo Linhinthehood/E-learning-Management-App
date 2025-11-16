@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../common/styles/colors.dart';
 import '../../common/widgets/course_list_item.dart';
 import '../../common/widgets/right_sidebar.dart';
+import '../../common/widgets/offline_indicator.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/semester_provider.dart';
@@ -91,13 +92,22 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Offline Indicator
+                    const OfflineIndicator(),
+
                     // Greeting Section
                     _buildGreeting(user.displayName),
                     const SizedBox(height: 30),
 
                     // Semester Switcher
                     _buildSemesterSwitcher(semestersAsync),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
+
+                    // Past Semester Warning Banner
+                    if (_selectedSemester != null && _selectedSemester!.isPast)
+                      _buildPastSemesterWarning(),
+
+                    const SizedBox(height: 20),
 
                     // Dashboard Data
                     if (_selectedSemester != null)
@@ -753,6 +763,51 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
         totalCourses: 0,
         totalStudents: 0,
         courseProgressList: [],
+      ),
+    );
+  }
+
+  /// Build warning banner for past semesters
+  Widget _buildPastSemesterWarning() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange, width: 2),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.orange[800],
+            size: 32,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Viewing Past Semester',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange[900],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'You are viewing a past semester. You cannot submit assignments or take quizzes for this semester. You can only view materials and grades.',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: Colors.orange[800],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

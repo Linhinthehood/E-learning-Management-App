@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../domain/entities/course_entity.dart';
 import '../../common/styles/colors.dart';
+import '../../providers/semester_provider.dart';
 import 'tabs/announcements_tab.dart';
 import 'tabs/assignments_tab.dart';
 import 'tabs/quizzes_tab.dart';
@@ -48,67 +49,169 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.course.name,
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+    // Fetch semester to check if it's past
+    final semesterAsync = ref.watch(semesterProvider);
+
+    return semesterAsync.when(
+      data: (semesters) {
+        // Find the semester for this course
+        final semester = semesters.where((s) => s.id == widget.course.semesterId).firstOrNull;
+        final bool isReadOnly = semester?.isPast ?? false;
+
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            Text(
-              widget.course.code,
-              style: GoogleFonts.inter(
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.course.name,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      widget.course.code,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    if (isReadOnly) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.orange),
+                        ),
+                        child: Text(
+                          'READ-ONLY',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange[900],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+            bottom: TabBar(
+              controller: _tabController,
+              labelColor: AppColors.buttonPrimary,
+              unselectedLabelColor: AppColors.textSecondary,
+              indicatorColor: AppColors.buttonPrimary,
+              labelStyle: GoogleFonts.inter(
                 fontSize: 14,
-                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
               ),
+              tabs: const [
+                Tab(text: 'Stream', icon: Icon(Icons.stream, size: 20)),
+                Tab(text: 'Classwork', icon: Icon(Icons.assignment, size: 20)),
+                Tab(text: 'Quizzes', icon: Icon(Icons.quiz, size: 20)),
+                Tab(text: 'Questions', icon: Icon(Icons.library_books, size: 20)),
+                Tab(text: 'Materials', icon: Icon(Icons.folder, size: 20)),
+                Tab(text: 'Forum', icon: Icon(Icons.forum, size: 20)),
+                Tab(text: 'People', icon: Icon(Icons.people, size: 20)),
+              ],
             ),
-          ],
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.buttonPrimary,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.buttonPrimary,
-          labelStyle: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
           ),
-          tabs: const [
-            Tab(text: 'Stream', icon: Icon(Icons.stream, size: 20)),
-            Tab(text: 'Classwork', icon: Icon(Icons.assignment, size: 20)),
-            Tab(text: 'Quizzes', icon: Icon(Icons.quiz, size: 20)),
-            Tab(text: 'Questions', icon: Icon(Icons.library_books, size: 20)),
-            Tab(text: 'Materials', icon: Icon(Icons.folder, size: 20)),
-            Tab(text: 'Forum', icon: Icon(Icons.forum, size: 20)),
-            Tab(text: 'People', icon: Icon(Icons.people, size: 20)),
-          ],
-        ),
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              AnnouncementsTab(course: widget.course),
+              AssignmentsTab(course: widget.course, isReadOnly: isReadOnly),
+              QuizzesTab(course: widget.course, isReadOnly: isReadOnly),
+              QuestionBanksTab(course: widget.course),
+              MaterialsTab(course: widget.course),
+              ForumTab(course: widget.course),
+              PeopleTab(course: widget.course),
+            ],
+          ),
+        );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          AnnouncementsTab(course: widget.course),
-          AssignmentsTab(course: widget.course),
-          QuizzesTab(course: widget.course),
-          QuestionBanksTab(course: widget.course),
-          MaterialsTab(course: widget.course),
-          ForumTab(course: widget.course),
-          PeopleTab(course: widget.course),
-        ],
-      ),
+      error: (_, __) {
+        // Default to not read-only if error
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.course.name,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  widget.course.code,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+            bottom: TabBar(
+              controller: _tabController,
+              labelColor: AppColors.buttonPrimary,
+              unselectedLabelColor: AppColors.textSecondary,
+              indicatorColor: AppColors.buttonPrimary,
+              labelStyle: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              tabs: const [
+                Tab(text: 'Stream', icon: Icon(Icons.stream, size: 20)),
+                Tab(text: 'Classwork', icon: Icon(Icons.assignment, size: 20)),
+                Tab(text: 'Quizzes', icon: Icon(Icons.quiz, size: 20)),
+                Tab(text: 'Questions', icon: Icon(Icons.library_books, size: 20)),
+                Tab(text: 'Materials', icon: Icon(Icons.folder, size: 20)),
+                Tab(text: 'Forum', icon: Icon(Icons.forum, size: 20)),
+                Tab(text: 'People', icon: Icon(Icons.people, size: 20)),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              AnnouncementsTab(course: widget.course),
+              AssignmentsTab(course: widget.course, isReadOnly: false),
+              QuizzesTab(course: widget.course, isReadOnly: false),
+              QuestionBanksTab(course: widget.course),
+              MaterialsTab(course: widget.course),
+              ForumTab(course: widget.course),
+              PeopleTab(course: widget.course),
+            ],
+          ),
+        );
+      },
     );
   }
 }

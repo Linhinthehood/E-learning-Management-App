@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../common/styles/colors.dart';
 import '../../common/widgets/left_sidebar.dart';
+import '../../common/widgets/offline_indicator.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../auth/login_screen.dart';
@@ -88,15 +89,25 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Row(
+      body: Column(
         children: [
-          // Left Sidebar
-          LeftSidebar(
-            selectedIndex: _selectedIndex,
-            onItemTapped: _onItemTapped,
+          // Offline Indicator
+          const OfflineIndicator(),
+
+          // Main Content Row
+          Expanded(
+            child: Row(
+              children: [
+                // Left Sidebar
+                LeftSidebar(
+                  selectedIndex: _selectedIndex,
+                  onItemTapped: _onItemTapped,
+                ),
+                // Main Content
+                Expanded(child: _screens[_selectedIndex]),
+              ],
+            ),
           ),
-          // Main Content
-          Expanded(child: _screens[_selectedIndex]),
         ],
       ),
       floatingActionButton: userAsync.when(

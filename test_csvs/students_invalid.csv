@@ -1,0 +1,6 @@
+email,displayName,phone,studentId,password
+invalid-email-format,No At Sign Student,1234567890,IT2023006,Pass123!
+student@test.com,A,1234567890,IT2023007,Pass123!
+student2@test.com,Valid Student Name,12345,IT2023008,short
+student3@test.com,Another Valid Student,1234567890,ABC,Pass1234!
+missing@test.com,,1234567890,IT2023009,Pass1234!

@@ -22,8 +22,28 @@ class SemesterEntity {
     return now.isAfter(startDate) && now.isBefore(endDate);
   }
 
+  /// Check if this semester is in the past
+  bool get isPast {
+    final now = DateTime.now();
+    return now.isAfter(endDate);
+  }
+
+  /// Check if this semester is in the future
+  bool get isFuture {
+    final now = DateTime.now();
+    return now.isBefore(startDate);
+  }
+
   /// Get semester duration in days
   int get durationInDays {
     return endDate.difference(startDate).inDays;
+  }
+
+  /// Get semester status as string
+  String get status {
+    if (isActive) return 'Active';
+    if (isPast) return 'Past';
+    if (isFuture) return 'Upcoming';
+    return 'Unknown';
   }
 }

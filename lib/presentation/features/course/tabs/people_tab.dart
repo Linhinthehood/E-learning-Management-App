@@ -10,6 +10,7 @@ import '../../../providers/enrollment_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/chat_provider.dart';
 import '../../messaging/chat_screen.dart';
+import '../../csv_import/group_csv_import_screen.dart';
 import '../widgets/enrollment_management_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -61,35 +62,74 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                 ),
               ),
               if (isInstructor)
-                ElevatedButton.icon(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => EnrollmentManagementDialog(
-                        course: widget.course,
-                        semesterId: widget.course.semesterId,
+                Row(
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        // Navigate to CSV import screen and wait for result
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const GroupCsvImportScreen(),
+                          ),
+                        );
+
+                        // Refresh groups and enrollments after import
+                        ref.read(groupProvider.notifier).loadGroups(widget.course.id);
+                        ref.read(enrollmentProvider.notifier).loadEnrollments(widget.course.id);
+                      },
+                      icon: const Icon(Icons.upload_file, size: 20),
+                      label: Text(
+                        'Import CSV',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.group_add, size: 20),
-                  label: Text(
-                    'Manage Students',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.buttonPrimary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        side: BorderSide(color: AppColors.buttonPrimary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonPrimary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => EnrollmentManagementDialog(
+                            course: widget.course,
+                            semesterId: widget.course.semesterId,
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.group_add, size: 20),
+                      label: Text(
+                        'Manage Students',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.buttonPrimary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  ],
                 ),
             ],
           ),

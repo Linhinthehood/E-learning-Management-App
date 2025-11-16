@@ -15,8 +15,13 @@ import '../../tracking/quiz_tracking_screen.dart';
 /// Quizzes tab - displays and manages quizzes
 class QuizzesTab extends ConsumerStatefulWidget {
   final CourseEntity course;
+  final bool isReadOnly;
 
-  const QuizzesTab({super.key, required this.course});
+  const QuizzesTab({
+    super.key,
+    required this.course,
+    this.isReadOnly = false,
+  });
 
   @override
   ConsumerState<QuizzesTab> createState() => _QuizzesTabState();

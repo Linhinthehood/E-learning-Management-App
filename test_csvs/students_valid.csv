@@ -1,0 +1,6 @@
+email,displayName,phone,studentId,password
+john.doe@example.com,John Doe,1234567890,IT2023001,Password123!
+jane.smith@example.com,Jane Smith,9876543210,IT2023002,SecurePass456!
+bob.johnson@example.com,Bob Johnson,1112223333,IT2023003,MyPass789!
+alice.williams@example.com,Alice Williams,4445556666,IT2023004,AlicePass2024!
+charlie.brown@example.com,Charlie Brown,7778889999,IT2023005,Charlie2024!

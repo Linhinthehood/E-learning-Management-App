@@ -14,6 +14,9 @@ class HiveInitializer {
     await Hive.openBox('userBox');
     await Hive.openBox('settingsBox');
     await Hive.openBox('semesterBox');
+    await Hive.openBox('courseBox');
+    await Hive.openBox('materialBox');
+    await Hive.openBox('assignmentBox');
   }
 
   /// Clear all Hive data (useful for logout)
@@ -21,5 +24,8 @@ class HiveInitializer {
     await Hive.box('userBox').clear();
     await Hive.box('settingsBox').clear();
     await Hive.box('semesterBox').clear();
+    await Hive.box('courseBox').clear();
+    await Hive.box('materialBox').clear();
+    await Hive.box('assignmentBox').clear();
   }
 }

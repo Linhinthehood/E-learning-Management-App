@@ -15,8 +15,13 @@ import '../../tracking/assignment_tracking_screen.dart';
 /// Assignments tab - displays and manages assignments
 class AssignmentsTab extends ConsumerStatefulWidget {
   final CourseEntity course;
+  final bool isReadOnly;
 
-  const AssignmentsTab({super.key, required this.course});
+  const AssignmentsTab({
+    super.key,
+    required this.course,
+    this.isReadOnly = false,
+  });
 
   @override
   ConsumerState<AssignmentsTab> createState() => _AssignmentsTabState();

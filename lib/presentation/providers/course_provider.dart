@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/remote/course_remote_datasource.dart';
+import '../../data/datasources/local/course_local_datasource.dart';
 import '../../data/repositories/course_repository_impl.dart';
 import '../../domain/entities/course_entity.dart';
 import '../../domain/usecases/course/get_student_courses_usecase.dart';
@@ -13,10 +14,16 @@ final courseRemoteDataSourceProvider = Provider<CourseRemoteDataSource>((ref) {
   return CourseRemoteDataSourceImpl();
 });
 
+/// Provider for course local data source
+final courseLocalDataSourceProvider = Provider<CourseLocalDataSource>((ref) {
+  return CourseLocalDataSourceImpl();
+});
+
 /// Provider for course repository
 final courseRepositoryProvider = Provider<CourseRepositoryImpl>((ref) {
   return CourseRepositoryImpl(
     remoteDataSource: ref.read(courseRemoteDataSourceProvider),
+    localDataSource: ref.read(courseLocalDataSourceProvider),
   );
 });
 
