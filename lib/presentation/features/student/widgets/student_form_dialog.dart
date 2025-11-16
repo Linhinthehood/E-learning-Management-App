@@ -68,7 +68,9 @@ class _StudentFormDialogState extends ConsumerState<StudentFormDialog> {
         ),
       ),
       content: SizedBox(
-        width: 500,
+        width: MediaQuery.of(context).size.width < 600
+            ? MediaQuery.of(context).size.width * 0.9
+            : 500,
         child: Form(
           key: _formKey,
           child: Column(

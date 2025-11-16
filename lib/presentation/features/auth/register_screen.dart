@@ -24,6 +24,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   String? _errorMessage;
   UserRole _selectedRole = UserRole.student;
 
+  // Helper method for responsive font sizes
+  double _getResponsiveFontSize(double baseSize, BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 600) return baseSize * 0.6;
+    if (width < 900) return baseSize * 0.8;
+    return baseSize;
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -97,17 +105,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   children: [
                     // Logo
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: MediaQuery.of(context).size.width < 600
+                          ? 80
+                          : 100,
+                      height: MediaQuery.of(context).size.width < 600
+                          ? 80
+                          : 100,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           'F.',
                           style: TextStyle(
-                            fontSize: 60,
+                            fontSize: _getResponsiveFontSize(60, context),
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -118,7 +130,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Text(
                       'E-Learning Management',
                       style: GoogleFonts.inter(
-                        fontSize: 32,
+                        fontSize: _getResponsiveFontSize(32, context),
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -127,13 +139,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Text(
                       'Join Us Today',
                       style: GoogleFonts.inter(
-                        fontSize: 16,
+                        fontSize: _getResponsiveFontSize(16, context),
                         color: Colors.white70,
                       ),
                     ),
                     const SizedBox(height: 60),
                     // Illustration placeholder
-                    const Text('📚', style: TextStyle(fontSize: 80)),
+                    Text(
+                      '📚',
+                      style: TextStyle(
+                        fontSize: _getResponsiveFontSize(80, context),
+                      ),
+                    ),
                   ],
                 ),
               ),

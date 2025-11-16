@@ -32,77 +32,108 @@ class RightSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive width - prevents overflow on tablets and mobile
+    final screenWidth = MediaQuery.of(context).size.width;
+    final sidebarWidth = screenWidth > 1200
+        ? 400.0
+        : screenWidth > 900
+            ? screenWidth * 0.35
+            : screenWidth * 0.4;
+
+    // Determine if we need compact layout
+    final isCompact = sidebarWidth < 300;
+    final padding = sidebarWidth < 250 ? 12.0 : (screenWidth < 900 ? 20.0 : 30.0);
+
     return Container(
-      width: 400,
-      padding: const EdgeInsets.all(30),
+      width: sidebarWidth,
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search and profile
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: AppColors.borderLight,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 18),
-                      const Icon(
-                        Icons.search,
-                        color: AppColors.textSecondary,
-                        size: 22,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Search...',
-                            hintStyle: GoogleFonts.inter(
-                              color: AppColors.textSecondary,
-                              fontSize: 15,
+          // Search and profile - compact on narrow screens
+          if (!isCompact)
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: AppColors.borderLight,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 12),
+                        const Icon(
+                          Icons.search,
+                          color: AppColors.textSecondary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Search...',
+                              hintStyle: GoogleFonts.inter(
+                                color: AppColors.textSecondary,
+                                fontSize: 14,
+                              ),
+                              border: InputBorder.none,
                             ),
-                            border: InputBorder.none,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 18),
-              Stack(
-                children: [
-                  const Icon(Icons.notifications_outlined, size: 26),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 9,
-                      height: 9,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(width: 18),
-              Container(
-                width: 45,
-                height: 45,
-                decoration: BoxDecoration(
-                  color: AppColors.textSecondary,
-                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.person, color: Colors.white, size: 28),
-              ),
-            ],
-          ),
+                const SizedBox(width: 12),
+                Stack(
+                  children: [
+                    const Icon(Icons.notifications_outlined, size: 24),
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.textSecondary,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.person, color: Colors.white, size: 24),
+                ),
+              ],
+            )
+          else
+            // Compact header for very narrow screens
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Icon(Icons.search, color: AppColors.textSecondary, size: 20),
+                const Icon(Icons.notifications_outlined, size: 20),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppColors.textSecondary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.person, color: Colors.white, size: 20),
+                ),
+              ],
+            ),
           const SizedBox(height: 30),
           // Stats cards
           Row(
@@ -249,7 +280,7 @@ class RightSidebar extends StatelessWidget {
           Text(
             value,
             style: GoogleFonts.inter(
-              fontSize: 40,
+              fontSize: MediaQuery.of(context).size.width < 1200 ? 28 : 40,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),

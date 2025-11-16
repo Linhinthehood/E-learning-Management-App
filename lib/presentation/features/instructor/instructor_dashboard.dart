@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../common/styles/colors.dart';
 import '../../common/widgets/left_sidebar.dart';
 import '../../common/widgets/offline_indicator.dart';
+import '../../common/widgets/responsive_layout.dart';
+import '../../common/widgets/mobile_app_bar.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../auth/login_screen.dart';
@@ -11,6 +13,7 @@ import '../messaging/chat_list_screen.dart';
 import '../semester/semester_management_screen.dart';
 import '../course/course_management_screen.dart';
 import '../student/student_management_screen.dart';
+import 'widgets/modern_instructor_mobile_homepage.dart';
 
 class InstructorDashboard extends ConsumerStatefulWidget {
   const InstructorDashboard({super.key});
@@ -22,6 +25,7 @@ class InstructorDashboard extends ConsumerStatefulWidget {
 
 class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
   int _selectedIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // List of screens for each navigation item
   final List<Widget> _screens = [
@@ -30,6 +34,15 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
     const CourseManagementScreen(), // 2: Courses
     const StudentManagementScreen(), // 3: Students
     const Placeholder(), // 4: Settings (TODO)
+  ];
+
+  // Screen titles for mobile app bar
+  final List<String> _screenTitles = [
+    'Dashboard',
+    'Semesters',
+    'Courses',
+    'Students',
+    'Settings',
   ];
 
   void _onItemTapped(int index) async {
@@ -86,28 +99,41 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(authProvider);
+    final isMobile = ResponsiveHelper.isMobile(context);
 
-    return Scaffold(
+    // Show modern mobile design on mobile devices
+    if (isMobile && _selectedIndex == 0) {
+      return const ModernInstructorMobileHomepage();
+    }
+
+    return ResponsiveLayout(
+      scaffoldKey: _scaffoldKey,
       backgroundColor: AppColors.background,
+      // Show app bar only on mobile
+      appBar: isMobile
+          ? MobileAppBar(
+              title: _screenTitles[_selectedIndex],
+              showMenuButton: true,
+            )
+          : null,
+      // Left sidebar for navigation
+      leftSidebar: LeftSidebar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: (index) {
+          _onItemTapped(index);
+          // Close drawer on mobile after selection
+          if (isMobile && _scaffoldKey.currentState?.isDrawerOpen == true) {
+            Navigator.of(context).pop();
+          }
+        },
+      ),
+      // Main content
       body: Column(
         children: [
           // Offline Indicator
           const OfflineIndicator(),
-
-          // Main Content Row
-          Expanded(
-            child: Row(
-              children: [
-                // Left Sidebar
-                LeftSidebar(
-                  selectedIndex: _selectedIndex,
-                  onItemTapped: _onItemTapped,
-                ),
-                // Main Content
-                Expanded(child: _screens[_selectedIndex]),
-              ],
-            ),
-          ),
+          // Current screen
+          Expanded(child: _screens[_selectedIndex]),
         ],
       ),
       floatingActionButton: userAsync.when(

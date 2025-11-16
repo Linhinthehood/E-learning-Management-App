@@ -7,11 +7,66 @@ import '../../common/styles/colors.dart';
 import '../../providers/semester_provider.dart';
 import 'widgets/semester_form_dialog.dart';
 
-class SemesterManagementScreen extends ConsumerWidget {
+class SemesterManagementScreen extends ConsumerStatefulWidget {
   const SemesterManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SemesterManagementScreen> createState() =>
+      _SemesterManagementScreenState();
+}
+
+class _SemesterManagementScreenState
+    extends ConsumerState<SemesterManagementScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _sortBy = 'Start Date (Newest)';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<SemesterEntity> _applyFiltersAndSort(List<SemesterEntity> semesters) {
+    var filtered = semesters.where((semester) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = semester.name
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            semester.code.toLowerCase().contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+      return true;
+    }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'Start Date (Newest)':
+        filtered.sort((a, b) => b.startDate.compareTo(a.startDate));
+        break;
+      case 'Start Date (Oldest)':
+        filtered.sort((a, b) => a.startDate.compareTo(b.startDate));
+        break;
+      case 'Name (A-Z)':
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case 'Name (Z-A)':
+        filtered.sort((a, b) => b.name.compareTo(a.name));
+        break;
+      case 'Duration (Short-Long)':
+        filtered.sort((a, b) => a.durationInDays.compareTo(b.durationInDays));
+        break;
+      case 'Duration (Long-Short)':
+        filtered.sort((a, b) => b.durationInDays.compareTo(a.durationInDays));
+        break;
+    }
+
+    return filtered;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final semesterState = ref.watch(semesterProvider);
 
     return Scaffold(
@@ -71,16 +126,136 @@ class SemesterManagementScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 16),
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Search semesters by name or code...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            _searchController.clear();
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: AppColors.cardBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Sort control
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: DropdownButtonFormField<String>(
+              // ignore: deprecated_member_use
+              value: _sortBy,
+              decoration: InputDecoration(
+                labelText: 'Sort by',
+                prefixIcon: const Icon(Icons.sort, size: 20),
+                filled: true,
+                fillColor: AppColors.cardBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+              ),
+              items: [
+                'Start Date (Newest)',
+                'Start Date (Oldest)',
+                'Name (A-Z)',
+                'Name (Z-A)',
+                'Duration (Short-Long)',
+                'Duration (Long-Short)',
+              ].map((sortOption) {
+                return DropdownMenuItem(
+                  value: sortOption,
+                  child: Text(
+                    sortOption,
+                    style: GoogleFonts.inter(fontSize: 14),
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _sortBy = value;
+                  });
+                }
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
           // Content
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: semesterState.when(
                 data: (semesters) {
+                  final filteredSemesters = _applyFiltersAndSort(semesters);
+
                   if (semesters.isEmpty) {
                     return _buildEmptyState(context, ref);
                   }
-                  return _buildSemesterList(context, ref, semesters);
+
+                  if (filteredSemesters.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 80,
+                            color: AppColors.textSecondary.withValues(alpha: 0.3),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'No semesters found',
+                            style: GoogleFonts.inter(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Try adjusting your search',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return _buildSemesterList(context, ref, filteredSemesters);
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => _buildErrorState(context, ref, error),

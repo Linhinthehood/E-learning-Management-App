@@ -18,6 +18,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
   String? _manualErrorMessage; // For validation errors
 
+  // Helper method for responsive font sizes
+  double _getResponsiveFontSize(double baseSize, BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 600) return baseSize * 0.6;
+    if (width < 900) return baseSize * 0.8;
+    return baseSize;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -129,17 +137,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     // Logo
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: MediaQuery.of(context).size.width < 600
+                          ? 80
+                          : 100,
+                      height: MediaQuery.of(context).size.width < 600
+                          ? 80
+                          : 100,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           'F.',
                           style: TextStyle(
-                            fontSize: 60,
+                            fontSize: _getResponsiveFontSize(60, context),
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -150,7 +162,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       'E-Learning Management',
                       style: GoogleFonts.inter(
-                        fontSize: 32,
+                        fontSize: _getResponsiveFontSize(32, context),
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -159,13 +171,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       'Learn, Grow, Succeed',
                       style: GoogleFonts.inter(
-                        fontSize: 16,
+                        fontSize: _getResponsiveFontSize(16, context),
                         color: Colors.white70,
                       ),
                     ),
                     const SizedBox(height: 60),
                     // Illustration placeholder
-                    const Text('📚', style: TextStyle(fontSize: 80)),
+                    Text(
+                      '📚',
+                      style: TextStyle(
+                        fontSize: _getResponsiveFontSize(80, context),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -317,50 +334,109 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // Remember me and forgot password
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
+                      // Remember me and forgot password - responsive layout
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Use Column on very narrow screens (< 400px)
+                          if (constraints.maxWidth < 400) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: Checkbox(
+                                        value: _rememberMe,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _rememberMe = value ?? false;
+                                          });
+                                        },
+                                        activeColor: AppColors.buttonPrimary,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Remember me',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                TextButton(
+                                  onPressed: () {},
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size(0, 30),
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: Text(
+                                    'Forgot password?',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: AppColors.textPrimary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                          // Use Row on wider screens
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: Checkbox(
-                                  value: _rememberMe,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _rememberMe = value ?? false;
-                                    });
-                                  },
-                                  activeColor: AppColors.buttonPrimary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: Checkbox(
+                                      value: _rememberMe,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _rememberMe = value ?? false;
+                                        });
+                                      },
+                                      activeColor: AppColors.buttonPrimary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Remember me',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  'Forgot password?',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Remember me',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
                             ],
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'Forgot password?',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 30),
                       // Error message

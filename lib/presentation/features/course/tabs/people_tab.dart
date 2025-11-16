@@ -25,6 +25,10 @@ class PeopleTab extends ConsumerStatefulWidget {
 }
 
 class _PeopleTabState extends ConsumerState<PeopleTab> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _filterGroup = 'All Groups';
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +39,25 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         ref.read(enrollmentProvider.notifier).loadEnrollments(widget.course.id);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<UserEntity> _filterStudents(List<UserEntity> students) {
+    return students.where((student) {
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = student.displayName
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            student.email.toLowerCase().contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+      return true;
+    }).toList();
   }
 
   @override
@@ -169,6 +192,45 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         ),
         const SizedBox(height: 16),
 
+        // Search bar
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'Search students by name or email...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          _searchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              filled: true,
+              fillColor: AppColors.cardBackground,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
         // Groups List
         Expanded(
           child: groupsAsync.when(
@@ -224,9 +286,17 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                               .any((e) => e.studentId == student.uid))
                           .toList();
 
+                      // Apply search filter to group students
+                      final filteredGroupStudents = _filterStudents(groupStudents);
+
+                      // Skip groups with no matching students if search is active
+                      if (_searchQuery.isNotEmpty && filteredGroupStudents.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
                       return _buildGroupCard(
                         group,
-                        groupStudents,
+                        filteredGroupStudents,
                         groupEnrollments.length,
                       );
                     },

@@ -23,6 +23,9 @@ class CourseManagementScreen extends ConsumerStatefulWidget {
 class _CourseManagementScreenState
     extends ConsumerState<CourseManagementScreen> {
   SemesterEntity? _selectedSemester;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _sortBy = 'Name (A-Z)';
 
   @override
   void initState() {
@@ -30,6 +33,50 @@ class _CourseManagementScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeSemester();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<CourseEntity> _applyFiltersAndSort(List<CourseEntity> courses) {
+    var filtered = courses.where((course) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = course.name
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            course.code.toLowerCase().contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+      return true;
+    }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'Name (A-Z)':
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case 'Name (Z-A)':
+        filtered.sort((a, b) => b.name.compareTo(a.name));
+        break;
+      case 'Code (A-Z)':
+        filtered.sort((a, b) => a.code.compareTo(b.code));
+        break;
+      case 'Code (Z-A)':
+        filtered.sort((a, b) => b.code.compareTo(a.code));
+        break;
+      case 'Sessions (Low-High)':
+        filtered.sort((a, b) => a.sessions.compareTo(b.sessions));
+        break;
+      case 'Sessions (High-Low)':
+        filtered.sort((a, b) => b.sessions.compareTo(a.sessions));
+        break;
+    }
+
+    return filtered;
   }
 
   Future<void> _initializeSemester() async {
@@ -177,6 +224,91 @@ class _CourseManagementScreenState
             child: _buildSemesterSelector(semestersAsync),
           ),
           const SizedBox(height: 24),
+          // Search and Sort controls
+          if (_selectedSemester != null) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search courses by name or code...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: AppColors.cardBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: DropdownButtonFormField<String>(
+                // ignore: deprecated_member_use
+                value: _sortBy,
+                decoration: InputDecoration(
+                  labelText: 'Sort by',
+                  prefixIcon: const Icon(Icons.sort, size: 20),
+                  filled: true,
+                  fillColor: AppColors.cardBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                ),
+                items: [
+                  'Name (A-Z)',
+                  'Name (Z-A)',
+                  'Code (A-Z)',
+                  'Code (Z-A)',
+                  'Sessions (Low-High)',
+                  'Sessions (High-Low)',
+                ].map((sortOption) {
+                  return DropdownMenuItem(
+                    value: sortOption,
+                    child: Text(
+                      sortOption,
+                      style: GoogleFonts.inter(fontSize: 14),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _sortBy = value;
+                    });
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
           // Content
           Expanded(
             child: Padding(
@@ -332,10 +464,45 @@ class _CourseManagementScreenState
   Widget _buildCoursesList(AsyncValue<List<CourseEntity>> coursesAsync) {
     return coursesAsync.when(
       data: (courses) {
+        final filteredCourses = _applyFiltersAndSort(courses);
+
         if (courses.isEmpty) {
           return _buildEmptyState();
         }
-        return _buildCourseGrid(courses);
+
+        if (filteredCourses.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 80,
+                  color: AppColors.textSecondary.withValues(alpha: 0.3),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'No courses found',
+                  style: GoogleFonts.inter(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Try adjusting your search or filters',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return _buildCourseGrid(filteredCourses);
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _buildErrorState(error),
@@ -395,17 +562,33 @@ class _CourseManagementScreenState
   }
 
   Widget _buildCourseGrid(List<CourseEntity> courses) {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-        childAspectRatio: 1.1,
-      ),
-      itemCount: courses.length,
-      itemBuilder: (context, index) {
-        final course = courses[index];
-        return _buildCourseCard(course);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Responsive grid columns based on screen width
+        int crossAxisCount;
+        if (constraints.maxWidth < 600) {
+          crossAxisCount = 1; // Mobile: 1 column
+        } else if (constraints.maxWidth < 900) {
+          crossAxisCount = 2; // Tablet: 2 columns
+        } else if (constraints.maxWidth < 1400) {
+          crossAxisCount = 3; // Desktop: 3 columns
+        } else {
+          crossAxisCount = 4; // Large desktop: 4 columns
+        }
+
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 20,
+            mainAxisSpacing: 20,
+            childAspectRatio: 1.1,
+          ),
+          itemCount: courses.length,
+          itemBuilder: (context, index) {
+            final course = courses[index];
+            return _buildCourseCard(course);
+          },
+        );
       },
     );
   }

@@ -8,13 +8,51 @@ void main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
+  // Initialize Firebase - MUST succeed for app to work
   try {
     await FirebaseInitializer.initialize();
     debugPrint('✅ Firebase initialized successfully');
-  } catch (e) {
-    debugPrint('⚠️ Firebase initialization failed: $e');
-    debugPrint('💡 Make sure you have set up Firebase configuration');
+  } catch (e, stackTrace) {
+    debugPrint('❌ Firebase initialization FAILED: $e');
+    debugPrint('Stack trace: $stackTrace');
+    // Show error but still try to run app
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Firebase Initialization Failed',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: $e',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Please ensure:\n'
+                    '1. google-services.json is in android/app/\n'
+                    '2. Firebase project is configured correctly\n'
+                    '3. App has internet connection',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    return; // Don't continue if Firebase fails
   }
 
   // Initialize Hive for offline storage

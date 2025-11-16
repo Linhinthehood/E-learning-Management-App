@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../common/styles/colors.dart';
 import '../../common/widgets/student_sidebar.dart';
+import '../../common/widgets/responsive_layout.dart';
+import '../../common/widgets/mobile_app_bar.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/notification_provider.dart';
@@ -14,6 +16,7 @@ import '../messaging/chat_list_screen.dart';
 import '../notifications/notification_list_screen.dart';
 import 'student_homepage.dart';
 import 'student_profile_screen.dart';
+import 'widgets/modern_mobile_homepage.dart';
 
 /// Student Dashboard with sidebar navigation
 class StudentDashboard extends ConsumerStatefulWidget {
@@ -26,11 +29,18 @@ class StudentDashboard extends ConsumerStatefulWidget {
 class _StudentDashboardState extends ConsumerState<StudentDashboard> {
   int _selectedIndex = 0;
   bool _hasCheckedReminders = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // List of screens for each navigation item
   final List<Widget> _screens = [
     const StudentHomepage(), // 0: Homepage
     const StudentProfileScreen(), // 1: Profile
+  ];
+
+  // Screen titles for mobile app bar
+  final List<String> _screenTitles = [
+    'My Courses',
+    'Profile',
   ];
 
   void _onItemTapped(int index) async {
@@ -108,6 +118,7 @@ class _StudentDashboardState extends ConsumerState<StudentDashboard> {
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(authProvider);
+    final isMobile = ResponsiveHelper.isMobile(context);
 
     // Check for deadline reminders when user data is available
     userAsync.whenData((user) {
@@ -117,19 +128,48 @@ class _StudentDashboardState extends ConsumerState<StudentDashboard> {
       }
     });
 
-    return Scaffold(
+    // Show modern mobile design on mobile devices
+    if (isMobile && _selectedIndex == 0) {
+      return const ModernMobileHomepage();
+    }
+
+    return ResponsiveLayout(
+      scaffoldKey: _scaffoldKey,
       backgroundColor: AppColors.background,
-      body: Row(
-        children: [
-          // Left Sidebar
-          StudentSidebar(
-            selectedIndex: _selectedIndex,
-            onItemTapped: _onItemTapped,
-          ),
-          // Main Content
-          Expanded(child: _screens[_selectedIndex]),
-        ],
+      // Show app bar only on mobile
+      appBar: isMobile
+          ? MobileAppBar(
+              title: _screenTitles[_selectedIndex],
+              showMenuButton: true,
+              actions: [
+                // Quick access to notifications on mobile
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationListScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            )
+          : null,
+      // Left sidebar for navigation
+      leftSidebar: StudentSidebar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: (index) {
+          _onItemTapped(index);
+          // Close drawer on mobile after selection
+          if (isMobile && _scaffoldKey.currentState?.isDrawerOpen == true) {
+            Navigator.of(context).pop();
+          }
+        },
       ),
+      // Main content
+      body: _screens[_selectedIndex],
       floatingActionButton: userAsync.when(
         data: (user) {
           if (user == null) return null;

@@ -120,43 +120,55 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildGreeting(String displayName) {
-    return Row(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+        return Row(
           children: [
-            Text(
-              'Hello $displayName!',
-              style: GoogleFonts.inter(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hello $displayName!',
+                    style: GoogleFonts.inter(
+                      fontSize: isMobile ? 20 : 32,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    "Welcome to your instructor dashboard.",
+                    style: GoogleFonts.inter(
+                      fontSize: isMobile ? 12 : 15,
+                      color: AppColors.textSecondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 5),
-            Text(
-              "Welcome to your instructor dashboard.",
-              style: GoogleFonts.inter(
-                fontSize: 15,
-                color: AppColors.textSecondary,
+            // Show illustration only on wider screens
+            if (!isMobile) ...[
+              const SizedBox(width: 30),
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: AppColors.borderLight,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: const Center(
+                  child: Text('👨‍🏫', style: TextStyle(fontSize: 60)),
+                ),
               ),
-            ),
+            ],
           ],
-        ),
-        const SizedBox(width: 30),
-        // Illustration
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: AppColors.borderLight,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: const Center(
-            child: Text('👨‍🏫', style: TextStyle(fontSize: 60)),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 
