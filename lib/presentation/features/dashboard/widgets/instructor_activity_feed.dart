@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../common/styles/colors.dart';
 import '../../../providers/instructor_dashboard_provider.dart';
-import '../../course/course_detail_screen.dart';
+import '../../instructor/course_detail_screen.dart';
 import '../../../../domain/entities/course_entity.dart';
 
 /// Activity Feed Widget for Instructor Dashboard
@@ -162,7 +162,7 @@ class _ActivityItem extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => CourseDetailScreen(
+              builder: (context) => InstructorCourseDetailScreen(
                 course: course,
                 initialTabIndex: _getTabIndex(),
               ),

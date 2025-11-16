@@ -73,14 +73,14 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
       children: [
         // Header
         Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'People',
                 style: GoogleFonts.inter(
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
@@ -153,7 +153,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                           vertical: 16,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                     ),
@@ -165,7 +165,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
 
         // Instructor Section
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _buildInstructorSection(),
         ),
         const SizedBox(height: 24),
@@ -179,7 +179,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
 
         // Groups and Students Section Header
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
               const Icon(Icons.group, size: 20, color: AppColors.textPrimary),
@@ -199,7 +199,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
 
         // Search bar
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: TextField(
             controller: _searchController,
             onChanged: (value) {
@@ -224,11 +224,11 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               filled: true,
               fillColor: AppColors.cardBackground,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: AppColors.border),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: AppColors.border),
               ),
             ),
@@ -279,7 +279,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: groups.length,
                     itemBuilder: (context, index) {
                       final group = groups[index];
@@ -515,7 +515,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
           color: AppColors.cardBackground,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(8),
             side: const BorderSide(color: AppColors.border),
           ),
           child: Padding(
@@ -622,7 +622,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
       color: AppColors.cardBackground,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         side: const BorderSide(color: AppColors.border),
       ),
       child: ExpansionTile(

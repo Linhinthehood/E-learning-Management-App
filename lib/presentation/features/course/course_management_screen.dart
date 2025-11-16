@@ -9,7 +9,7 @@ import '../../providers/semester_provider.dart';
 import '../csv_import/course_csv_import_screen.dart';
 import 'widgets/course_form_dialog.dart';
 import 'widgets/enrollment_management_dialog.dart';
-import 'course_detail_screen.dart';
+import '../instructor/course_detail_screen.dart';
 
 /// Course Management Screen for instructors
 class CourseManagementScreen extends ConsumerStatefulWidget {
@@ -669,7 +669,7 @@ class _CourseManagementScreenState
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) =>
-                                CourseDetailScreen(course: course),
+                                InstructorCourseDetailScreen(course: course),
                           ),
                         );
                       },

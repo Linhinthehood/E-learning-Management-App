@@ -2,20 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../common/styles/colors.dart';
-import '../../common/widgets/course_list_item.dart';
-import '../../common/widgets/right_sidebar.dart';
 import '../../common/widgets/offline_indicator.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/course_provider.dart';
 import '../../providers/semester_provider.dart';
 import '../../providers/student_dashboard_provider.dart';
 import '../../../domain/entities/semester_entity.dart';
-import '../../../domain/entities/course_entity.dart';
 import 'widgets/dashboard_statistics_cards.dart';
 import 'widgets/upcoming_deadlines_widget.dart';
 import 'widgets/course_progress_widget.dart';
 import 'widgets/recent_grades_widget.dart';
-import '../course/course_detail_screen.dart';
+import 'course_detail_screen.dart';
 
 /// Student Homepage - Displays enrolled courses with semester switcher
 class StudentHomepage extends ConsumerStatefulWidget {
@@ -27,7 +23,6 @@ class StudentHomepage extends ConsumerStatefulWidget {
 
 class _StudentHomepageState extends ConsumerState<StudentHomepage> {
   SemesterEntity? _selectedSemester;
-  int _selectedTab = 0;
 
   @override
   void initState() {
@@ -51,7 +46,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
           setState(() {
             _selectedSemester = activeSemester;
           });
-          _loadCourses();
         }
       },
       loading: () {},
@@ -59,71 +53,42 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
     );
   }
 
-  void _loadCourses() {
-    final userAsync = ref.read(authProvider);
-    userAsync.whenData((user) {
-      if (user != null && _selectedSemester != null) {
-        ref
-            .read(studentCoursesProvider.notifier)
-            .loadCourses(user.uid, _selectedSemester!.id);
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(authProvider);
     final semestersAsync = ref.watch(semesterProvider);
-    final coursesAsync = ref.watch(studentCoursesProvider);
 
     return userAsync.when(
       data: (user) {
         if (user == null) return const SizedBox.shrink();
 
-        return Row(
-          children: [
-            // Main Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 40,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Offline Indicator
-                    const OfflineIndicator(),
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Offline Indicator
+              const OfflineIndicator(),
 
-                    // Greeting Section
-                    _buildGreeting(user.displayName),
-                    const SizedBox(height: 30),
+              // Greeting Section
+              _buildGreeting(user.displayName),
+              const SizedBox(height: 30),
 
-                    // Semester Switcher
-                    _buildSemesterSwitcher(semestersAsync),
-                    const SizedBox(height: 20),
+              // Semester Switcher
+              _buildSemesterSwitcher(semestersAsync),
+              const SizedBox(height: 20),
 
-                    // Past Semester Warning Banner
-                    if (_selectedSemester != null && _selectedSemester!.isPast)
-                      _buildPastSemesterWarning(),
+              // Past Semester Warning Banner
+              if (_selectedSemester != null && _selectedSemester!.isPast)
+                _buildPastSemesterWarning(),
 
-                    const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-                    // Dashboard Data
-                    if (_selectedSemester != null)
-                      _buildDashboardContent(user.uid, _selectedSemester!.id),
-
-                    const SizedBox(height: 30),
-
-                    // Courses Section with Tabs
-                    _buildCoursesSection(coursesAsync),
-                  ],
-                ),
-              ),
-            ),
-            // Right Sidebar with student data
-            _buildRightSidebar(user.uid),
-          ],
+              // Dashboard Data
+              if (_selectedSemester != null)
+                _buildDashboardContent(user.uid, _selectedSemester!.id),
+            ],
+          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -191,7 +156,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
             setState(() {
               _selectedSemester = activeSemester;
             });
-            _loadCourses();
           });
         }
 
@@ -267,7 +231,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                         setState(() {
                           _selectedSemester = newValue;
                         });
-                        _loadCourses();
                       }
                     },
                   ),
@@ -279,184 +242,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
       },
       loading: () => const SizedBox.shrink(),
       error: (error, _) => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _buildCoursesSection(AsyncValue<List<CourseEntity>> coursesAsync) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Courses',
-          style: GoogleFonts.inter(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 20),
-        // Tabs
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildTab('All Courses', 0),
-              const SizedBox(width: 30),
-              _buildTab('Courses This Semester', 1),
-              const SizedBox(width: 30),
-              _buildTab('Need Homework Courses', 2),
-              const SizedBox(width: 30),
-              _buildTab('Course With Upcoming Test', 3),
-            ],
-          ),
-        ),
-        const SizedBox(height: 25),
-        // Course list
-        coursesAsync.when(
-          data: (courses) {
-            if (courses.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(60),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(
-                      Icons.book_outlined,
-                      size: 80,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'No courses enrolled',
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'You are not enrolled in any courses for this semester.',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            final colors = [
-              const Color(0xFFFF6B6B),
-              const Color(0xFF4ECDC4),
-              const Color(0xFFE056FD),
-              const Color(0xFFFFA726),
-              const Color(0xFF42A5F5),
-              const Color(0xFF95E1D3),
-            ];
-
-            return Column(
-              children: courses.asMap().entries.map((entry) {
-                final index = entry.key;
-                final course = entry.value;
-                final color = colors[index % colors.length];
-
-                return FutureBuilder<Map<String, String>?>(
-                  future: _getInstructorInfo(course.instructorId),
-                  builder: (context, snapshot) {
-                    final instructorName =
-                        snapshot.data?['name'] ?? 'Unknown Instructor';
-
-                    return CourseListItem(
-                      title: course.name,
-                      instructor: instructorName,
-                      duration: '${course.sessions} Sessions',
-                      rating: 4.5,
-                      icon: _getCourseIcon(course.name),
-                      iconColor: color,
-                    );
-                  },
-                );
-              }).toList(),
-            );
-          },
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(40),
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          error: (error, _) => Container(
-            padding: const EdgeInsets.all(40),
-            decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              children: [
-                const Icon(Icons.error_outline, size: 60, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  'Error loading courses',
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  style: GoogleFonts.inter(fontSize: 14, color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTab(String label, int index) {
-    final isSelected = _selectedTab == index;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTab = index;
-        });
-      },
-      child: Column(
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 15,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected
-                  ? AppColors.textPrimary
-                  : AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          if (isSelected)
-            Container(
-              height: 3,
-              width: 30,
-              decoration: BoxDecoration(
-                color: AppColors.textPrimary,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-        ],
-      ),
     );
   }
 
@@ -498,7 +283,9 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        CourseDetailScreen(course: course),
+                                        StudentCourseDetailScreen(
+                                          course: course,
+                                        ),
                                   ),
                                 );
                               },
@@ -507,7 +294,9 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        CourseDetailScreen(course: course),
+                                        StudentCourseDetailScreen(
+                                          course: course,
+                                        ),
                                   ),
                                 );
                               },
@@ -521,7 +310,9 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        CourseDetailScreen(course: course),
+                                        StudentCourseDetailScreen(
+                                          course: course,
+                                        ),
                                   ),
                                 );
                               },
@@ -541,7 +332,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    CourseDetailScreen(course: course),
+                                    StudentCourseDetailScreen(course: course),
                               ),
                             );
                           },
@@ -562,7 +353,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  CourseDetailScreen(course: course),
+                                  StudentCourseDetailScreen(course: course),
                             ),
                           );
                         },
@@ -571,7 +362,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  CourseDetailScreen(course: course),
+                                  StudentCourseDetailScreen(course: course),
                             ),
                           );
                         },
@@ -585,7 +376,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  CourseDetailScreen(course: course),
+                                  StudentCourseDetailScreen(course: course),
                             ),
                           );
                         },
@@ -599,7 +390,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  CourseDetailScreen(course: course),
+                                  StudentCourseDetailScreen(course: course),
                             ),
                           );
                         },
@@ -645,117 +436,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Future<Map<String, String>?> _getInstructorInfo(String instructorId) async {
-    try {
-      final repository = ref.read(courseRepositoryProvider);
-      return await repository.getInstructorInfo(instructorId);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  IconData _getCourseIcon(String courseName) {
-    final name = courseName.toLowerCase();
-    if (name.contains('math') || name.contains('calculus')) {
-      return Icons.calculate;
-    }
-    if (name.contains('physics')) return Icons.science;
-    if (name.contains('chemistry')) return Icons.science;
-    if (name.contains('biology')) return Icons.biotech;
-    if (name.contains('computer') || name.contains('programming')) {
-      return Icons.computer;
-    }
-    if (name.contains('english') || name.contains('literature')) {
-      return Icons.book;
-    }
-    if (name.contains('history')) return Icons.history_edu;
-    if (name.contains('art')) return Icons.brush;
-    if (name.contains('music')) return Icons.music_note;
-    if (name.contains('spanish') || name.contains('french')) {
-      return Icons.language;
-    }
-    if (name.contains('design') || name.contains('figma')) {
-      return Icons.design_services;
-    }
-    if (name.contains('photo')) return Icons.camera_alt;
-    return Icons.school;
-  }
-
-  Widget _buildRightSidebar(String studentId) {
-    if (_selectedSemester == null) {
-      return const RightSidebar(
-        totalCourses: 0,
-        totalStudents: 0,
-        courseProgressList: [],
-      );
-    }
-
-    final dashboardAsync = ref.watch(
-      studentDashboardProvider(
-        StudentDashboardParams(
-          studentId: studentId,
-          semesterId: _selectedSemester!.id,
-        ),
-      ),
-    );
-
-    return dashboardAsync.when(
-      data: (data) {
-        final colors = [
-          const Color(0xFF6366F1), // Indigo
-          const Color(0xFF8B5CF6), // Purple
-          const Color(0xFFEC4899), // Pink
-          const Color(0xFFF59E0B), // Amber
-          const Color(0xFF10B981), // Green
-          const Color(0xFF3B82F6), // Blue
-        ];
-
-        // Build course progress list from student's enrolled courses
-        final courseProgressList = <CourseProgressData>[];
-        int colorIndex = 0;
-
-        for (final entry in data.courseProgress.entries) {
-          final courseProgress = entry.value;
-          final course = data.courseMap[entry.key];
-          if (course != null) {
-            // Calculate overall progress as average of assignment and quiz progress
-            final progress =
-                (courseProgress.assignmentProgress +
-                    courseProgress.quizProgress) /
-                2;
-
-            courseProgressList.add(
-              CourseProgressData(
-                name: course.name,
-                progress: progress.clamp(0.0, 1.0),
-                color: colors[colorIndex % colors.length],
-              ),
-            );
-            colorIndex++;
-          }
-        }
-
-        return RightSidebar(
-          totalCourses: data.statistics.totalCourses,
-          totalStudents: data.statistics.pendingAssignments,
-          courseProgressList: courseProgressList,
-          firstCardLabel: 'Enrolled\nCourses',
-          secondCardLabel: 'Pending\nAssignments',
-        );
-      },
-      loading: () => const RightSidebar(
-        totalCourses: 0,
-        totalStudents: 0,
-        courseProgressList: [],
-      ),
-      error: (_, __) => const RightSidebar(
-        totalCourses: 0,
-        totalStudents: 0,
-        courseProgressList: [],
       ),
     );
   }

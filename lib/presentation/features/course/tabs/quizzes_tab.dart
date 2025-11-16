@@ -16,8 +16,14 @@ import '../../tracking/quiz_tracking_screen.dart';
 class QuizzesTab extends ConsumerStatefulWidget {
   final CourseEntity course;
   final bool isReadOnly;
+  final bool isStudent; // If true, hide create button
 
-  const QuizzesTab({super.key, required this.course, this.isReadOnly = false});
+  const QuizzesTab({
+    super.key,
+    required this.course,
+    this.isReadOnly = false,
+    this.isStudent = false,
+  });
 
   @override
   ConsumerState<QuizzesTab> createState() => _QuizzesTabState();

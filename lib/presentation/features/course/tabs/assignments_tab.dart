@@ -17,11 +17,13 @@ import '../../../../services/file_download_service.dart';
 class AssignmentsTab extends ConsumerStatefulWidget {
   final CourseEntity course;
   final bool isReadOnly;
+  final bool isStudent; // If true, hide create button
 
   const AssignmentsTab({
     super.key,
     required this.course,
     this.isReadOnly = false,
+    this.isStudent = false,
   });
 
   @override
@@ -127,28 +129,31 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  ElevatedButton.icon(
-                    onPressed: () => _showAssignmentDialog(context, ref, null),
-                    icon: const Icon(Icons.add, size: 20),
-                    label: Text(
-                      'Add Assignment',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                  // Only show Add button for instructors
+                  if (!widget.isStudent && !widget.isReadOnly)
+                    ElevatedButton.icon(
+                      onPressed: () =>
+                          _showAssignmentDialog(context, ref, null),
+                      icon: const Icon(Icons.add, size: 20),
+                      label: Text(
+                        'Add Assignment',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.buttonPrimary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.buttonPrimary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
