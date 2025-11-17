@@ -7,11 +7,66 @@ import '../../common/styles/colors.dart';
 import '../../providers/semester_provider.dart';
 import 'widgets/semester_form_dialog.dart';
 
-class SemesterManagementScreen extends ConsumerWidget {
+class SemesterManagementScreen extends ConsumerStatefulWidget {
   const SemesterManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SemesterManagementScreen> createState() =>
+      _SemesterManagementScreenState();
+}
+
+class _SemesterManagementScreenState
+    extends ConsumerState<SemesterManagementScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _sortBy = 'Date (Newest First)';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<SemesterEntity> _applyFiltersAndSort(List<SemesterEntity> semesters) {
+    var filtered = semesters.where((semester) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = semester.name
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            semester.code.toLowerCase().contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+      return true;
+    }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'Date (Newest First)':
+        filtered.sort((a, b) => b.startDate.compareTo(a.startDate));
+        break;
+      case 'Date (Oldest First)':
+        filtered.sort((a, b) => a.startDate.compareTo(b.startDate));
+        break;
+      case 'Name (A-Z)':
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case 'Name (Z-A)':
+        filtered.sort((a, b) => b.name.compareTo(a.name));
+        break;
+      case 'Duration (Shortest First)':
+        filtered.sort((a, b) => a.durationInDays.compareTo(b.durationInDays));
+        break;
+      case 'Duration (Longest First)':
+        filtered.sort((a, b) => b.durationInDays.compareTo(a.durationInDays));
+        break;
+    }
+
+    return filtered;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final semesterState = ref.watch(semesterProvider);
 
     return Scaffold(
@@ -47,7 +102,7 @@ class SemesterManagementScreen extends ConsumerWidget {
                   ],
                 ),
                 ElevatedButton.icon(
-                  onPressed: () => _showSemesterDialog(context, ref),
+                  onPressed: () => _showSemesterDialog(),
                   icon: const Icon(Icons.add),
                   label: Text(
                     'Add Semester',
@@ -71,6 +126,98 @@ class SemesterManagementScreen extends ConsumerWidget {
               ],
             ),
           ),
+
+          // Search and Sort
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Search by name or code...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            _searchController.clear();
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: AppColors.cardBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Sort dropdown
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _sortBy,
+                    decoration: InputDecoration(
+                      labelText: 'Sort by',
+                      prefixIcon: const Icon(Icons.sort, size: 20),
+                      filled: true,
+                      fillColor: AppColors.cardBackground,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                    ),
+                    items: [
+                      'Date (Newest First)',
+                      'Date (Oldest First)',
+                      'Name (A-Z)',
+                      'Name (Z-A)',
+                      'Duration (Shortest First)',
+                      'Duration (Longest First)',
+                    ].map((sortOption) {
+                      return DropdownMenuItem(
+                        value: sortOption,
+                        child: Text(
+                          sortOption,
+                          style: GoogleFonts.inter(fontSize: 14),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _sortBy = value;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
           // Content
           Expanded(
             child: Padding(
@@ -78,12 +225,66 @@ class SemesterManagementScreen extends ConsumerWidget {
               child: semesterState.when(
                 data: (semesters) {
                   if (semesters.isEmpty) {
-                    return _buildEmptyState(context, ref);
+                    return _buildEmptyState();
                   }
-                  return _buildSemesterList(context, ref, semesters);
+
+                  // Apply filters and sort
+                  final filteredSemesters = _applyFiltersAndSort(semesters);
+
+                  // If no semesters match the search, show empty search state
+                  if (filteredSemesters.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 80,
+                            color: AppColors.textSecondary.withValues(alpha: 0.3),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'No semesters match your search',
+                            style: GoogleFonts.inter(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Try different keywords',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                _searchQuery = '';
+                              });
+                            },
+                            child: Text(
+                              'Clear search',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.buttonPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return _buildSemesterList(filteredSemesters);
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => _buildErrorState(context, ref, error),
+                error: (error, stack) => _buildErrorState(error),
               ),
             ),
           ),
@@ -92,7 +293,7 @@ class SemesterManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +322,7 @@ class SemesterManagementScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
           ElevatedButton.icon(
-            onPressed: () => _showSemesterDialog(context, ref),
+            onPressed: () => _showSemesterDialog(null),
             icon: const Icon(Icons.add),
             label: Text(
               'Add Semester',
@@ -144,7 +345,7 @@ class SemesterManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
+  Widget _buildErrorState(Object error) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -198,26 +399,18 @@ class SemesterManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSemesterList(
-    BuildContext context,
-    WidgetRef ref,
-    List<SemesterEntity> semesters,
-  ) {
+  Widget _buildSemesterList(List<SemesterEntity> semesters) {
     return ListView.separated(
       itemCount: semesters.length,
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final semester = semesters[index];
-        return _buildSemesterCard(context, ref, semester);
+        return _buildSemesterCard(semester);
       },
     );
   }
 
-  Widget _buildSemesterCard(
-    BuildContext context,
-    WidgetRef ref,
-    SemesterEntity semester,
-  ) {
+  Widget _buildSemesterCard(SemesterEntity semester) {
     final dateFormat = DateFormat('MMM dd, yyyy');
     final isActive = semester.isActive;
 
@@ -318,15 +511,14 @@ class SemesterManagementScreen extends ConsumerWidget {
           Row(
             children: [
               IconButton(
-                onPressed: () => _showSemesterDialog(context, ref, semester),
+                onPressed: () => _showSemesterDialog(semester),
                 icon: const Icon(Icons.edit_outlined),
                 color: AppColors.textPrimary,
                 tooltip: 'Edit',
               ),
               const SizedBox(width: 8),
               IconButton(
-                onPressed: () =>
-                    _showDeleteConfirmation(context, ref, semester),
+                onPressed: () => _showDeleteConfirmation(semester),
                 icon: const Icon(Icons.delete_outline),
                 color: Colors.red,
                 tooltip: 'Delete',
@@ -338,22 +530,14 @@ class SemesterManagementScreen extends ConsumerWidget {
     );
   }
 
-  void _showSemesterDialog(
-    BuildContext context,
-    WidgetRef ref, [
-    SemesterEntity? semester,
-  ]) {
+  void _showSemesterDialog([SemesterEntity? semester]) {
     showDialog(
       context: context,
       builder: (context) => SemesterFormDialog(semester: semester),
     );
   }
 
-  void _showDeleteConfirmation(
-    BuildContext context,
-    WidgetRef ref,
-    SemesterEntity semester,
-  ) {
+  void _showDeleteConfirmation(SemesterEntity semester) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

@@ -23,6 +23,9 @@ class CourseManagementScreen extends ConsumerStatefulWidget {
 class _CourseManagementScreenState
     extends ConsumerState<CourseManagementScreen> {
   SemesterEntity? _selectedSemester;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _sortBy = 'Name (A-Z)';
 
   @override
   void initState() {
@@ -30,6 +33,50 @@ class _CourseManagementScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeSemester();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<CourseEntity> _applyFiltersAndSort(List<CourseEntity> courses) {
+    var filtered = courses.where((course) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = course.name
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            course.code.toLowerCase().contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+      return true;
+    }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'Name (A-Z)':
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case 'Name (Z-A)':
+        filtered.sort((a, b) => b.name.compareTo(a.name));
+        break;
+      case 'Code (A-Z)':
+        filtered.sort((a, b) => a.code.compareTo(b.code));
+        break;
+      case 'Code (Z-A)':
+        filtered.sort((a, b) => b.code.compareTo(a.code));
+        break;
+      case 'Sessions (Low to High)':
+        filtered.sort((a, b) => a.sessions.compareTo(b.sessions));
+        break;
+      case 'Sessions (High to Low)':
+        filtered.sort((a, b) => b.sessions.compareTo(a.sessions));
+        break;
+    }
+
+    return filtered;
   }
 
   Future<void> _initializeSemester() async {
@@ -177,6 +224,101 @@ class _CourseManagementScreenState
             child: _buildSemesterSelector(semestersAsync),
           ),
           const SizedBox(height: 24),
+
+          // Search and Sort (only show if semester is selected)
+          if (_selectedSemester != null) ...[
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search by course name or code...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: AppColors.cardBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Sort dropdown
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _sortBy,
+                      decoration: InputDecoration(
+                        labelText: 'Sort by',
+                        prefixIcon: const Icon(Icons.sort, size: 20),
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      items: [
+                        'Name (A-Z)',
+                        'Name (Z-A)',
+                        'Code (A-Z)',
+                        'Code (Z-A)',
+                        'Sessions (Low to High)',
+                        'Sessions (High to Low)',
+                      ].map((sortOption) {
+                        return DropdownMenuItem(
+                          value: sortOption,
+                          child: Text(
+                            sortOption,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _sortBy = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+
           // Content
           Expanded(
             child: Padding(
@@ -335,7 +477,61 @@ class _CourseManagementScreenState
         if (courses.isEmpty) {
           return _buildEmptyState();
         }
-        return _buildCourseGrid(courses);
+
+        // Apply filters and sort
+        final filteredCourses = _applyFiltersAndSort(courses);
+
+        // If no courses match the filter, show empty search state
+        if (filteredCourses.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 80,
+                  color: AppColors.textSecondary.withValues(alpha: 0.3),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'No courses match your search',
+                  style: GoogleFonts.inter(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Try different keywords',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _searchController.clear();
+                      _searchQuery = '';
+                    });
+                  },
+                  child: Text(
+                    'Clear search',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.buttonPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return _buildCourseGrid(filteredCourses);
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _buildErrorState(error),

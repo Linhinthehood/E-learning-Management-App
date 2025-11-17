@@ -25,6 +25,11 @@ class PeopleTab extends ConsumerStatefulWidget {
 }
 
 class _PeopleTabState extends ConsumerState<PeopleTab> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _filterGroup = 'All Groups';
+  String _sortBy = 'Name (A-Z)';
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +40,47 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         ref.read(enrollmentProvider.notifier).loadEnrollments(widget.course.id);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<UserEntity> _applyFiltersAndSort(
+    List<UserEntity> students,
+    String? groupIdFilter,
+  ) {
+    var filtered = students.where((student) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = student.displayName
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            student.email.toLowerCase().contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+      return true;
+    }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'Name (A-Z)':
+        filtered.sort((a, b) => a.displayName.compareTo(b.displayName));
+        break;
+      case 'Name (Z-A)':
+        filtered.sort((a, b) => b.displayName.compareTo(a.displayName));
+        break;
+      case 'Email (A-Z)':
+        filtered.sort((a, b) => a.email.compareTo(b.email));
+        break;
+      case 'Email (Z-A)':
+        filtered.sort((a, b) => b.email.compareTo(a.email));
+        break;
+    }
+
+    return filtered;
   }
 
   @override
@@ -149,6 +195,199 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         ),
         const SizedBox(height: 16),
 
+        // Search bar
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'Search students by name or email...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          _searchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              filled: true,
+              fillColor: AppColors.cardBackground,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Filter and Sort controls
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              // Filter by group dropdown
+              Expanded(
+                child: groupsAsync.when(
+                  data: (groups) {
+                    final groupFilterOptions = [
+                      'All Groups',
+                      ...groups.map((g) => g.name),
+                    ];
+                    // Reset filter if the selected group no longer exists
+                    if (!groupFilterOptions.contains(_filterGroup)) {
+                      _filterGroup = 'All Groups';
+                    }
+                    return DropdownButtonFormField<String>(
+                      value: _filterGroup,
+                      decoration: InputDecoration(
+                        labelText: 'Filter by Group',
+                        prefixIcon: const Icon(Icons.filter_list, size: 20),
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      items: groupFilterOptions.map((groupName) {
+                        return DropdownMenuItem(
+                          value: groupName,
+                          child: Text(
+                            groupName,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _filterGroup = value;
+                          });
+                        }
+                      },
+                    );
+                  },
+                  loading: () => DropdownButtonFormField<String>(
+                    value: _filterGroup,
+                    decoration: InputDecoration(
+                      labelText: 'Filter by Group',
+                      prefixIcon: const Icon(Icons.filter_list, size: 20),
+                      filled: true,
+                      fillColor: AppColors.cardBackground,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'All Groups',
+                        child: Text(
+                          'All Groups',
+                          style: GoogleFonts.inter(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                    onChanged: null,
+                  ),
+                  error: (_, __) => DropdownButtonFormField<String>(
+                    value: _filterGroup,
+                    decoration: InputDecoration(
+                      labelText: 'Filter by Group',
+                      prefixIcon: const Icon(Icons.filter_list, size: 20),
+                      filled: true,
+                      fillColor: AppColors.cardBackground,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'All Groups',
+                        child: Text(
+                          'All Groups',
+                          style: GoogleFonts.inter(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                    onChanged: null,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Sort dropdown
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _sortBy,
+                  decoration: InputDecoration(
+                    labelText: 'Sort by',
+                    prefixIcon: const Icon(Icons.sort, size: 20),
+                    filled: true,
+                    fillColor: AppColors.cardBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                  items: [
+                    'Name (A-Z)',
+                    'Name (Z-A)',
+                    'Email (A-Z)',
+                    'Email (Z-A)',
+                  ].map((sortOption) {
+                    return DropdownMenuItem(
+                      value: sortOption,
+                      child: Text(
+                        sortOption,
+                        style: GoogleFonts.inter(fontSize: 14),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _sortBy = value;
+                      });
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Divider
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Divider(color: AppColors.border),
+        ),
+        const SizedBox(height: 16),
+
         // Groups and Students Section Header
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -211,11 +450,45 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                     );
                   }
 
+                  // Filter groups based on selected filter
+                  final filteredGroups = _filterGroup == 'All Groups'
+                      ? groups
+                      : groups
+                          .where((g) => g.name == _filterGroup)
+                          .toList();
+
+                  // If filtering and no groups match, show empty state
+                  if (filteredGroups.isEmpty && _filterGroup != 'All Groups') {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.group_off,
+                            size: 64,
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No groups match your filter',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    itemCount: groups.length,
+                    itemCount: filteredGroups.length,
                     itemBuilder: (context, index) {
-                      final group = groups[index];
+                      final group = filteredGroups[index];
                       final groupEnrollments = enrollments
                           .where((e) => e.groupId == group.id)
                           .toList();
@@ -224,9 +497,13 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                               .any((e) => e.studentId == student.uid))
                           .toList();
 
+                      // Apply search and sort to students
+                      final filteredStudents =
+                          _applyFiltersAndSort(groupStudents, group.id);
+
                       return _buildGroupCard(
                         group,
-                        groupStudents,
+                        filteredStudents,
                         groupEnrollments.length,
                       );
                     },

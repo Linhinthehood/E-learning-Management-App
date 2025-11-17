@@ -24,6 +24,10 @@ class AnnouncementsTab extends ConsumerStatefulWidget {
 }
 
 class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _sortBy = 'Date (Newest First)';
+
   @override
   void initState() {
     super.initState();
@@ -40,12 +44,55 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<AnnouncementEntity> _applyFiltersAndSort(
+      List<AnnouncementEntity> announcements) {
+    var filtered = announcements.where((announcement) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final matchesSearch = announcement.title
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            announcement.content
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+      }
+      return true;
+    }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'Date (Newest First)':
+        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+      case 'Date (Oldest First)':
+        filtered.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+      case 'Title (A-Z)':
+        filtered.sort((a, b) => a.title.compareTo(b.title));
+        break;
+      case 'Title (Z-A)':
+        filtered.sort((a, b) => b.title.compareTo(a.title));
+        break;
+    }
+
+    return filtered;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final announcementsAsync = ref.watch(announcementProvider);
     final groupsAsync = ref.watch(groupProvider);
 
     return announcementsAsync.when(
       data: (announcements) {
+        final filteredAnnouncements = _applyFiltersAndSort(announcements);
+
         return Column(
           children: [
             // Header with Add button
@@ -89,6 +136,95 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
               ),
             ),
 
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search announcements...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: AppColors.cardBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Sort dropdown
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _sortBy,
+                      decoration: InputDecoration(
+                        labelText: 'Sort by',
+                        prefixIcon: const Icon(Icons.sort, size: 20),
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      items: [
+                        'Date (Newest First)',
+                        'Date (Oldest First)',
+                        'Title (A-Z)',
+                        'Title (Z-A)',
+                      ].map((sortOption) {
+                        return DropdownMenuItem(
+                          value: sortOption,
+                          child: Text(
+                            sortOption,
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _sortBy = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Announcements list
             Expanded(
               child: announcements.isEmpty
@@ -123,19 +259,59 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                         ],
                       ),
                     )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      itemCount: announcements.length,
-                      itemBuilder: (context, index) {
-                        final announcement = announcements[index];
-                        return _buildAnnouncementCard(
-                          context,
-                          ref,
-                          announcement,
-                          groupsAsync,
-                        );
-                      },
-                    ),
+                  : filteredAnnouncements.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: AppColors.textSecondary.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No announcements match your search',
+                                style: GoogleFonts.inter(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _searchController.clear();
+                                    _searchQuery = '';
+                                  });
+                                },
+                                child: Text(
+                                  'Clear search',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: AppColors.buttonPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          itemCount: filteredAnnouncements.length,
+                          itemBuilder: (context, index) {
+                            final announcement = filteredAnnouncements[index];
+                            return _buildAnnouncementCard(
+                              context,
+                              ref,
+                              announcement,
+                              groupsAsync,
+                            );
+                          },
+                        ),
             ),
           ],
         );
