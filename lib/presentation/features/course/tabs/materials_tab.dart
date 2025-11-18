@@ -121,21 +121,24 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Materials',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  Flexible(
+                    child: Text(
+                      'Materials',
+                      style: GoogleFonts.inter(
+                        fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 16),
                   // Only show Add button for instructors
                   if (!widget.isStudent)
                     ElevatedButton.icon(
                       onPressed: () => _showMaterialDialog(context, ref, null),
-                      icon: const Icon(Icons.add, size: 20),
+                      icon: const Icon(Icons.add, size: 18),
                       label: Text(
-                        'Add Material',
+                        MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Material',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -206,9 +209,10 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                     child: DropdownButtonFormField<String>(
                       // ignore: deprecated_member_use
                       value: _filterType,
+                      isDense: true,
                       decoration: InputDecoration(
-                        labelText: 'Filter by Type',
-                        prefixIcon: const Icon(Icons.filter_list, size: 20),
+                        labelText: MediaQuery.of(context).size.width < 600 ? 'Filter' : 'Filter by Type',
+                        prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.filter_list, size: 20),
                         filled: true,
                         fillColor: AppColors.cardBackground,
                         border: OutlineInputBorder(
@@ -219,6 +223,10 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+                          vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                        ),
                       ),
                       items: ['All', 'Documents', 'Videos', 'Links'].map((
                         type,
@@ -227,7 +235,10 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                           value: type,
                           child: Text(
                             type,
-                            style: GoogleFonts.inter(fontSize: 14),
+                            style: GoogleFonts.inter(
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         );
                       }).toList(),
@@ -246,9 +257,10 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                     child: DropdownButtonFormField<String>(
                       // ignore: deprecated_member_use
                       value: _sortBy,
+                      isDense: true,
                       decoration: InputDecoration(
-                        labelText: 'Sort by',
-                        prefixIcon: const Icon(Icons.sort, size: 20),
+                        labelText: 'Sort',
+                        prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.sort, size: 20),
                         filled: true,
                         fillColor: AppColors.cardBackground,
                         border: OutlineInputBorder(
@@ -259,7 +271,39 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+                          vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                        ),
                       ),
+                      selectedItemBuilder: MediaQuery.of(context).size.width < 600
+                          ? (BuildContext context) {
+                              return [
+                                'Date (Newest First)',
+                                'Date (Oldest First)',
+                                'Title (A-Z)',
+                                'Title (Z-A)',
+                              ].map((sortOption) {
+                                // Show abbreviated text on small screens
+                                String displayText;
+                                switch (sortOption) {
+                                  case 'Date (Newest First)':
+                                    displayText = 'Date ↓';
+                                    break;
+                                  case 'Date (Oldest First)':
+                                    displayText = 'Date ↑';
+                                    break;
+                                  default:
+                                    displayText = sortOption;
+                                }
+                                return Text(
+                                  displayText,
+                                  style: GoogleFonts.inter(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              }).toList();
+                            }
+                          : null,
                       items:
                           [
                             'Date (Newest First)',
@@ -271,7 +315,10 @@ class _MaterialsTabState extends ConsumerState<MaterialsTab> {
                               value: sortOption,
                               child: Text(
                                 sortOption,
-                                style: GoogleFonts.inter(fontSize: 14),
+                                style: GoogleFonts.inter(
+                                  fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             );
                           }).toList(),

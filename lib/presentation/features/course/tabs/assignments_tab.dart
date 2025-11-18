@@ -121,22 +121,25 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Assignments',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  Flexible(
+                    child: Text(
+                      'Assignments',
+                      style: GoogleFonts.inter(
+                        fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 16),
                   // Only show Add button for instructors
                   if (!widget.isStudent && !widget.isReadOnly)
                     ElevatedButton.icon(
                       onPressed: () =>
                           _showAssignmentDialog(context, ref, null),
-                      icon: const Icon(Icons.add, size: 20),
+                      icon: const Icon(Icons.add, size: 18),
                       label: Text(
-                        'Add Assignment',
+                        MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Assignment',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -208,9 +211,10 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                     child: DropdownButtonFormField<String>(
                       // ignore: deprecated_member_use
                       value: _filterStatus,
+                      isDense: true,
                       decoration: InputDecoration(
-                        labelText: 'Filter by Status',
-                        prefixIcon: const Icon(Icons.filter_list, size: 20),
+                        labelText: MediaQuery.of(context).size.width < 600 ? 'Filter' : 'Filter by Status',
+                        prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.filter_list, size: 20),
                         filled: true,
                         fillColor: AppColors.cardBackground,
                         border: OutlineInputBorder(
@@ -221,6 +225,10 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+                          vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                        ),
                       ),
                       items: ['All', 'Open', 'Closed', 'Upcoming'].map((
                         status,
@@ -229,7 +237,10 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                           value: status,
                           child: Text(
                             status,
-                            style: GoogleFonts.inter(fontSize: 14),
+                            style: GoogleFonts.inter(
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         );
                       }).toList(),
@@ -250,9 +261,10 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                     child: DropdownButtonFormField<String>(
                       // ignore: deprecated_member_use
                       value: _sortBy,
+                      isDense: true,
                       decoration: InputDecoration(
-                        labelText: 'Sort by',
-                        prefixIcon: const Icon(Icons.sort, size: 20),
+                        labelText: 'Sort',
+                        prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.sort, size: 20),
                         filled: true,
                         fillColor: AppColors.cardBackground,
                         border: OutlineInputBorder(
@@ -263,7 +275,39 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+                          vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                        ),
                       ),
+                      selectedItemBuilder: MediaQuery.of(context).size.width < 600
+                          ? (BuildContext context) {
+                              return [
+                                'Deadline (Nearest First)',
+                                'Deadline (Furthest First)',
+                                'Title (A-Z)',
+                                'Title (Z-A)',
+                              ].map((sortOption) {
+                                // Show abbreviated text on small screens
+                                String displayText;
+                                switch (sortOption) {
+                                  case 'Deadline (Nearest First)':
+                                    displayText = 'Deadline ↑';
+                                    break;
+                                  case 'Deadline (Furthest First)':
+                                    displayText = 'Deadline ↓';
+                                    break;
+                                  default:
+                                    displayText = sortOption;
+                                }
+                                return Text(
+                                  displayText,
+                                  style: GoogleFonts.inter(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              }).toList();
+                            }
+                          : null,
                       items:
                           [
                             'Deadline (Nearest First)',
@@ -275,7 +319,10 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                               value: sortOption,
                               child: Text(
                                 sortOption,
-                                style: GoogleFonts.inter(fontSize: 14),
+                                style: GoogleFonts.inter(
+                                  fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             );
                           }).toList(),

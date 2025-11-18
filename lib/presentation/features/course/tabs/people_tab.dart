@@ -77,18 +77,24 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'People',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              Flexible(
+                child: Text(
+                  'People',
+                  style: GoogleFonts.inter(
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 16 : 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
+              const SizedBox(width: 16),
               if (isInstructor)
-                Row(
-                  children: [
-                    OutlinedButton.icon(
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (MediaQuery.of(context).size.width >= 600)
+                        OutlinedButton.icon(
                       onPressed: () async {
                         // Navigate to CSV import screen and wait for result
                         await Navigator.push(
@@ -126,25 +132,26 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => EnrollmentManagementDialog(
-                            course: widget.course,
-                            semesterId: widget.course.semesterId,
+                      if (MediaQuery.of(context).size.width >= 600)
+                        const SizedBox(width: 12),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => EnrollmentManagementDialog(
+                              course: widget.course,
+                              semesterId: widget.course.semesterId,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.group_add, size: 18),
+                        label: Text(
+                          MediaQuery.of(context).size.width < 600 ? 'Manage' : 'Manage Students',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.group_add, size: 20),
-                      label: Text(
-                        'Manage Students',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.buttonPrimary,
                         foregroundColor: Colors.white,
@@ -157,7 +164,8 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                         ),
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
             ],
           ),

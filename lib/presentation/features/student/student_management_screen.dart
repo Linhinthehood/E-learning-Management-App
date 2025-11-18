@@ -77,30 +77,36 @@ class _StudentManagementScreenState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Student Management',
-                      style: GoogleFonts.inter(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Student Management',
+                        style: GoogleFonts.inter(
+                          fontSize: MediaQuery.of(context).size.width < 600 ? 20 : 28,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Create and manage student accounts',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
+                      const SizedBox(height: 4),
+                      Text(
+                        'Create and manage student accounts',
+                        style: GoogleFonts.inter(
+                          fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                Row(
-                  children: [
-                    OutlinedButton.icon(
+                const SizedBox(width: 16),
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (MediaQuery.of(context).size.width >= 600)
+                        OutlinedButton.icon(
                       onPressed: () async {
                         // Navigate to CSV import screen and wait for result
                         await Navigator.push(
@@ -133,17 +139,18 @@ class _StudentManagementScreenState
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      onPressed: () => _showStudentDialog(context, ref),
-                      icon: const Icon(Icons.add, size: 20),
-                      label: Text(
-                        'Add Student',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                      if (MediaQuery.of(context).size.width >= 600)
+                        const SizedBox(width: 12),
+                      ElevatedButton.icon(
+                        onPressed: () => _showStudentDialog(context, ref),
+                        icon: const Icon(Icons.add, size: 18),
+                        label: Text(
+                          MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Student',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.buttonPrimary,
                         foregroundColor: Colors.white,
@@ -156,7 +163,8 @@ class _StudentManagementScreenState
                         ),
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

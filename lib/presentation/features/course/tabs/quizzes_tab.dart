@@ -114,19 +114,22 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Quizzes',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  Flexible(
+                    child: Text(
+                      'Quizzes',
+                      style: GoogleFonts.inter(
+                        fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 16),
                   ElevatedButton.icon(
                     onPressed: () => _showQuizDialog(context, ref, null),
-                    icon: const Icon(Icons.add, size: 20),
+                    icon: const Icon(Icons.add, size: 18),
                     label: Text(
-                      'Add Quiz',
+                      MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Quiz',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -197,9 +200,10 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                     child: DropdownButtonFormField<String>(
                       // ignore: deprecated_member_use
                       value: _filterStatus,
+                      isDense: true,
                       decoration: InputDecoration(
-                        labelText: 'Filter by Status',
-                        prefixIcon: const Icon(Icons.filter_list, size: 20),
+                        labelText: MediaQuery.of(context).size.width < 600 ? 'Filter' : 'Filter by Status',
+                        prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.filter_list, size: 20),
                         filled: true,
                         fillColor: AppColors.cardBackground,
                         border: OutlineInputBorder(
@@ -210,6 +214,10 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+                          vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                        ),
                       ),
                       items: ['All', 'Open', 'Closed', 'Upcoming'].map((
                         status,
@@ -218,7 +226,10 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           value: status,
                           child: Text(
                             status,
-                            style: GoogleFonts.inter(fontSize: 14),
+                            style: GoogleFonts.inter(
+                              fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         );
                       }).toList(),
@@ -237,9 +248,10 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                     child: DropdownButtonFormField<String>(
                       // ignore: deprecated_member_use
                       value: _sortBy,
+                      isDense: true,
                       decoration: InputDecoration(
-                        labelText: 'Sort by',
-                        prefixIcon: const Icon(Icons.sort, size: 20),
+                        labelText: 'Sort',
+                        prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.sort, size: 20),
                         filled: true,
                         fillColor: AppColors.cardBackground,
                         border: OutlineInputBorder(
@@ -250,7 +262,39 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+                          vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                        ),
                       ),
+                      selectedItemBuilder: MediaQuery.of(context).size.width < 600
+                          ? (BuildContext context) {
+                              return [
+                                'Close Date (Nearest First)',
+                                'Close Date (Furthest First)',
+                                'Title (A-Z)',
+                                'Title (Z-A)',
+                              ].map((sortOption) {
+                                // Show abbreviated text on small screens
+                                String displayText;
+                                switch (sortOption) {
+                                  case 'Close Date (Nearest First)':
+                                    displayText = 'Close ↑';
+                                    break;
+                                  case 'Close Date (Furthest First)':
+                                    displayText = 'Close ↓';
+                                    break;
+                                  default:
+                                    displayText = sortOption;
+                                }
+                                return Text(
+                                  displayText,
+                                  style: GoogleFonts.inter(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              }).toList();
+                            }
+                          : null,
                       items:
                           [
                             'Close Date (Nearest First)',
@@ -262,7 +306,10 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                               value: sortOption,
                               child: Text(
                                 sortOption,
-                                style: GoogleFonts.inter(fontSize: 14),
+                                style: GoogleFonts.inter(
+                                  fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             );
                           }).toList(),

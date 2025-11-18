@@ -13,7 +13,6 @@ import '../messaging/chat_list_screen.dart';
 import '../semester/semester_management_screen.dart';
 import '../course/course_management_screen.dart';
 import '../student/student_management_screen.dart';
-import 'widgets/modern_instructor_mobile_homepage.dart';
 
 class InstructorDashboard extends ConsumerStatefulWidget {
   const InstructorDashboard({super.key});
@@ -33,7 +32,6 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
     const SemesterManagementScreen(), // 1: Semesters
     const CourseManagementScreen(), // 2: Courses
     const StudentManagementScreen(), // 3: Students
-    const Placeholder(), // 4: Settings (TODO)
   ];
 
   // Screen titles for mobile app bar
@@ -42,13 +40,21 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
     'Semesters',
     'Courses',
     'Students',
-    'Settings',
   ];
 
   void _onItemTapped(int index) async {
+    // Close drawer on mobile if open
+    if (ResponsiveHelper.isMobile(context) &&
+        _scaffoldKey.currentState?.isDrawerOpen == true) {
+      Navigator.of(context).pop();
+    }
+
     if (index == 5) {
-      // Logout
-      await _handleLogout();
+      // Logout - wait a bit for drawer to close
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        await _handleLogout();
+      }
     } else {
       setState(() {
         _selectedIndex = index;
@@ -100,11 +106,6 @@ class _InstructorDashboardState extends ConsumerState<InstructorDashboard> {
   Widget build(BuildContext context) {
     final userAsync = ref.watch(authProvider);
     final isMobile = ResponsiveHelper.isMobile(context);
-
-    // Show modern mobile design on mobile devices
-    if (isMobile && _selectedIndex == 0) {
-      return const ModernInstructorMobileHomepage();
-    }
 
     return ResponsiveLayout(
       scaffoldKey: _scaffoldKey,

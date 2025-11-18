@@ -99,26 +99,31 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
   Widget _buildGreeting(String displayName) {
     return Row(
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Hello $displayName!',
-              style: GoogleFonts.inter(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hello $displayName!',
+                style: GoogleFonts.inter(
+                  fontSize: MediaQuery.of(context).size.width < 600 ? 24 : 32,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
               ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              "It's good to see you again.",
-              style: GoogleFonts.inter(
-                fontSize: 15,
-                color: AppColors.textSecondary,
+              const SizedBox(height: 5),
+              Text(
+                "It's good to see you again.",
+                style: GoogleFonts.inter(
+                  fontSize: MediaQuery.of(context).size.width < 600 ? 13 : 15,
+                  color: AppColors.textSecondary,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(width: 30),
         // Illustration

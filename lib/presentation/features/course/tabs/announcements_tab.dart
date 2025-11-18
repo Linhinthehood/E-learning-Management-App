@@ -109,22 +109,25 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Announcements',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  Flexible(
+                    child: Text(
+                      'Announcements',
+                      style: GoogleFonts.inter(
+                        fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 16),
                   // Only show Add button for instructors
                   if (!widget.isStudent)
                     ElevatedButton.icon(
                       onPressed: () =>
                           _showAnnouncementDialog(context, ref, null),
-                      icon: const Icon(Icons.add, size: 20),
+                      icon: const Icon(Icons.add, size: 18),
                       label: Text(
-                        'Add Announcement',
+                        MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Announcement',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -191,9 +194,10 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
               child: DropdownButtonFormField<String>(
                 // ignore: deprecated_member_use
                 value: _sortBy,
+                isDense: true,
                 decoration: InputDecoration(
-                  labelText: 'Sort by',
-                  prefixIcon: const Icon(Icons.sort, size: 20),
+                  labelText: 'Sort',
+                  prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.sort, size: 20),
                   filled: true,
                   fillColor: AppColors.cardBackground,
                   border: OutlineInputBorder(
@@ -204,7 +208,39 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: AppColors.border),
                   ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+                    vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                  ),
                 ),
+                selectedItemBuilder: MediaQuery.of(context).size.width < 600
+                    ? (BuildContext context) {
+                        return [
+                          'Date (Newest)',
+                          'Date (Oldest)',
+                          'Title (A-Z)',
+                          'Title (Z-A)',
+                        ].map((sortOption) {
+                          // Show abbreviated text on small screens
+                          String displayText;
+                          switch (sortOption) {
+                            case 'Date (Newest)':
+                              displayText = 'Date ↓';
+                              break;
+                            case 'Date (Oldest)':
+                              displayText = 'Date ↑';
+                              break;
+                            default:
+                              displayText = sortOption;
+                          }
+                          return Text(
+                            displayText,
+                            style: GoogleFonts.inter(fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        }).toList();
+                      }
+                    : null,
                 items:
                     [
                       'Date (Newest)',
@@ -216,7 +252,10 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                         value: sortOption,
                         child: Text(
                           sortOption,
-                          style: GoogleFonts.inter(fontSize: 14),
+                          style: GoogleFonts.inter(
+                            fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       );
                     }).toList(),

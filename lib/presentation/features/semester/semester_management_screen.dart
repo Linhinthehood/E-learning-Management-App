@@ -79,32 +79,35 @@ class _SemesterManagementScreenState
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Semester Management',
-                      style: GoogleFonts.inter(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Semester Management',
+                        style: GoogleFonts.inter(
+                          fontSize: MediaQuery.of(context).size.width < 600 ? 20 : 32,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Manage academic semesters',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
+                      const SizedBox(height: 8),
+                      Text(
+                        'Manage academic semesters',
+                        style: GoogleFonts.inter(
+                          fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 16),
                 ElevatedButton.icon(
                   onPressed: () => _showSemesterDialog(context, ref),
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(Icons.add, size: 18),
                   label: Text(
-                    'Add Semester',
+                    MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Semester',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -417,12 +420,15 @@ class _SemesterManagementScreenState
               children: [
                 Row(
                   children: [
-                    Text(
-                      semester.name,
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                    Flexible(
+                      child: Text(
+                        semester.name,
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -465,11 +471,14 @@ class _SemesterManagementScreenState
                       color: AppColors.textSecondary,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      '${dateFormat.format(semester.startDate)} - ${dateFormat.format(semester.endDate)}',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
+                    Flexible(
+                      child: Text(
+                        '${dateFormat.format(semester.startDate)} - ${dateFormat.format(semester.endDate)}',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 16),

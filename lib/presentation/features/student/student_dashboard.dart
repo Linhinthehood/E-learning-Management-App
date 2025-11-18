@@ -16,7 +16,6 @@ import '../messaging/chat_list_screen.dart';
 import '../notifications/notification_list_screen.dart';
 import 'student_homepage.dart';
 import 'student_profile_screen.dart';
-import 'widgets/modern_mobile_homepage.dart';
 
 /// Student Dashboard with sidebar navigation
 class StudentDashboard extends ConsumerStatefulWidget {
@@ -41,9 +40,18 @@ class _StudentDashboardState extends ConsumerState<StudentDashboard> {
   final List<String> _screenTitles = ['My Courses', 'Profile'];
 
   void _onItemTapped(int index) async {
+    // Close drawer on mobile if open
+    if (ResponsiveHelper.isMobile(context) &&
+        _scaffoldKey.currentState?.isDrawerOpen == true) {
+      Navigator.of(context).pop();
+    }
+
     if (index == 2) {
-      // Logout
-      await _handleLogout();
+      // Logout - wait a bit for drawer to close
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        await _handleLogout();
+      }
     } else {
       setState(() {
         _selectedIndex = index;
@@ -124,11 +132,6 @@ class _StudentDashboardState extends ConsumerState<StudentDashboard> {
         Future.microtask(() => _checkDeadlineReminders(user.uid));
       }
     });
-
-    // Show modern mobile design on mobile devices
-    if (isMobile && _selectedIndex == 0) {
-      return const ModernMobileHomepage();
-    }
 
     return ResponsiveLayout(
       scaffoldKey: _scaffoldKey,

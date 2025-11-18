@@ -70,12 +70,17 @@ class ResponsiveLayout extends StatelessWidget {
       appBar: appBar,
       // Drawer for mobile - contains left sidebar content
       drawer: (isMobile && leftSidebar != null)
-          ? Drawer(child: leftSidebar!)
+          ? Drawer(
+              width: 120,
+              child: leftSidebar!,
+            )
           : null,
       // End drawer for right sidebar on mobile/tablet
       endDrawer: (!showRight && rightSidebar != null)
           ? Drawer(
-              width: MediaQuery.of(context).size.width * 0.75,
+              width: MediaQuery.of(context).size.width < 360
+                  ? MediaQuery.of(context).size.width * 0.75
+                  : MediaQuery.of(context).size.width * 0.6,
               child: rightSidebar!,
             )
           : null,

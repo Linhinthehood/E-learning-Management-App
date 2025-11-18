@@ -430,11 +430,14 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> {
                               color: AppColors.textSecondary,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'Display name cannot be changed. Please contact administrator if you need to update it.',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
+                            Flexible(
+                              child: Text(
+                                'Display name cannot be changed. Please contact administrator if you need to update it.',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                                softWrap: true,
                               ),
                             ),
                           ],

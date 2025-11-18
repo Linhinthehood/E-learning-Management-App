@@ -120,30 +120,36 @@ class _CourseManagementScreenState
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Course Management',
-                      style: GoogleFonts.inter(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Course Management',
+                        style: GoogleFonts.inter(
+                          fontSize: MediaQuery.of(context).size.width < 600 ? 20 : 32,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Manage your courses',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
+                      const SizedBox(height: 8),
+                      Text(
+                        'Manage your courses',
+                        style: GoogleFonts.inter(
+                          fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                Row(
-                  children: [
-                    OutlinedButton.icon(
+                const SizedBox(width: 16),
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (MediaQuery.of(context).size.width >= 600)
+                        OutlinedButton.icon(
                       onPressed: () async {
                         // Navigate to CSV import screen and wait for result
                         await Navigator.push(
@@ -180,28 +186,29 @@ class _CourseManagementScreenState
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        if (_selectedSemester == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please select a semester first'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          return;
-                        }
-                        _showCourseDialog(null);
-                      },
-                      icon: const Icon(Icons.add),
-                      label: Text(
-                        'Add Course',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                      if (MediaQuery.of(context).size.width >= 600)
+                        const SizedBox(width: 12),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          if (_selectedSemester == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please select a semester first'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+                          _showCourseDialog(null);
+                        },
+                        icon: const Icon(Icons.add, size: 18),
+                        label: Text(
+                          MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Course',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.buttonPrimary,
                         foregroundColor: Colors.white,
@@ -215,7 +222,7 @@ class _CourseManagementScreenState
                       ),
                     ),
                   ],
-                ),
+                )),
               ],
             ),
           ),
@@ -568,14 +575,19 @@ class _CourseManagementScreenState
       builder: (context, constraints) {
         // Responsive grid columns based on screen width
         int crossAxisCount;
+        double childAspectRatio;
         if (constraints.maxWidth < 600) {
           crossAxisCount = 1; // Mobile: 1 column
+          childAspectRatio = 0.75; // Taller cards on mobile
         } else if (constraints.maxWidth < 900) {
           crossAxisCount = 2; // Tablet: 2 columns
+          childAspectRatio = 0.9;
         } else if (constraints.maxWidth < 1400) {
           crossAxisCount = 3; // Desktop: 3 columns
+          childAspectRatio = 1.0;
         } else {
           crossAxisCount = 4; // Large desktop: 4 columns
+          childAspectRatio = 1.1;
         }
 
         return GridView.builder(
@@ -583,7 +595,7 @@ class _CourseManagementScreenState
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 20,
             mainAxisSpacing: 20,
-            childAspectRatio: 1.1,
+            childAspectRatio: childAspectRatio,
           ),
           itemCount: courses.length,
           itemBuilder: (context, index) {
@@ -694,22 +706,24 @@ class _CourseManagementScreenState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.event_outlined,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${course.sessions} sessions',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
+                      Flexible(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.event_outlined,
+                              size: 14,
                               color: AppColors.textSecondary,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            Text(
+                              '${course.sessions} sessions',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       Row(
                         children: [

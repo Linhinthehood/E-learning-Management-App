@@ -59,8 +59,6 @@ class _LeftSidebarState extends State<LeftSidebar> {
           const SizedBox(height: 20),
           _buildNavItem(Icons.person_rounded, 3, 'Students'),
           const Spacer(),
-          _buildNavItem(Icons.settings_rounded, 4, 'Settings'),
-          const SizedBox(height: 20),
           _buildNavItem(Icons.logout_rounded, 5, 'Logout'),
           const SizedBox(height: 30),
         ],
@@ -72,21 +70,32 @@ class _LeftSidebarState extends State<LeftSidebar> {
     final isSelected = widget.selectedIndex == index;
     return Tooltip(
       message: tooltip,
-      child: GestureDetector(
-        onTap: () => widget.onItemTapped(index),
-        child: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Colors.white.withValues(alpha: 0.1)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: isSelected ? AppColors.iconActive : AppColors.iconInactive,
-            size: 26,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            print('Nav item tapped: index $index, tooltip: $tooltip');
+            widget.onItemTapped(index);
+          },
+          borderRadius: BorderRadius.circular(12),
+          splashColor: Colors.white.withValues(alpha: 0.3),
+          highlightColor: Colors.white.withValues(alpha: 0.1),
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Icon(
+                icon,
+                color: isSelected ? AppColors.iconActive : AppColors.iconInactive,
+                size: 26,
+              ),
+            ),
           ),
         ),
       ),

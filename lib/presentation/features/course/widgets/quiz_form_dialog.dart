@@ -298,12 +298,15 @@ class _QuizFormDialogState extends ConsumerState<QuizFormDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    widget.quiz == null ? 'Create Quiz' : 'Edit Quiz',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  Flexible(
+                    child: Text(
+                      widget.quiz == null ? 'Create Quiz' : 'Edit Quiz',
+                      style: GoogleFonts.inter(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   IconButton(
@@ -440,12 +443,16 @@ class _QuizFormDialogState extends ConsumerState<QuizFormDialog> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          _timeOpen != null
-                                              ? '${_timeOpen!.day}/${_timeOpen!.month}/${_timeOpen!.year} ${_timeOpen!.hour}:${_timeOpen!.minute.toString().padLeft(2, '0')}'
-                                              : 'Select open time',
-                                          style: GoogleFonts.inter(),
+                                        Flexible(
+                                          child: Text(
+                                            _timeOpen != null
+                                                ? '${_timeOpen!.day}/${_timeOpen!.month}/${_timeOpen!.year} ${_timeOpen!.hour}:${_timeOpen!.minute.toString().padLeft(2, '0')}'
+                                                : 'Select open time',
+                                            style: GoogleFonts.inter(),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
+                                        const SizedBox(width: 8),
                                         const Icon(
                                           Icons.calendar_today,
                                           size: 20,
@@ -486,12 +493,16 @@ class _QuizFormDialogState extends ConsumerState<QuizFormDialog> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          _timeClose != null
-                                              ? '${_timeClose!.day}/${_timeClose!.month}/${_timeClose!.year} ${_timeClose!.hour}:${_timeClose!.minute.toString().padLeft(2, '0')}'
-                                              : 'Select close time',
-                                          style: GoogleFonts.inter(),
+                                        Flexible(
+                                          child: Text(
+                                            _timeClose != null
+                                                ? '${_timeClose!.day}/${_timeClose!.month}/${_timeClose!.year} ${_timeClose!.hour}:${_timeClose!.minute.toString().padLeft(2, '0')}'
+                                                : 'Select close time',
+                                            style: GoogleFonts.inter(),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
+                                        const SizedBox(width: 8),
                                         const Icon(
                                           Icons.calendar_today,
                                           size: 20,

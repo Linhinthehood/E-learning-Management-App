@@ -134,6 +134,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Logo
                     Container(
@@ -159,6 +160,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 30),
                     Text(
                       'E-Learning Management',
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: _getResponsiveFontSize(32, context),
                         fontWeight: FontWeight.bold,
@@ -168,6 +170,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 10),
                     Text(
                       'Learn, Grow, Succeed',
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: _getResponsiveFontSize(16, context),
                         color: Colors.white70,
@@ -192,28 +195,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: SingleChildScrollView(
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 450),
-                  padding: const EdgeInsets.all(40),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 600 ? 20 : 40,
+                    vertical: 40,
+                  ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'Welcome back!',
-                        style: GoogleFonts.inter(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Please login to your account',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 50),
                       // Email field
                       Text(
                         'Email',
@@ -256,12 +245,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.email_outlined,
-                            color: AppColors.textSecondary,
+                            horizontal: 20,
+                            vertical: 20,
                           ),
                         ),
                       ),
@@ -309,12 +294,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.lock_outline,
-                            color: AppColors.textSecondary,
+                            horizontal: 20,
+                            vertical: 20,
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(

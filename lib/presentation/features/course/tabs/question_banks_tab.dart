@@ -45,20 +45,23 @@ class _QuestionBanksTabState extends ConsumerState<QuestionBanksTab> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Question Banks',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  Flexible(
+                    child: Text(
+                      'Question Banks',
+                      style: GoogleFonts.inter(
+                        fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 16),
                   ElevatedButton.icon(
                     onPressed: () =>
                         _showQuestionBankDialog(context, ref, null),
-                    icon: const Icon(Icons.add, size: 20),
+                    icon: const Icon(Icons.add, size: 18),
                     label: Text(
-                      'Add Question Bank',
+                      MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Question Bank',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

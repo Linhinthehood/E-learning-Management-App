@@ -414,14 +414,17 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    widget.assignment == null
-                        ? 'Create Assignment'
-                        : 'Edit Assignment',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  Flexible(
+                    child: Text(
+                      widget.assignment == null
+                          ? 'Create Assignment'
+                          : 'Edit Assignment',
+                      style: GoogleFonts.inter(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   IconButton(
@@ -558,12 +561,16 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          _startDate != null
-                                              ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year} ${_startDate!.hour}:${_startDate!.minute.toString().padLeft(2, '0')}'
-                                              : 'Select start date',
-                                          style: GoogleFonts.inter(),
+                                        Flexible(
+                                          child: Text(
+                                            _startDate != null
+                                                ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year} ${_startDate!.hour}:${_startDate!.minute.toString().padLeft(2, '0')}'
+                                                : 'Select start date',
+                                            style: GoogleFonts.inter(),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
+                                        const SizedBox(width: 8),
                                         const Icon(
                                           Icons.calendar_today,
                                           size: 20,
@@ -604,12 +611,16 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          _deadline != null
-                                              ? '${_deadline!.day}/${_deadline!.month}/${_deadline!.year} ${_deadline!.hour}:${_deadline!.minute.toString().padLeft(2, '0')}'
-                                              : 'Select deadline',
-                                          style: GoogleFonts.inter(),
+                                        Flexible(
+                                          child: Text(
+                                            _deadline != null
+                                                ? '${_deadline!.day}/${_deadline!.month}/${_deadline!.year} ${_deadline!.hour}:${_deadline!.minute.toString().padLeft(2, '0')}'
+                                                : 'Select deadline',
+                                            style: GoogleFonts.inter(),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
+                                        const SizedBox(width: 8),
                                         const Icon(
                                           Icons.calendar_today,
                                           size: 20,
@@ -662,12 +673,16 @@ class _AssignmentFormDialogState extends ConsumerState<AssignmentFormDialog> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  _lateDeadline != null
-                                      ? '${_lateDeadline!.day}/${_lateDeadline!.month}/${_lateDeadline!.year} ${_lateDeadline!.hour}:${_lateDeadline!.minute.toString().padLeft(2, '0')}'
-                                      : 'Select late deadline',
-                                  style: GoogleFonts.inter(),
+                                Flexible(
+                                  child: Text(
+                                    _lateDeadline != null
+                                        ? '${_lateDeadline!.day}/${_lateDeadline!.month}/${_lateDeadline!.year} ${_lateDeadline!.hour}:${_lateDeadline!.minute.toString().padLeft(2, '0')}'
+                                        : 'Select late deadline',
+                                    style: GoogleFonts.inter(),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
+                                const SizedBox(width: 8),
                                 const Icon(Icons.calendar_today, size: 20),
                               ],
                             ),

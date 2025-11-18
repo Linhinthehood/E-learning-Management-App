@@ -76,12 +76,15 @@ class InstructorCharts extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                'Assignment Submission Rates',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: Text(
+                  'Assignment Submission Rates',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -137,15 +140,20 @@ class InstructorCharts extends StatelessWidget {
                             value.toInt() < submissionData.length) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              submissionData[value.toInt()].assignmentTitle
-                                  .split(' ')
-                                  .first,
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                color: AppColors.textSecondary,
+                            child: SizedBox(
+                              width: 60,
+                              child: Text(
+                                submissionData[value.toInt()].assignmentTitle
+                                    .split(' ')
+                                    .first,
+                                style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  color: AppColors.textSecondary,
+                                ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           );
                         }
@@ -245,12 +253,15 @@ class InstructorCharts extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                'Average Quiz Scores',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: Text(
+                  'Average Quiz Scores',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -305,15 +316,20 @@ class InstructorCharts extends StatelessWidget {
                             value.toInt() < quizScoreData.length) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              quizScoreData[value.toInt()].quizTitle
-                                  .split(' ')
-                                  .first,
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                color: AppColors.textSecondary,
+                            child: SizedBox(
+                              width: 60,
+                              child: Text(
+                                quizScoreData[value.toInt()].quizTitle
+                                    .split(' ')
+                                    .first,
+                                style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  color: AppColors.textSecondary,
+                                ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           );
                         }
