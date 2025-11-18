@@ -92,7 +92,9 @@ class _LeftSidebarState extends State<LeftSidebar> {
             child: Center(
               child: Icon(
                 icon,
-                color: isSelected ? AppColors.iconActive : AppColors.iconInactive,
+                color: isSelected
+                    ? AppColors.iconActive
+                    : AppColors.iconInactive,
                 size: 26,
               ),
             ),

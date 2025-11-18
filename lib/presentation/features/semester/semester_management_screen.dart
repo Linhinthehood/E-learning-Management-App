@@ -86,7 +86,9 @@ class _SemesterManagementScreenState
                       Text(
                         'Semester Management',
                         style: GoogleFonts.inter(
-                          fontSize: MediaQuery.of(context).size.width < 600 ? 20 : 32,
+                          fontSize: MediaQuery.of(context).size.width < 600
+                              ? 20
+                              : 32,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
@@ -95,7 +97,9 @@ class _SemesterManagementScreenState
                       Text(
                         'Manage academic semesters',
                         style: GoogleFonts.inter(
-                          fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                          fontSize: MediaQuery.of(context).size.width < 600
+                              ? 12
+                              : 16,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -107,7 +111,9 @@ class _SemesterManagementScreenState
                   onPressed: () => _showSemesterDialog(context, ref),
                   icon: const Icon(Icons.add, size: 18),
                   label: Text(
-                    MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Semester',
+                    MediaQuery.of(context).size.width < 600
+                        ? 'Add'
+                        : 'Add Semester',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

@@ -118,7 +118,9 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                     child: Text(
                       'Quizzes',
                       style: GoogleFonts.inter(
-                        fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
+                        fontSize: MediaQuery.of(context).size.width < 600
+                            ? 18
+                            : 24,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
@@ -129,7 +131,9 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                     onPressed: () => _showQuizDialog(context, ref, null),
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(
-                      MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Quiz',
+                      MediaQuery.of(context).size.width < 600
+                          ? 'Add'
+                          : 'Add Quiz',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -202,8 +206,12 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                       value: _filterStatus,
                       isDense: true,
                       decoration: InputDecoration(
-                        labelText: MediaQuery.of(context).size.width < 600 ? 'Filter' : 'Filter by Status',
-                        prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.filter_list, size: 20),
+                        labelText: MediaQuery.of(context).size.width < 600
+                            ? 'Filter'
+                            : 'Filter by Status',
+                        prefixIcon: MediaQuery.of(context).size.width < 600
+                            ? null
+                            : const Icon(Icons.filter_list, size: 20),
                         filled: true,
                         fillColor: AppColors.cardBackground,
                         border: OutlineInputBorder(
@@ -215,8 +223,12 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
-                          vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                          horizontal: MediaQuery.of(context).size.width < 600
+                              ? 8
+                              : 16,
+                          vertical: MediaQuery.of(context).size.width < 600
+                              ? 12
+                              : 16,
                         ),
                       ),
                       items: ['All', 'Open', 'Closed', 'Upcoming'].map((
@@ -227,7 +239,9 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           child: Text(
                             status,
                             style: GoogleFonts.inter(
-                              fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 12
+                                  : 14,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -251,7 +265,9 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                       isDense: true,
                       decoration: InputDecoration(
                         labelText: 'Sort',
-                        prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.sort, size: 20),
+                        prefixIcon: MediaQuery.of(context).size.width < 600
+                            ? null
+                            : const Icon(Icons.sort, size: 20),
                         filled: true,
                         fillColor: AppColors.cardBackground,
                         border: OutlineInputBorder(
@@ -263,11 +279,16 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                           borderSide: const BorderSide(color: AppColors.border),
                         ),
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
-                          vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                          horizontal: MediaQuery.of(context).size.width < 600
+                              ? 8
+                              : 16,
+                          vertical: MediaQuery.of(context).size.width < 600
+                              ? 12
+                              : 16,
                         ),
                       ),
-                      selectedItemBuilder: MediaQuery.of(context).size.width < 600
+                      selectedItemBuilder:
+                          MediaQuery.of(context).size.width < 600
                           ? (BuildContext context) {
                               return [
                                 'Close Date (Nearest First)',
@@ -307,7 +328,10 @@ class _QuizzesTabState extends ConsumerState<QuizzesTab> {
                               child: Text(
                                 sortOption,
                                 style: GoogleFonts.inter(
-                                  fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                                  fontSize:
+                                      MediaQuery.of(context).size.width < 600
+                                      ? 12
+                                      : 14,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),

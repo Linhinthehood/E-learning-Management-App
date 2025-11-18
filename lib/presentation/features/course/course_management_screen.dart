@@ -127,7 +127,9 @@ class _CourseManagementScreenState
                       Text(
                         'Course Management',
                         style: GoogleFonts.inter(
-                          fontSize: MediaQuery.of(context).size.width < 600 ? 20 : 32,
+                          fontSize: MediaQuery.of(context).size.width < 600
+                              ? 20
+                              : 32,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
@@ -136,7 +138,9 @@ class _CourseManagementScreenState
                       Text(
                         'Manage your courses',
                         style: GoogleFonts.inter(
-                          fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                          fontSize: MediaQuery.of(context).size.width < 600
+                              ? 12
+                              : 16,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -150,42 +154,42 @@ class _CourseManagementScreenState
                     children: [
                       if (MediaQuery.of(context).size.width >= 600)
                         OutlinedButton.icon(
-                      onPressed: () async {
-                        // Navigate to CSV import screen and wait for result
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const CourseCsvImportScreen(),
-                          ),
-                        );
+                          onPressed: () async {
+                            // Navigate to CSV import screen and wait for result
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CourseCsvImportScreen(),
+                              ),
+                            );
 
-                        // Refresh course list after import
-                        if (_selectedSemester != null) {
-                          ref
-                              .read(courseProvider.notifier)
-                              .loadCourses(_selectedSemester!.id);
-                        }
-                      },
-                      icon: const Icon(Icons.upload_file, size: 20),
-                      label: Text(
-                        'Import CSV',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                            // Refresh course list after import
+                            if (_selectedSemester != null) {
+                              ref
+                                  .read(courseProvider.notifier)
+                                  .loadCourses(_selectedSemester!.id);
+                            }
+                          },
+                          icon: const Icon(Icons.upload_file, size: 20),
+                          label: Text(
+                            'Import CSV',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.buttonPrimary,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
+                            side: BorderSide(color: AppColors.buttonPrimary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.buttonPrimary,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 16,
-                        ),
-                        side: BorderSide(color: AppColors.buttonPrimary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
                       if (MediaQuery.of(context).size.width >= 600)
                         const SizedBox(width: 12),
                       ElevatedButton.icon(
@@ -203,26 +207,29 @@ class _CourseManagementScreenState
                         },
                         icon: const Icon(Icons.add, size: 18),
                         label: Text(
-                          MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Course',
+                          MediaQuery.of(context).size.width < 600
+                              ? 'Add'
+                              : 'Add Course',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.buttonPrimary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.buttonPrimary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                )),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

@@ -88,7 +88,9 @@ class _StudentSidebarState extends State<StudentSidebar> {
             child: Center(
               child: Icon(
                 icon,
-                color: isSelected ? AppColors.iconActive : AppColors.iconInactive,
+                color: isSelected
+                    ? AppColors.iconActive
+                    : AppColors.iconInactive,
                 size: 26,
               ),
             ),

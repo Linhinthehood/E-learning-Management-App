@@ -49,7 +49,9 @@ class _QuestionBanksTabState extends ConsumerState<QuestionBanksTab> {
                     child: Text(
                       'Question Banks',
                       style: GoogleFonts.inter(
-                        fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
+                        fontSize: MediaQuery.of(context).size.width < 600
+                            ? 18
+                            : 24,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
@@ -61,7 +63,9 @@ class _QuestionBanksTabState extends ConsumerState<QuestionBanksTab> {
                         _showQuestionBankDialog(context, ref, null),
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(
-                      MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Question Bank',
+                      MediaQuery.of(context).size.width < 600
+                          ? 'Add'
+                          : 'Add Question Bank',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

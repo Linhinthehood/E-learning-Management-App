@@ -196,7 +196,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 450),
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width < 600 ? 20 : 40,
+                    horizontal: MediaQuery.of(context).size.width < 600
+                        ? 20
+                        : 40,
                     vertical: 40,
                   ),
                   child: Column(

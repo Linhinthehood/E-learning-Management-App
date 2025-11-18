@@ -113,7 +113,9 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                     child: Text(
                       'Announcements',
                       style: GoogleFonts.inter(
-                        fontSize: MediaQuery.of(context).size.width < 600 ? 18 : 24,
+                        fontSize: MediaQuery.of(context).size.width < 600
+                            ? 18
+                            : 24,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
@@ -127,7 +129,9 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                           _showAnnouncementDialog(context, ref, null),
                       icon: const Icon(Icons.add, size: 18),
                       label: Text(
-                        MediaQuery.of(context).size.width < 600 ? 'Add' : 'Add Announcement',
+                        MediaQuery.of(context).size.width < 600
+                            ? 'Add'
+                            : 'Add Announcement',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -197,7 +201,9 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                 isDense: true,
                 decoration: InputDecoration(
                   labelText: 'Sort',
-                  prefixIcon: MediaQuery.of(context).size.width < 600 ? null : const Icon(Icons.sort, size: 20),
+                  prefixIcon: MediaQuery.of(context).size.width < 600
+                      ? null
+                      : const Icon(Icons.sort, size: 20),
                   filled: true,
                   fillColor: AppColors.cardBackground,
                   border: OutlineInputBorder(
@@ -209,7 +215,9 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                     borderSide: const BorderSide(color: AppColors.border),
                   ),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+                    horizontal: MediaQuery.of(context).size.width < 600
+                        ? 8
+                        : 16,
                     vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
                   ),
                 ),
@@ -253,7 +261,9 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                         child: Text(
                           sortOption,
                           style: GoogleFonts.inter(
-                            fontSize: MediaQuery.of(context).size.width < 600 ? 12 : 14,
+                            fontSize: MediaQuery.of(context).size.width < 600
+                                ? 12
+                                : 14,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),

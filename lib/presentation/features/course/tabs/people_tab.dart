@@ -95,43 +95,43 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                     children: [
                       if (MediaQuery.of(context).size.width >= 600)
                         OutlinedButton.icon(
-                      onPressed: () async {
-                        // Navigate to CSV import screen and wait for result
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const GroupCsvImportScreen(),
-                          ),
-                        );
+                          onPressed: () async {
+                            // Navigate to CSV import screen and wait for result
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const GroupCsvImportScreen(),
+                              ),
+                            );
 
-                        // Refresh groups and enrollments after import
-                        ref
-                            .read(groupProvider.notifier)
-                            .loadGroups(widget.course.id);
-                        ref
-                            .read(enrollmentProvider.notifier)
-                            .loadEnrollments(widget.course.id);
-                      },
-                      icon: const Icon(Icons.upload_file, size: 20),
-                      label: Text(
-                        'Import CSV',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                            // Refresh groups and enrollments after import
+                            ref
+                                .read(groupProvider.notifier)
+                                .loadGroups(widget.course.id);
+                            ref
+                                .read(enrollmentProvider.notifier)
+                                .loadEnrollments(widget.course.id);
+                          },
+                          icon: const Icon(Icons.upload_file, size: 20),
+                          label: Text(
+                            'Import CSV',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.buttonPrimary,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            side: BorderSide(color: AppColors.buttonPrimary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
                         ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.buttonPrimary,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        side: BorderSide(color: AppColors.buttonPrimary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
                       if (MediaQuery.of(context).size.width >= 600)
                         const SizedBox(width: 12),
                       ElevatedButton.icon(
@@ -146,24 +146,26 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                         },
                         icon: const Icon(Icons.group_add, size: 18),
                         label: Text(
-                          MediaQuery.of(context).size.width < 600 ? 'Manage' : 'Manage Students',
+                          MediaQuery.of(context).size.width < 600
+                              ? 'Manage'
+                              : 'Manage Students',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.buttonPrimary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.buttonPrimary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
-                    ),
                     ],
                   ),
                 ),
