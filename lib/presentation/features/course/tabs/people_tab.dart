@@ -27,7 +27,6 @@ class PeopleTab extends ConsumerStatefulWidget {
 class _PeopleTabState extends ConsumerState<PeopleTab> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _filterGroup = 'All Groups';
 
   @override
   void initState() {

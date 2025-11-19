@@ -5,11 +5,7 @@ import '../../../domain/entities/course_entity.dart';
 import '../../common/styles/colors.dart';
 import '../../providers/semester_provider.dart';
 import 'tabs/announcements_tab.dart';
-import 'tabs/assignments_tab.dart';
-import 'tabs/quizzes_tab.dart';
-import 'tabs/question_banks_tab.dart';
-import 'tabs/materials_tab.dart';
-import 'tabs/forum_tab.dart';
+import 'tabs/classwork_tab.dart';
 import 'tabs/people_tab.dart';
 
 /// Course Detail Screen - Main screen for managing course content
@@ -35,9 +31,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 7,
+      length: 3,
       vsync: this,
-      initialIndex: widget.initialTabIndex,
+      initialIndex: widget.initialTabIndex.clamp(0, 2),
     );
   }
 
@@ -69,49 +65,58 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            title: Row(
               children: [
-                Text(
-                  widget.course.name,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      widget.course.code,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.course.name,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    if (isReadOnly) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.orange),
-                        ),
-                        child: Text(
-                          'READ-ONLY',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange[900],
+                      Row(
+                        children: [
+                          Text(
+                            widget.course.code,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ),
+                          if (isReadOnly) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(3),
+                                border: Border.all(color: Colors.orange, width: 1),
+                              ),
+                              child: Text(
+                                'READ-ONLY',
+                                style: GoogleFonts.inter(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange[900],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ],
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -125,16 +130,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 fontWeight: FontWeight.w600,
               ),
               tabs: const [
-                Tab(text: 'Stream', icon: Icon(Icons.stream, size: 20)),
-                Tab(text: 'Classwork', icon: Icon(Icons.assignment, size: 20)),
-                Tab(text: 'Quizzes', icon: Icon(Icons.quiz, size: 20)),
-                Tab(
-                  text: 'Questions',
-                  icon: Icon(Icons.library_books, size: 20),
-                ),
-                Tab(text: 'Materials', icon: Icon(Icons.folder, size: 20)),
-                Tab(text: 'Forum', icon: Icon(Icons.forum, size: 20)),
-                Tab(text: 'People', icon: Icon(Icons.people, size: 20)),
+                Tab(text: 'Stream', icon: Icon(Icons.stream, size: 18)),
+                Tab(text: 'Classwork', icon: Icon(Icons.assignment, size: 18)),
+                Tab(text: 'People', icon: Icon(Icons.people, size: 18)),
               ],
             ),
           ),
@@ -142,11 +140,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             controller: _tabController,
             children: [
               AnnouncementsTab(course: widget.course),
-              AssignmentsTab(course: widget.course, isReadOnly: isReadOnly),
-              QuizzesTab(course: widget.course, isReadOnly: isReadOnly),
-              QuestionBanksTab(course: widget.course),
-              MaterialsTab(course: widget.course),
-              ForumTab(course: widget.course),
+              ClassworkTab(course: widget.course, isReadOnly: isReadOnly, isStudent: false),
               PeopleTab(course: widget.course),
             ],
           ),
@@ -165,22 +159,31 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            title: Row(
               children: [
-                Text(
-                  widget.course.name,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  widget.course.code,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.course.name,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        widget.course.code,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -195,16 +198,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 fontWeight: FontWeight.w600,
               ),
               tabs: const [
-                Tab(text: 'Stream', icon: Icon(Icons.stream, size: 20)),
-                Tab(text: 'Classwork', icon: Icon(Icons.assignment, size: 20)),
-                Tab(text: 'Quizzes', icon: Icon(Icons.quiz, size: 20)),
-                Tab(
-                  text: 'Questions',
-                  icon: Icon(Icons.library_books, size: 20),
-                ),
-                Tab(text: 'Materials', icon: Icon(Icons.folder, size: 20)),
-                Tab(text: 'Forum', icon: Icon(Icons.forum, size: 20)),
-                Tab(text: 'People', icon: Icon(Icons.people, size: 20)),
+                Tab(text: 'Stream', icon: Icon(Icons.stream, size: 18)),
+                Tab(text: 'Classwork', icon: Icon(Icons.assignment, size: 18)),
+                Tab(text: 'People', icon: Icon(Icons.people, size: 18)),
               ],
             ),
           ),
@@ -212,11 +208,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             controller: _tabController,
             children: [
               AnnouncementsTab(course: widget.course),
-              AssignmentsTab(course: widget.course, isReadOnly: false),
-              QuizzesTab(course: widget.course, isReadOnly: false),
-              QuestionBanksTab(course: widget.course),
-              MaterialsTab(course: widget.course),
-              ForumTab(course: widget.course),
+              ClassworkTab(course: widget.course, isReadOnly: false, isStudent: false),
               PeopleTab(course: widget.course),
             ],
           ),

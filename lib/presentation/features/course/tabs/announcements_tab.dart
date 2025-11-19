@@ -13,6 +13,7 @@ import '../../../providers/view_tracking_provider.dart';
 import '../widgets/announcement_form_dialog.dart';
 import '../../tracking/announcement_tracking_screen.dart';
 import '../../../../services/file_download_service.dart';
+import '../../forum/forum_list_screen.dart';
 
 /// Announcements tab - displays and manages announcements
 class AnnouncementsTab extends ConsumerStatefulWidget {
@@ -103,9 +104,64 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
 
         return Column(
           children: [
+            // Forum access card
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+              child: Card(
+                color: AppColors.cardBackground,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: AppColors.border),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ForumListScreen(course: widget.course),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Icon(Icons.forum, size: 24, color: AppColors.buttonPrimary),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Forum',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Discuss topics and ask questions',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSecondary),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
             // Header with Add button
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
