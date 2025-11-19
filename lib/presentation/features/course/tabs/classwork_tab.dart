@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide MaterialType;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../common/styles/colors.dart';
@@ -867,6 +867,21 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
               ],
             ),
             const SizedBox(height: 8),
+            // Description preview
+            if (assignment.description.isNotEmpty) ...[
+              Text(
+                assignment.description,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+            ],
+            // Status and dates
             Row(
               children: [
                 Container(
@@ -896,16 +911,154 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Deadline: ${_formatDateTime(assignment.deadline)}',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
               ],
             ),
+            const SizedBox(height: 8),
+            // Details section
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.calendar_today, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Opens: ${_formatDateTime(assignment.startDate)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.event, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Deadline: ${_formatDateTime(assignment.deadline)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (assignment.lateDeadline != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.schedule, size: 14, color: Colors.orange),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Late deadline: ${_formatDateTime(assignment.lateDeadline!)}',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.repeat, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      assignment.hasUnlimitedAttempts
+                          ? 'Unlimited attempts'
+                          : '${assignment.maxAttempts} attempt(s)',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.upload_file, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Max ${assignment.maxFileSizeMB}MB',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (assignment.allowsLateSubmission)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.schedule, size: 14, color: Colors.orange),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Late submission allowed',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                if (!assignment.isForAllGroups)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.group, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Scoped to groups',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                if (assignment.attachments.isNotEmpty)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.attach_file, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${assignment.attachments.length} attachment(s)',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+            // Allowed file formats
+            if (assignment.allowedFileFormats.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: assignment.allowedFileFormats.map((format) {
+                  return Chip(
+                    avatar: const Icon(Icons.insert_drive_file, size: 14),
+                    label: Text(
+                      format.toUpperCase(),
+                      style: GoogleFonts.inter(fontSize: 10),
+                    ),
+                    backgroundColor: AppColors.background,
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  );
+                }).toList(),
+              ),
+            ],
             // Student submission section
             if (!isAuthor && currentUserId != null) ...[
               const SizedBox(height: 12),
@@ -1110,6 +1263,21 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
               ],
             ),
             const SizedBox(height: 8),
+            // Description preview
+            if (quiz.description.isNotEmpty) ...[
+              Text(
+                quiz.description,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+            ],
+            // Status
             Row(
               children: [
                 Container(
@@ -1139,14 +1307,136 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Closes: ${_formatDateTime(quiz.timeClose)}',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Details section
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.calendar_today, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Opens: ${_formatDateTime(quiz.timeOpen)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.event, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Closes: ${_formatDateTime(quiz.timeClose)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (quiz.hasTimeLimit)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.timer, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${quiz.durationMinutes} minutes',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.timer_off, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'No time limit',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.repeat, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      quiz.hasUnlimitedAttempts
+                          ? 'Unlimited attempts'
+                          : '${quiz.numAttempts} attempt(s)',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.quiz, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${quiz.structure.totalQuestions} question(s)',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (quiz.shuffleQuestions || quiz.shuffleAnswers)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.shuffle, size: 14, color: Colors.orange),
+                      const SizedBox(width: 4),
+                      Text(
+                        quiz.shuffleQuestions && quiz.shuffleAnswers
+                            ? 'Shuffle Q&A'
+                            : quiz.shuffleQuestions
+                                ? 'Shuffle questions'
+                                : 'Shuffle answers',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                if (!quiz.isForAllGroups)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.group, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Scoped to groups',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
             // Student quiz attempt section
@@ -1409,19 +1699,114 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              '${material.files.length} file(s)',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppColors.textSecondary,
+            // Description preview
+            if (material.description.isNotEmpty) ...[
+              Text(
+                material.description,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+            ],
+            // Material type badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.buttonPrimary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _getMaterialTypeLabel(material.type),
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: AppColors.buttonPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 8),
+            // Details section
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.insert_drive_file, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${material.files.length} file(s)',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.calendar_today, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Created: ${_formatDate(material.createdAt)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (material.updatedAt != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.update, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Updated: ${_formatDate(material.updatedAt!)}',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                if (!material.isForAllGroups)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.group, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Scoped to groups',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+            // Files preview
             if (material.files.isNotEmpty) ...[
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: material.files.map((file) {
+                children: material.files.take(3).map((file) {
                   return Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -1482,6 +1867,18 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
                   );
                 }).toList(),
               ),
+              if (material.files.length > 3)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    '+ ${material.files.length - 3} more file(s)',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
             ],
           ],
         ),
@@ -1591,6 +1988,29 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
 
   String _formatDateTime(DateTime date) {
     return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _getMaterialTypeLabel(MaterialType type) {
+    switch (type) {
+      case MaterialType.document:
+        return 'Document';
+      case MaterialType.video:
+        return 'Video';
+      case MaterialType.audio:
+        return 'Audio';
+      case MaterialType.link:
+        return 'Link';
+      case MaterialType.presentation:
+        return 'Presentation';
+      case MaterialType.spreadsheet:
+        return 'Spreadsheet';
+      case MaterialType.code:
+        return 'Code';
+      case MaterialType.image:
+        return 'Image';
+      case MaterialType.other:
+        return 'Other';
+    }
   }
 
   void _showAssignmentDialog(

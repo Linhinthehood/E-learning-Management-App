@@ -39,13 +39,10 @@ class _StudentSidebarState extends State<StudentSidebar> {
               borderRadius: BorderRadius.circular(15),
             ),
             child: const Center(
-              child: Text(
-                'F.',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+              child: Icon(
+                Icons.school,
+                size: 32,
+                color: AppColors.buttonPrimary,
               ),
             ),
           ),
