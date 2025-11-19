@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../common/styles/colors.dart';
+import '../../../common/widgets/skeleton_widgets.dart';
 import '../../../../domain/entities/course_entity.dart';
 import '../../../../domain/entities/group_entity.dart';
 import '../../../../domain/entities/user_entity.dart';
@@ -320,7 +321,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                     },
                   );
                 },
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const SkeletonPeopleTab(),
                 error: (error, _) => Center(
                   child: Text(
                     'Error loading students',
@@ -328,7 +329,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                   ),
                 ),
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const SkeletonPeopleTab(),
               error: (error, _) => Center(
                 child: Text(
                   'Error loading enrollments',
@@ -336,7 +337,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                 ),
               ),
             ),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const SkeletonPeopleTab(),
             error: (error, _) => Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

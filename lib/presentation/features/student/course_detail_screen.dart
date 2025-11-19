@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../domain/entities/course_entity.dart';
 import '../../common/styles/colors.dart';
+import '../../common/widgets/skeleton_widgets.dart';
 import '../../providers/semester_provider.dart';
 import '../../features/course/tabs/announcements_tab.dart';
 import '../../features/course/tabs/classwork_tab.dart';
@@ -149,8 +150,7 @@ class _StudentCourseDetailScreenState
           ),
         );
       },
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => const SkeletonCourseDetailScreen(),
       error: (_, __) {
         // Default to read-only if error
         return Scaffold(

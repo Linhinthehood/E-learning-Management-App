@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../common/styles/colors.dart';
 import '../../common/widgets/offline_indicator.dart';
+import '../../common/widgets/skeleton_widgets.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/semester_provider.dart';
 import '../../providers/student_dashboard_provider.dart';
@@ -91,7 +92,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonStudentDashboardContent(),
       error: (_, __) => const Center(child: Text('Error loading user')),
     );
   }
@@ -408,12 +409,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
           ],
         );
       },
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(40),
-          child: CircularProgressIndicator(),
-        ),
-      ),
+      loading: () => const SkeletonStudentDashboardContent(),
       error: (error, stack) => Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(

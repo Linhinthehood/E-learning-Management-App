@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../common/styles/colors.dart';
+import '../../../common/widgets/skeleton_widgets.dart';
 import '../../../../domain/entities/course_entity.dart';
 import '../../../../domain/entities/announcement_entity.dart';
 import '../../../../domain/entities/comment_entity.dart';
@@ -409,7 +410,40 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Column(
+        children: [
+          // Forum card skeleton
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+            child: SkeletonBox(height: 80, width: double.infinity),
+          ),
+          // Header skeleton
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SkeletonBox(height: 24, width: 150),
+                SkeletonBox(height: 40, width: 140),
+              ],
+            ),
+          ),
+          // Search bar skeleton
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SkeletonBox(height: 48, width: double.infinity),
+          ),
+          const SizedBox(height: 16),
+          // Sort skeleton
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SkeletonBox(height: 56, width: 200),
+          ),
+          const SizedBox(height: 16),
+          // Announcements list skeleton
+          const Expanded(child: SkeletonAnnouncementList()),
+        ],
+      ),
       error: (error, stack) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

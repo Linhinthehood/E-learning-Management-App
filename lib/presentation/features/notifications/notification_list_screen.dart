@@ -7,8 +7,13 @@ import '../../providers/notification_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../../domain/entities/user_entity.dart';
 import 'widgets/notification_card.dart';
-import '../../../utils/helpers/deep_link_handler.dart';
 import 'package:intl/intl.dart';
+import '../student/course_detail_screen.dart';
+import '../course/screens/assignment_detail_screen.dart';
+import '../course/screens/quiz_detail_screen.dart';
+import '../course/screens/material_detail_screen.dart';
+import '../forum/forum_list_screen.dart';
+import '../messaging/chat_screen.dart';
 
 /// Notification List Screen - displays all notifications for a student
 class NotificationListScreen extends ConsumerStatefulWidget {
@@ -22,6 +27,7 @@ class NotificationListScreen extends ConsumerStatefulWidget {
 class _NotificationListScreenState
     extends ConsumerState<NotificationListScreen> {
   String _filterOption = 'all'; // all, unread
+  String? _processingNotificationId;
 
   @override
   void initState() {
@@ -80,6 +86,124 @@ class _NotificationListScreenState
           ),
         );
       }
+    }
+  }
+
+  Future<void> _handleNotificationTap(NotificationEntity notification) async {
+    if (_processingNotificationId != null) return;
+    setState(() {
+      _processingNotificationId = notification.id;
+    });
+
+    final navigationService = ref.read(notificationNavigationServiceProvider);
+
+    try {
+      final result = await navigationService.resolve(notification);
+      if (!mounted) return;
+
+      if (result == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Không thể mở nội dung thông báo này'),
+          ),
+        );
+        return;
+      }
+
+      if (!notification.isRead) {
+        await ref
+            .read(notificationProvider.notifier)
+            .markAsRead(notification.id);
+      }
+
+      await _navigateToResult(result);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi mở thông báo: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _processingNotificationId = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _navigateToResult(
+    NotificationNavigationResult result,
+  ) async {
+    if (!mounted) return;
+
+    if (result is AssignmentNavigationResult) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AssignmentDetailScreen(
+            course: result.course,
+            assignment: result.assignment,
+          ),
+        ),
+      );
+    } else if (result is QuizNavigationResult) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => QuizDetailScreen(
+            course: result.course,
+            quiz: result.quiz,
+          ),
+        ),
+      );
+    } else if (result is MaterialNavigationResult) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MaterialDetailScreen(
+            course: result.course,
+            material: result.material,
+          ),
+        ),
+      );
+    } else if (result is CourseTabNavigationResult) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => StudentCourseDetailScreen(
+            course: result.course,
+            initialTabIndex: result.initialTabIndex,
+          ),
+        ),
+      );
+    } else if (result is ForumNavigationResult) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ForumListScreen(course: result.course),
+        ),
+      );
+    } else if (result is MessageNavigationResult) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChatScreen(
+            chatId: result.chatId,
+            participantId: result.participantId,
+            participantName: result.participantName,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Chưa hỗ trợ mở thông báo này'),
+        ),
+      );
     }
   }
 
@@ -262,24 +386,8 @@ class _NotificationListScreenState
                                   .map(
                                     (notification) => NotificationCard(
                                       notification: notification,
-                                      onTap: () async {
-                                        // Mark as read
-                                        if (!notification.isRead) {
-                                          await ref
-                                              .read(
-                                                notificationProvider.notifier,
-                                              )
-                                              .markAsRead(notification.id);
-                                        }
-
-                                        // Handle deep link
-                                        if (context.mounted) {
-                                          await DeepLinkHandler.handleDeepLink(
-                                            context,
-                                            notification.linkTo,
-                                          );
-                                        }
-                                      },
+                                      onTap: () =>
+                                          _handleNotificationTap(notification),
                                       onDelete: () {
                                         ref
                                             .read(notificationProvider.notifier)
@@ -287,6 +395,9 @@ class _NotificationListScreenState
                                               notification.id,
                                             );
                                       },
+                                      isProcessing:
+                                          _processingNotificationId ==
+                                              notification.id,
                                     ),
                                   ),
                             ],

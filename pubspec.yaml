@@ -39,6 +39,9 @@ dependencies:
   # CSV Export
   csv: ^5.0.0
   
+  # Skeleton Loading
+  shimmer: ^3.0.0
+  
   
 dev_dependencies:
   flutter_test:

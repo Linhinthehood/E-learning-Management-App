@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide MaterialType;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../common/styles/colors.dart';
+import '../../../common/widgets/skeleton_widgets.dart';
 import '../../../../domain/entities/course_entity.dart';
 import '../../../../domain/entities/assignment_entity.dart';
 import '../../../../domain/entities/quiz_entity.dart';
@@ -331,10 +332,165 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: Column(
-                      children: [
-                        // Type filter
-                        Row(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Use Wrap for responsive layout on small screens
+                        if (constraints.maxWidth < 800) {
+                          return Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              SizedBox(
+                                width: constraints.maxWidth < 400 
+                                    ? double.infinity 
+                                    : (constraints.maxWidth - 24) / 2,
+                                child: DropdownButtonFormField<String>(
+                                  value: _filterType,
+                                  isDense: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'Type',
+                                    prefixIcon: MediaQuery.of(context).size.width < 400 
+                                        ? null 
+                                        : const Icon(Icons.category, size: 20),
+                                    filled: true,
+                                    fillColor: AppColors.cardBackground,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: AppColors.border),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: AppColors.border),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  items: [
+                                    'All', 
+                                    'Assignments', 
+                                    'Quizzes', 
+                                    'Materials',
+                                    if (!widget.isStudent) 'Question Banks',
+                                  ].map((type) {
+                                    return DropdownMenuItem(
+                                      value: type,
+                                      child: Text(
+                                        type,
+                                        style: GoogleFonts.inter(fontSize: 14),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        _filterType = value;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                width: constraints.maxWidth < 400 
+                                    ? double.infinity 
+                                    : (constraints.maxWidth - 24) / 2,
+                                child: DropdownButtonFormField<String>(
+                                  value: _filterStatus,
+                                  isDense: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'Status',
+                                    prefixIcon: MediaQuery.of(context).size.width < 400 
+                                        ? null 
+                                        : const Icon(Icons.filter_list, size: 20),
+                                    filled: true,
+                                    fillColor: AppColors.cardBackground,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: AppColors.border),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: AppColors.border),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  items: ['All', 'Open', 'Closed', 'Upcoming'].map((status) {
+                                    return DropdownMenuItem(
+                                      value: status,
+                                      child: Text(
+                                        status,
+                                        style: GoogleFonts.inter(fontSize: 14),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        _filterStatus = value;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                width: constraints.maxWidth < 400 
+                                    ? double.infinity 
+                                    : (constraints.maxWidth - 24) / 2,
+                                child: DropdownButtonFormField<String>(
+                                  value: _sortBy,
+                                  isDense: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'Sort',
+                                    prefixIcon: MediaQuery.of(context).size.width < 400 
+                                        ? null 
+                                        : const Icon(Icons.sort, size: 20),
+                                    filled: true,
+                                    fillColor: AppColors.cardBackground,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: AppColors.border),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: AppColors.border),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  items: [
+                                    'Date (Newest First)',
+                                    'Date (Oldest First)',
+                                    'Title (A-Z)',
+                                    'Title (Z-A)',
+                                  ].map((sortOption) {
+                                    return DropdownMenuItem(
+                                      value: sortOption,
+                                      child: Text(
+                                        sortOption,
+                                        style: GoogleFonts.inter(fontSize: 14),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        _sortBy = value;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        // Use Row for larger screens
+                        return Row(
                           children: [
                             Expanded(
                               child: DropdownButtonFormField<String>(
@@ -470,8 +626,8 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
                               ),
                             ),
                           ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -550,15 +706,7 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
               ],
             );
           },
-          loading: () => CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: const Center(child: CircularProgressIndicator()),
-              ),
-            ],
-          ),
+          loading: () => const SkeletonClassworkTab(),
           error: (error, _) => CustomScrollView(
             controller: _scrollController,
             slivers: [
@@ -584,15 +732,7 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
             ],
           ),
         ),
-          loading: () => CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: const Center(child: CircularProgressIndicator()),
-              ),
-            ],
-          ),
+          loading: () => const SkeletonClassworkTab(),
           error: (error, _) => CustomScrollView(
             controller: _scrollController,
             slivers: [
@@ -618,15 +758,7 @@ class _ClassworkTabState extends ConsumerState<ClassworkTab> {
             ],
           ),
         ),
-        loading: () => CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-          ],
-        ),
+        loading: () => const SkeletonClassworkTab(),
         error: (error, _) => CustomScrollView(
           controller: _scrollController,
           slivers: [

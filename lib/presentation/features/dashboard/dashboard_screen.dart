@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../common/styles/colors.dart';
+import '../../common/widgets/skeleton_widgets.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/instructor_dashboard_provider.dart';
 import 'widgets/instructor_statistics_cards.dart';
 import 'widgets/instructor_activity_feed.dart';
 import 'widgets/instructor_charts.dart';
-import 'widgets/instructor_quick_actions.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -37,12 +37,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               // Dashboard Data
               dashboardAsync.when(
                 data: (data) => _buildDashboardContent(data),
-                loading: () => const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(40),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
+                loading: () => const SkeletonDashboardContent(),
                 error: (error, stack) => Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -85,7 +80,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonDashboardContent(),
       error: (_, __) => const Center(child: Text('Error loading user')),
     );
   }
@@ -149,9 +144,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       children: [
         // Statistics Cards
         InstructorStatisticsCards(statistics: data.statistics),
-        const SizedBox(height: 30),
-        // Quick Actions
-        const InstructorQuickActions(),
         const SizedBox(height: 30),
         // Charts
         InstructorCharts(
