@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../domain/entities/course_entity.dart';
 import '../../../domain/entities/semester_entity.dart';
 import '../../common/styles/colors.dart';
+import '../../common/widgets/skeleton_widgets.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/semester_provider.dart';
 import '../csv_import/course_csv_import_screen.dart';
@@ -451,15 +452,7 @@ class _CourseManagementScreenState
           ),
         );
       },
-      loading: () => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: const Center(child: CircularProgressIndicator()),
-      ),
+      loading: () => const SkeletonSemesterSelector(),
       error: (error, _) => Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -520,7 +513,7 @@ class _CourseManagementScreenState
 
         return _buildCourseGrid(filteredCourses);
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SkeletonCourseGrid(),
       error: (error, _) => _buildErrorState(error),
     );
   }

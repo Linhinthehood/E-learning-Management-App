@@ -114,13 +114,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: Center(
-                        child: Text(
-                          'F.',
-                          style: TextStyle(
-                            fontSize: _getResponsiveFontSize(60, context),
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+                        child: Icon(
+                          Icons.school,
+                          size: _getResponsiveFontSize(50, context),
+                          color: AppColors.buttonPrimary,
                         ),
                       ),
                     ),

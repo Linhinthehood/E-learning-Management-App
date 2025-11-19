@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../common/styles/colors.dart';
+import '../../../common/widgets/skeleton_widgets.dart';
 import '../../../../domain/entities/course_entity.dart';
 import '../../../../domain/entities/announcement_entity.dart';
 import '../../../../domain/entities/comment_entity.dart';
@@ -13,6 +14,7 @@ import '../../../providers/view_tracking_provider.dart';
 import '../widgets/announcement_form_dialog.dart';
 import '../../tracking/announcement_tracking_screen.dart';
 import '../../../../services/file_download_service.dart';
+import '../../forum/forum_list_screen.dart';
 
 /// Announcements tab - displays and manages announcements
 class AnnouncementsTab extends ConsumerStatefulWidget {
@@ -103,9 +105,64 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
 
         return Column(
           children: [
+            // Forum access card
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+              child: Card(
+                color: AppColors.cardBackground,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: AppColors.border),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ForumListScreen(course: widget.course),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Icon(Icons.forum, size: 24, color: AppColors.buttonPrimary),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Forum',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Discuss topics and ask questions',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSecondary),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
             // Header with Add button
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -363,7 +420,40 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Column(
+        children: [
+          // Forum card skeleton
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+            child: SkeletonBox(height: 80, width: double.infinity),
+          ),
+          // Header skeleton
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SkeletonBox(height: 24, width: 150),
+                SkeletonBox(height: 40, width: 140),
+              ],
+            ),
+          ),
+          // Search bar skeleton
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SkeletonBox(height: 48, width: double.infinity),
+          ),
+          const SizedBox(height: 16),
+          // Sort skeleton
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SkeletonBox(height: 56, width: 200),
+          ),
+          const SizedBox(height: 16),
+          // Announcements list skeleton
+          const Expanded(child: SkeletonAnnouncementList()),
+        ],
+      ),
       error: (error, stack) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

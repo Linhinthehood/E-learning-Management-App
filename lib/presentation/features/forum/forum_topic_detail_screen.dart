@@ -12,6 +12,7 @@ import 'widgets/topic_form_dialog.dart';
 import 'widgets/reply_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../domain/entities/user_entity.dart';
+import '../../../../services/file_download_service.dart';
 
 /// Forum Topic Detail Screen - displays topic and all replies
 class ForumTopicDetailScreen extends ConsumerStatefulWidget {
@@ -491,13 +492,55 @@ class _ForumTopicDetailScreenState
                     spacing: 8,
                     runSpacing: 8,
                     children: topic.attachments.map((attachment) {
-                      return Chip(
-                        avatar: const Icon(Icons.attach_file, size: 16),
-                        label: Text(
-                          attachment.split('/').last,
-                          style: GoogleFonts.inter(fontSize: 12),
+                      final fileName = attachment.split('/').last;
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                        backgroundColor: AppColors.background,
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.attach_file, size: 16),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                fileName,
+                                style: GoogleFonts.inter(fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            // Open button
+                            IconButton(
+                              icon: const Icon(Icons.open_in_new, size: 16),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 24,
+                                minHeight: 24,
+                              ),
+                              onPressed: () => _openFile(context, attachment),
+                              tooltip: 'Open file',
+                            ),
+                            // Download button
+                            IconButton(
+                              icon: const Icon(Icons.download, size: 16),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 24,
+                                minHeight: 24,
+                              ),
+                              onPressed: () => _downloadFile(context, attachment, fileName),
+                              tooltip: 'Download file',
+                            ),
+                          ],
+                        ),
                       );
                     }).toList(),
                   ),
@@ -575,6 +618,82 @@ class _ForumTopicDetailScreenState
       return '${difference.inDays}d ago';
     } else {
       return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
+  Future<void> _openFile(BuildContext context, String fileUrl) async {
+    final downloadService = FileDownloadService();
+
+    try {
+      await downloadService.openFile(fileUrl: fileUrl);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to open file: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _downloadFile(
+    BuildContext context,
+    String fileUrl,
+    String fileName,
+  ) async {
+    final downloadService = FileDownloadService();
+
+    try {
+      // Show loading
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text('Downloading $fileName...'),
+              ],
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+
+      await downloadService.downloadFile(fileUrl: fileUrl, fileName: fileName);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File downloaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        final errorMessage = e.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              errorMessage.contains('untrusted')
+                  ? 'Cannot download: Cloudinary account needs verification. Use "Open" to view file.'
+                  : 'Failed to download file: ${e.toString()}',
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     }
   }
 

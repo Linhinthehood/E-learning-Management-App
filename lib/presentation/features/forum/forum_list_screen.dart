@@ -25,6 +25,17 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
   String _filterOption = 'all'; // all, recent, mostReplies
 
   @override
+  void initState() {
+    super.initState();
+    // Load topics when screen is first opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadTopics();
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -91,114 +102,123 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
   Widget build(BuildContext context) {
     final topicsAsync = ref.watch(forumTopicProvider);
 
-    return Column(
-      children: [
-        // Header with search and filter
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Forum',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => _showTopicDialog(context, null),
-                    icon: const Icon(Icons.add, size: 20),
-                    label: Text(
-                      'New Topic',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.buttonPrimary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Search bar
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search topics...',
-                  hintStyle: GoogleFonts.inter(fontSize: 14),
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            _applySearch();
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: AppColors.cardBackground,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-                style: GoogleFonts.inter(fontSize: 14),
-                onSubmitted: (_) => _applySearch(),
-                onChanged: (_) {
-                  if (_searchController.text.trim().isEmpty &&
-                      _searchQuery.isNotEmpty) {
-                    _applySearch();
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
-              // Filter chips
-              Row(
-                children: [
-                  FilterChip(
-                    label: const Text('All'),
-                    selected: _filterOption == 'all',
-                    onSelected: (_) => _applyFilter('all'),
-                  ),
-                  const SizedBox(width: 8),
-                  FilterChip(
-                    label: const Text('Recent'),
-                    selected: _filterOption == 'recent',
-                    onSelected: (_) => _applyFilter('recent'),
-                  ),
-                ],
-              ),
-            ],
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          'Forum',
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: ElevatedButton.icon(
+              onPressed: () => _showTopicDialog(context, null),
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(
+                MediaQuery.of(context).size.width < 600 ? 'New' : 'New Topic',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.buttonPrimary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Search and filter section
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Column(
+              children: [
+                // Search bar
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search topics...',
+                    hintStyle: GoogleFonts.inter(fontSize: 14),
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              _applySearch();
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: AppColors.cardBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  style: GoogleFonts.inter(fontSize: 14),
+                  onSubmitted: (_) => _applySearch(),
+                  onChanged: (_) {
+                    if (_searchController.text.trim().isEmpty &&
+                        _searchQuery.isNotEmpty) {
+                      _applySearch();
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                // Filter chips
+                Row(
+                  children: [
+                    FilterChip(
+                      label: const Text('All'),
+                      selected: _filterOption == 'all',
+                      onSelected: (_) => _applyFilter('all'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Recent'),
+                      selected: _filterOption == 'recent',
+                      onSelected: (_) => _applyFilter('recent'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
 
-        // Topics list
-        Expanded(
-          child: topicsAsync.when(
-            data: (topics) {
+          // Topics list
+          Expanded(
+            child: topicsAsync.when(
+              data: (topics) {
               // Sort by most replies if filter is 'mostReplies'
               final sortedTopics = List<ForumTopicEntity>.from(topics);
               if (_filterOption == 'mostReplies') {
@@ -244,7 +264,7 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
                   _loadTopics();
                 },
                 child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: sortedTopics.length,
                   itemBuilder: (context, index) {
                     final topic = sortedTopics[index];
@@ -252,38 +272,39 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
                   },
                 ),
               );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error loading topics',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error loading topics',
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    error.toString(),
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(fontSize: 14),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => _loadTopics(),
-                    child: const Text('Retry'),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      error.toString(),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(fontSize: 14),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => _loadTopics(),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

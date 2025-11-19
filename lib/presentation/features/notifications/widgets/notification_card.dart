@@ -6,14 +6,16 @@ import '../../../../domain/entities/notification_entity.dart';
 /// Notification Card Widget - displays a single notification
 class NotificationCard extends StatelessWidget {
   final NotificationEntity notification;
-  final VoidCallback onTap;
+  final Future<void> Function()? onTap;
   final VoidCallback onDelete;
+  final bool isProcessing;
 
   const NotificationCard({
     super.key,
     required this.notification,
     required this.onTap,
     required this.onDelete,
+    this.isProcessing = false,
   });
 
   IconData _getNotificationIcon() {
@@ -101,7 +103,8 @@ class NotificationCard extends StatelessWidget {
 
     return Dismissible(
       key: Key(notification.id),
-      direction: DismissDirection.endToStart,
+      direction:
+          isProcessing ? DismissDirection.none : DismissDirection.endToStart,
       onDismissed: (_) => onDelete(),
       background: Container(
         alignment: Alignment.centerRight,
@@ -128,109 +131,133 @@ class NotificationCard extends StatelessWidget {
           ),
         ),
         child: InkWell(
-          onTap: onTap,
+          onTap: (onTap == null || isProcessing)
+              ? null
+              : () async {
+                  await onTap!.call();
+                },
           borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Notification icon
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _getNotificationIcon(),
-                    color: iconColor,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Notification content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title and time
-                      Row(
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Notification icon
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: iconColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        _getNotificationIcon(),
+                        color: iconColor,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Notification content
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              notification.title,
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: isUnread
-                                    ? FontWeight.bold
-                                    : FontWeight.w600,
-                                color: AppColors.textPrimary,
+                          // Title and time
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  notification.title,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: isUnread
+                                        ? FontWeight.bold
+                                        : FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              Text(
+                                _formatTime(notification.createdAt),
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          // Type badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: iconColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              _getNotificationTypeLabel(),
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                color: iconColor,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          // Message
                           Text(
-                            _formatTime(notification.createdAt),
+                            notification.message,
                             style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
+                              fontSize: 14,
+                              color: isUnread
+                                  ? AppColors.textPrimary
+                                  : AppColors.textSecondary,
+                              height: 1.4,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      // Type badge
+                    ),
+                    // Unread indicator
+                    if (isUnread)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: iconColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          _getNotificationTypeLabel(),
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            color: iconColor,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.only(left: 8),
+                        decoration: const BoxDecoration(
+                          color: AppColors.buttonPrimary,
+                          shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      // Message
-                      Text(
-                        notification.message,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: isUnread
-                              ? AppColors.textPrimary
-                              : AppColors.textSecondary,
-                          height: 1.4,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
-                // Unread indicator
-                if (isUnread)
-                  Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: const BoxDecoration(
-                      color: AppColors.buttonPrimary,
-                      shape: BoxShape.circle,
+              ),
+              if (isProcessing)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),

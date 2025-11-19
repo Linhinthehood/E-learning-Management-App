@@ -6,6 +6,7 @@ import '../../../../domain/entities/assignment_submission_entity.dart';
 import '../../../common/styles/colors.dart';
 import '../../../providers/assignment_submission_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../../services/file_upload_service.dart';
 
 /// Dialog for submitting an assignment
 class AssignmentSubmissionDialog extends ConsumerStatefulWidget {
@@ -29,6 +30,9 @@ class _AssignmentSubmissionDialogState
   final List<String> _submittedFiles = [];
   late TextEditingController _fileUrlController;
   bool _isLoading = false;
+  bool _isUploading = false;
+  double _uploadProgress = 0.0;
+  final FileUploadService _fileUploadService = FileUploadService();
 
   @override
   void initState() {
@@ -56,6 +60,61 @@ class _AssignmentSubmissionDialogState
     setState(() {
       _submittedFiles.remove(url);
     });
+  }
+
+  Future<void> _pickAndUploadFiles() async {
+    try {
+      // Pick files
+      final files = await _fileUploadService.pickFiles(allowMultiple: true);
+
+      if (files == null || files.isEmpty) return;
+
+      setState(() {
+        _isUploading = true;
+        _uploadProgress = 0.0;
+      });
+
+      // Upload files
+      final uploadedUrls = await _fileUploadService.uploadMultipleFiles(
+        files: files,
+        path: 'courses/${widget.assignment.courseId}/assignments/submissions',
+        onProgress: (current, total) {
+          setState(() {
+            _uploadProgress = current / total;
+          });
+        },
+      );
+
+      // Add uploaded URLs to submitted files
+      setState(() {
+        _submittedFiles.addAll(uploadedUrls);
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${files.length} file(s) uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload files: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _submitAssignment() async {
@@ -326,42 +385,47 @@ class _AssignmentSubmissionDialogState
                         ),
                       const SizedBox(height: 12),
 
-                      // Upload button - Note about Firebase Storage
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.orange.withValues(alpha: 0.3),
+                      // Upload button
+                      ElevatedButton.icon(
+                        onPressed: _isUploading ? null : _pickAndUploadFiles,
+                        icon: _isUploading
+                            ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                                  value: _uploadProgress > 0 ? _uploadProgress : null,
+                                ),
+                              )
+                            : const Icon(Icons.upload_file, size: 18),
+                        label: Text(
+                          _isUploading
+                              ? 'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%'
+                              : 'Upload Files',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.info_outline,
-                              size: 20,
-                              color: Colors.orange,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Note: File upload requires Firebase Storage. Upload to Google Drive/Dropbox and paste URL instead.',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.buttonPrimary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
 
                       const SizedBox(height: 16),
 
-                      // Paste file URL
+                      // Paste file URL (optional)
                       Text(
-                        'Add file URL',
+                        'Or add file URL manually',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -378,7 +442,7 @@ class _AssignmentSubmissionDialogState
                                 filled: true,
                                 fillColor: AppColors.background,
                                 hintText:
-                                    'Paste file URL (Google Drive, Dropbox, etc.)',
+                                    'Paste file URL (optional)',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: const BorderSide(
