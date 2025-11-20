@@ -205,30 +205,21 @@ class AssignmentNavigationResult extends NotificationNavigationResult {
   final CourseEntity course;
   final AssignmentEntity assignment;
 
-  AssignmentNavigationResult({
-    required this.course,
-    required this.assignment,
-  });
+  AssignmentNavigationResult({required this.course, required this.assignment});
 }
 
 class QuizNavigationResult extends NotificationNavigationResult {
   final CourseEntity course;
   final QuizEntity quiz;
 
-  QuizNavigationResult({
-    required this.course,
-    required this.quiz,
-  });
+  QuizNavigationResult({required this.course, required this.quiz});
 }
 
 class MaterialNavigationResult extends NotificationNavigationResult {
   final CourseEntity course;
   final MaterialEntity material;
 
-  MaterialNavigationResult({
-    required this.course,
-    required this.material,
-  });
+  MaterialNavigationResult({required this.course, required this.material});
 }
 
 class CourseTabNavigationResult extends NotificationNavigationResult {
@@ -267,11 +258,11 @@ class NotificationNavigationService {
     required IQuizRepository quizRepository,
     required IMaterialRepository materialRepository,
     required IChatRepository chatRepository,
-  })  : _courseRepository = courseRepository,
-        _assignmentRepository = assignmentRepository,
-        _quizRepository = quizRepository,
-        _materialRepository = materialRepository,
-        _chatRepository = chatRepository;
+  }) : _courseRepository = courseRepository,
+       _assignmentRepository = assignmentRepository,
+       _quizRepository = quizRepository,
+       _materialRepository = materialRepository,
+       _chatRepository = chatRepository;
 
   final ICourseRepository _courseRepository;
   final IAssignmentRepository _assignmentRepository;
@@ -298,7 +289,10 @@ class NotificationNavigationService {
           parts[2],
         );
         if (course == null || assignment == null) return null;
-        return AssignmentNavigationResult(course: course, assignment: assignment);
+        return AssignmentNavigationResult(
+          course: course,
+          assignment: assignment,
+        );
 
       case 'quiz':
         if (parts.length < 3) return null;
@@ -330,10 +324,10 @@ class NotificationNavigationService {
         if (parts.length < 2) return null;
         final chat = await _chatRepository.getChatById(parts[1]);
         if (chat == null) return null;
-        final instructorInfo =
-            await _courseRepository.getInstructorInfo(chat.instructorId);
-        final participantName =
-            instructorInfo?['displayName'] ?? 'Instructor';
+        final instructorInfo = await _courseRepository.getInstructorInfo(
+          chat.instructorId,
+        );
+        final participantName = instructorInfo?['displayName'] ?? 'Instructor';
         return MessageNavigationResult(
           chatId: chat.id,
           participantId: chat.instructorId,
@@ -349,11 +343,11 @@ class NotificationNavigationService {
 /// Provider exposing navigation resolver for notifications
 final notificationNavigationServiceProvider =
     Provider<NotificationNavigationService>((ref) {
-  return NotificationNavigationService(
-    courseRepository: ref.read(courseRepositoryProvider),
-    assignmentRepository: ref.read(assignmentRepositoryProvider),
-    quizRepository: ref.read(quizRepositoryProvider),
-    materialRepository: ref.read(materialRepositoryProvider),
-    chatRepository: ref.read(chatRepositoryProvider),
-  );
-});
+      return NotificationNavigationService(
+        courseRepository: ref.read(courseRepositoryProvider),
+        assignmentRepository: ref.read(assignmentRepositoryProvider),
+        quizRepository: ref.read(quizRepositoryProvider),
+        materialRepository: ref.read(materialRepositoryProvider),
+        chatRepository: ref.read(chatRepositoryProvider),
+      );
+    });

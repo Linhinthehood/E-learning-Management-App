@@ -394,8 +394,13 @@ class _AssignmentSubmissionDialogState
                                 height: 16,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                                  value: _uploadProgress > 0 ? _uploadProgress : null,
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                  value: _uploadProgress > 0
+                                      ? _uploadProgress
+                                      : null,
                                 ),
                               )
                             : const Icon(Icons.upload_file, size: 18),
@@ -441,8 +446,7 @@ class _AssignmentSubmissionDialogState
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: AppColors.background,
-                                hintText:
-                                    'Paste file URL (optional)',
+                                hintText: 'Paste file URL (optional)',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: const BorderSide(

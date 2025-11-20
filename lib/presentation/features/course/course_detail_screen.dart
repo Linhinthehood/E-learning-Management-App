@@ -101,7 +101,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                               decoration: BoxDecoration(
                                 color: Colors.orange.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(3),
-                                border: Border.all(color: Colors.orange, width: 1),
+                                border: Border.all(
+                                  color: Colors.orange,
+                                  width: 1,
+                                ),
                               ),
                               child: Text(
                                 'READ-ONLY',
@@ -140,7 +143,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             controller: _tabController,
             children: [
               AnnouncementsTab(course: widget.course),
-              ClassworkTab(course: widget.course, isReadOnly: isReadOnly, isStudent: false),
+              ClassworkTab(
+                course: widget.course,
+                isReadOnly: isReadOnly,
+                isStudent: false,
+              ),
               PeopleTab(course: widget.course),
             ],
           ),
@@ -208,7 +215,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             controller: _tabController,
             children: [
               AnnouncementsTab(course: widget.course),
-              ClassworkTab(course: widget.course, isReadOnly: false, isStudent: false),
+              ClassworkTab(
+                course: widget.course,
+                isReadOnly: false,
+                isStudent: false,
+              ),
               PeopleTab(course: widget.course),
             ],
           ),

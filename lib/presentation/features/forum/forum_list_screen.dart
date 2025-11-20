@@ -219,66 +219,70 @@ class _ForumListScreenState extends ConsumerState<ForumListScreen> {
           Expanded(
             child: topicsAsync.when(
               data: (topics) {
-              // Sort by most replies if filter is 'mostReplies'
-              final sortedTopics = List<ForumTopicEntity>.from(topics);
-              if (_filterOption == 'mostReplies') {
-                sortedTopics.sort(
-                  (a, b) => b.replyCount.compareTo(a.replyCount),
-                );
-              }
+                // Sort by most replies if filter is 'mostReplies'
+                final sortedTopics = List<ForumTopicEntity>.from(topics);
+                if (_filterOption == 'mostReplies') {
+                  sortedTopics.sort(
+                    (a, b) => b.replyCount.compareTo(a.replyCount),
+                  );
+                }
 
-              if (sortedTopics.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.forum_outlined,
-                        size: 64,
-                        color: AppColors.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No topics yet',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
+                if (sortedTopics.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.forum_outlined,
+                          size: 64,
+                          color: AppColors.textSecondary.withValues(alpha: 0.5),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Click "New Topic" to start a discussion',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
+                        const SizedBox(height: 16),
+                        Text(
+                          'No topics yet',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          'Click "New Topic" to start a discussion',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    _loadTopics();
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: sortedTopics.length,
+                    itemBuilder: (context, index) {
+                      final topic = sortedTopics[index];
+                      return _buildTopicCard(context, topic);
+                    },
                   ),
                 );
-              }
-
-              return RefreshIndicator(
-                onRefresh: () async {
-                  _loadTopics();
-                },
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: sortedTopics.length,
-                  itemBuilder: (context, index) {
-                    final topic = sortedTopics[index];
-                    return _buildTopicCard(context, topic);
-                  },
-                ),
-              );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.red,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Error loading topics',

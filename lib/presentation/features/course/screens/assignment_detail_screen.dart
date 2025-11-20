@@ -23,10 +23,12 @@ class AssignmentDetailScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AssignmentDetailScreen> createState() => _AssignmentDetailScreenState();
+  ConsumerState<AssignmentDetailScreen> createState() =>
+      _AssignmentDetailScreenState();
 }
 
-class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen> {
+class _AssignmentDetailScreenState
+    extends ConsumerState<AssignmentDetailScreen> {
   @override
   void initState() {
     super.initState();
@@ -110,23 +112,25 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                       color: widget.assignment.isOpen
                                           ? Colors.green.withValues(alpha: 0.1)
                                           : widget.assignment.isClosed
-                                              ? Colors.red.withValues(alpha: 0.1)
-                                              : Colors.orange.withValues(alpha: 0.1),
+                                          ? Colors.red.withValues(alpha: 0.1)
+                                          : Colors.orange.withValues(
+                                              alpha: 0.1,
+                                            ),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       widget.assignment.isOpen
                                           ? 'Open'
                                           : widget.assignment.isClosed
-                                              ? 'Closed'
-                                              : 'Upcoming',
+                                          ? 'Closed'
+                                          : 'Upcoming',
                                       style: GoogleFonts.inter(
                                         fontSize: 11,
                                         color: widget.assignment.isOpen
                                             ? Colors.green
                                             : widget.assignment.isClosed
-                                                ? Colors.red
-                                                : Colors.orange,
+                                            ? Colors.red
+                                            : Colors.orange,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -200,7 +204,9 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                 Icon(
                                   Icons.pending_actions,
                                   size: 48,
-                                  color: AppColors.textSecondary.withValues(alpha: 0.5),
+                                  color: AppColors.textSecondary.withValues(
+                                    alpha: 0.5,
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
@@ -211,7 +217,9 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                     color: AppColors.textSecondary,
                                   ),
                                 ),
-                                if (canSubmit && widget.assignment.isOpen && !widget.assignment.isClosed) ...[
+                                if (canSubmit &&
+                                    widget.assignment.isOpen &&
+                                    !widget.assignment.isClosed) ...[
                                   const SizedBox(height: 16),
                                   SizedBox(
                                     width: double.infinity,
@@ -222,12 +230,18 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                         widget.assignment,
                                         1,
                                       ),
-                                      icon: const Icon(Icons.upload_file, size: 18),
+                                      icon: const Icon(
+                                        Icons.upload_file,
+                                        size: 18,
+                                      ),
                                       label: const Text('Submit Assignment'),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.buttonPrimary,
+                                        backgroundColor:
+                                            AppColors.buttonPrimary,
                                         foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -253,33 +267,43 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                 Row(
                                   children: [
                                     Icon(
-                                      latestSubmission.status == SubmissionStatus.graded
+                                      latestSubmission.status ==
+                                              SubmissionStatus.graded
                                           ? Icons.grading
-                                          : latestSubmission.status == SubmissionStatus.late
-                                              ? Icons.schedule
-                                              : Icons.check_circle,
-                                      color: latestSubmission.status == SubmissionStatus.graded
+                                          : latestSubmission.status ==
+                                                SubmissionStatus.late
+                                          ? Icons.schedule
+                                          : Icons.check_circle,
+                                      color:
+                                          latestSubmission.status ==
+                                              SubmissionStatus.graded
                                           ? Colors.blue
-                                          : latestSubmission.status == SubmissionStatus.late
-                                              ? Colors.orange
-                                              : Colors.green,
+                                          : latestSubmission.status ==
+                                                SubmissionStatus.late
+                                          ? Colors.orange
+                                          : Colors.green,
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      latestSubmission.status == SubmissionStatus.graded
+                                      latestSubmission.status ==
+                                              SubmissionStatus.graded
                                           ? 'Graded'
-                                          : latestSubmission.status == SubmissionStatus.late
-                                              ? 'Submitted Late'
-                                              : 'Submitted',
+                                          : latestSubmission.status ==
+                                                SubmissionStatus.late
+                                          ? 'Submitted Late'
+                                          : 'Submitted',
                                       style: GoogleFonts.inter(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
-                                        color: latestSubmission.status == SubmissionStatus.graded
+                                        color:
+                                            latestSubmission.status ==
+                                                SubmissionStatus.graded
                                             ? Colors.blue
-                                            : latestSubmission.status == SubmissionStatus.late
-                                                ? Colors.orange
-                                                : Colors.green,
+                                            : latestSubmission.status ==
+                                                  SubmissionStatus.late
+                                            ? Colors.orange
+                                            : Colors.green,
                                       ),
                                     ),
                                     if (latestSubmission.grade != null) ...[
@@ -325,7 +349,8 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                 ),
 
                                 // Feedback
-                                if (latestSubmission.feedback != null && latestSubmission.feedback!.isNotEmpty) ...[
+                                if (latestSubmission.feedback != null &&
+                                    latestSubmission.feedback!.isNotEmpty) ...[
                                   const SizedBox(height: 16),
                                   Container(
                                     padding: const EdgeInsets.all(12),
@@ -335,7 +360,8 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                       border: Border.all(color: Colors.blue),
                                     ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Feedback:',
@@ -378,27 +404,45 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                       decoration: BoxDecoration(
                                         color: AppColors.background,
                                         borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: AppColors.border),
+                                        border: Border.all(
+                                          color: AppColors.border,
+                                        ),
                                       ),
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.attach_file, size: 20),
+                                          const Icon(
+                                            Icons.attach_file,
+                                            size: 20,
+                                          ),
                                           const SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
                                               fileName,
-                                              style: GoogleFonts.inter(fontSize: 14),
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14,
+                                              ),
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                           IconButton(
-                                            icon: const Icon(Icons.open_in_new, size: 18),
-                                            onPressed: () => _openFile(context, fileUrl),
+                                            icon: const Icon(
+                                              Icons.open_in_new,
+                                              size: 18,
+                                            ),
+                                            onPressed: () =>
+                                                _openFile(context, fileUrl),
                                             tooltip: 'Open file',
                                           ),
                                           IconButton(
-                                            icon: const Icon(Icons.download, size: 18),
-                                            onPressed: () => _downloadFile(context, fileUrl, fileName),
+                                            icon: const Icon(
+                                              Icons.download,
+                                              size: 18,
+                                            ),
+                                            onPressed: () => _downloadFile(
+                                              context,
+                                              fileUrl,
+                                              fileName,
+                                            ),
                                             tooltip: 'Download file',
                                           ),
                                         ],
@@ -408,7 +452,9 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                 ],
 
                                 // Edit submission button
-                                if (canSubmit && widget.assignment.isOpen && !widget.assignment.isClosed) ...[
+                                if (canSubmit &&
+                                    widget.assignment.isOpen &&
+                                    !widget.assignment.isClosed) ...[
                                   const SizedBox(height: 16),
                                   SizedBox(
                                     width: double.infinity,
@@ -424,9 +470,12 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
                                         'Edit Submission (Attempt ${latestSubmission.attemptNumber + 1})',
                                       ),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.buttonPrimary,
+                                        backgroundColor:
+                                            AppColors.buttonPrimary,
                                         foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -462,7 +511,9 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
     ).then((success) {
       if (mounted && success == true) {
         // Refresh the assignment list in parent screen
-        ref.read(assignmentProvider.notifier).loadAssignments(widget.assignment.courseId);
+        ref
+            .read(assignmentProvider.notifier)
+            .loadAssignments(widget.assignment.courseId);
         setState(() {}); // Refresh UI
       }
     });
@@ -543,4 +594,3 @@ class _AssignmentDetailScreenState extends ConsumerState<AssignmentDetailScreen>
     }
   }
 }
-

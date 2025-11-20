@@ -120,7 +120,8 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => ForumListScreen(course: widget.course),
+                        builder: (context) =>
+                            ForumListScreen(course: widget.course),
                       ),
                     );
                   },
@@ -128,7 +129,11 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        Icon(Icons.forum, size: 24, color: AppColors.buttonPrimary),
+                        Icon(
+                          Icons.forum,
+                          size: 24,
+                          color: AppColors.buttonPrimary,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -153,7 +158,11 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                             ],
                           ),
                         ),
-                        Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSecondary),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
                       ],
                     ),
                   ),

@@ -112,7 +112,6 @@ class MessageNotifier extends StateNotifier<AsyncValue<List<MessageEntity>>> {
       await _notificationRepository.createNotification(notification);
     } catch (e) {
       // Don't fail the message if notification fails
-      print('Failed to send message notification: $e');
     }
   }
 

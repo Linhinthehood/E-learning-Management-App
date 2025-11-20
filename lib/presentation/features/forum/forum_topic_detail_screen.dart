@@ -536,7 +536,8 @@ class _ForumTopicDetailScreenState
                                 minWidth: 24,
                                 minHeight: 24,
                               ),
-                              onPressed: () => _downloadFile(context, attachment, fileName),
+                              onPressed: () =>
+                                  _downloadFile(context, attachment, fileName),
                               tooltip: 'Download file',
                             ),
                           ],

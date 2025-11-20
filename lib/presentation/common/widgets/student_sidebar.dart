@@ -67,7 +67,6 @@ class _StudentSidebarState extends State<StudentSidebar> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            print('Nav item tapped: index $index, tooltip: $tooltip');
             widget.onItemTapped(index);
           },
           borderRadius: BorderRadius.circular(12),

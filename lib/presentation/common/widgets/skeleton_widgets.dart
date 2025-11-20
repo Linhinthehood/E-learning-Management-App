@@ -65,10 +65,7 @@ class SkeletonCourseCard extends StatelessWidget {
           // Cover image skeleton
           Expanded(
             flex: 3,
-            child: SkeletonBox(
-              width: double.infinity,
-              borderRadius: 0,
-            ),
+            child: SkeletonBox(width: double.infinity, borderRadius: 0),
           ),
           // Course info skeleton
           Expanded(
@@ -201,9 +198,7 @@ class SkeletonAnnouncementCard extends StatelessWidget {
           // Comment input
           Row(
             children: [
-              Expanded(
-                child: SkeletonBox(height: 40, width: double.infinity),
-              ),
+              Expanded(child: SkeletonBox(height: 40, width: double.infinity)),
               const SizedBox(width: 8),
               SkeletonBox(height: 40, width: 40),
             ],
@@ -373,10 +368,13 @@ class SkeletonPeopleTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           // Groups list skeleton
-          ...List.generate(3, (index) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: const SkeletonGroupCard(),
-          )),
+          ...List.generate(
+            3,
+            (index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: const SkeletonGroupCard(),
+            ),
+          ),
           const SizedBox(height: 16),
         ],
       ),
@@ -693,20 +691,20 @@ class SkeletonClassworkTab extends StatelessWidget {
                     children: [
                       SkeletonBox(
                         height: 56,
-                        width: constraints.maxWidth < 400 
-                            ? double.infinity 
+                        width: constraints.maxWidth < 400
+                            ? double.infinity
                             : (constraints.maxWidth - 24) / 2,
                       ),
                       SkeletonBox(
                         height: 56,
-                        width: constraints.maxWidth < 400 
-                            ? double.infinity 
+                        width: constraints.maxWidth < 400
+                            ? double.infinity
                             : (constraints.maxWidth - 24) / 2,
                       ),
                       SkeletonBox(
                         height: 56,
-                        width: constraints.maxWidth < 400 
-                            ? double.infinity 
+                        width: constraints.maxWidth < 400
+                            ? double.infinity
                             : (constraints.maxWidth - 24) / 2,
                       ),
                     ],
@@ -714,11 +712,17 @@ class SkeletonClassworkTab extends StatelessWidget {
                 }
                 return Row(
                   children: [
-                    Expanded(child: SkeletonBox(height: 56, width: double.infinity)),
+                    Expanded(
+                      child: SkeletonBox(height: 56, width: double.infinity),
+                    ),
                     const SizedBox(width: 12),
-                    Expanded(child: SkeletonBox(height: 56, width: double.infinity)),
+                    Expanded(
+                      child: SkeletonBox(height: 56, width: double.infinity),
+                    ),
                     const SizedBox(width: 12),
-                    Expanded(child: SkeletonBox(height: 56, width: double.infinity)),
+                    Expanded(
+                      child: SkeletonBox(height: 56, width: double.infinity),
+                    ),
                   ],
                 );
               },
@@ -777,4 +781,3 @@ class SkeletonCourseDetailScreen extends StatelessWidget {
     );
   }
 }
-

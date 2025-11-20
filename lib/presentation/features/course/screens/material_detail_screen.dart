@@ -19,7 +19,8 @@ class MaterialDetailScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<MaterialDetailScreen> createState() => _MaterialDetailScreenState();
+  ConsumerState<MaterialDetailScreen> createState() =>
+      _MaterialDetailScreenState();
 }
 
 class _MaterialDetailScreenState extends ConsumerState<MaterialDetailScreen> {
@@ -368,4 +369,3 @@ class _MaterialDetailScreenState extends ConsumerState<MaterialDetailScreen> {
     }
   }
 }
-

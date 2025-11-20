@@ -105,7 +105,10 @@ class _InstructorCourseDetailScreenState
                               decoration: BoxDecoration(
                                 color: Colors.orange.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(3),
-                                border: Border.all(color: Colors.orange, width: 1),
+                                border: Border.all(
+                                  color: Colors.orange,
+                                  width: 1,
+                                ),
                               ),
                               child: Text(
                                 'READ-ONLY',
@@ -144,7 +147,11 @@ class _InstructorCourseDetailScreenState
             controller: _tabController,
             children: [
               AnnouncementsTab(course: widget.course, isStudent: false),
-              ClassworkTab(course: widget.course, isReadOnly: isReadOnly, isStudent: false),
+              ClassworkTab(
+                course: widget.course,
+                isReadOnly: isReadOnly,
+                isStudent: false,
+              ),
               PeopleTab(course: widget.course),
             ],
           ),
@@ -211,7 +218,11 @@ class _InstructorCourseDetailScreenState
             controller: _tabController,
             children: [
               AnnouncementsTab(course: widget.course, isStudent: false),
-              ClassworkTab(course: widget.course, isReadOnly: false, isStudent: false),
+              ClassworkTab(
+                course: widget.course,
+                isReadOnly: false,
+                isStudent: false,
+              ),
               PeopleTab(course: widget.course),
             ],
           ),

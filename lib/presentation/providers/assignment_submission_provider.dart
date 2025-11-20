@@ -143,7 +143,6 @@ class AssignmentSubmissionNotifier
       await _notificationRepository.createNotification(notification);
     } catch (e) {
       // Don't fail the submission if notification fails
-      print('Failed to send submission confirmed notification: $e');
     }
   }
 
@@ -202,7 +201,6 @@ class AssignmentSubmissionNotifier
       await _notificationRepository.createNotification(notification);
     } catch (e) {
       // Don't fail the update if notification fails
-      print('Failed to send graded notification: $e');
     }
   }
 

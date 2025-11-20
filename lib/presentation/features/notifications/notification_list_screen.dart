@@ -103,9 +103,7 @@ class _NotificationListScreenState
 
       if (result == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Không thể mở nội dung thông báo này'),
-          ),
+          const SnackBar(content: Text('Không thể mở nội dung thông báo này')),
         );
         return;
       }
@@ -135,9 +133,7 @@ class _NotificationListScreenState
     }
   }
 
-  Future<void> _navigateToResult(
-    NotificationNavigationResult result,
-  ) async {
+  Future<void> _navigateToResult(NotificationNavigationResult result) async {
     if (!mounted) return;
 
     if (result is AssignmentNavigationResult) {
@@ -154,10 +150,8 @@ class _NotificationListScreenState
       await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => QuizDetailScreen(
-            course: result.course,
-            quiz: result.quiz,
-          ),
+          builder: (_) =>
+              QuizDetailScreen(course: result.course, quiz: result.quiz),
         ),
       );
     } else if (result is MaterialNavigationResult) {
@@ -200,9 +194,7 @@ class _NotificationListScreenState
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Chưa hỗ trợ mở thông báo này'),
-        ),
+        const SnackBar(content: Text('Chưa hỗ trợ mở thông báo này')),
       );
     }
   }
@@ -397,7 +389,7 @@ class _NotificationListScreenState
                                       },
                                       isProcessing:
                                           _processingNotificationId ==
-                                              notification.id,
+                                          notification.id,
                                     ),
                                   ),
                             ],

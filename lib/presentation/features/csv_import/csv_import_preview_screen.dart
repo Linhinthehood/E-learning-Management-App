@@ -143,7 +143,7 @@ class _CsvImportPreviewScreenState<T> extends State<CsvImportPreviewScreen<T>> {
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
         child: DataTable(
-          headingRowColor: MaterialStateProperty.all(Colors.grey[200]),
+          headingRowColor: WidgetStateProperty.all(Colors.grey[200]),
           columns: [
             const DataColumn(
               label: Text('#', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -165,7 +165,7 @@ class _CsvImportPreviewScreenState<T> extends State<CsvImportPreviewScreen<T>> {
           ],
           rows: widget.importResult.rows.map((row) {
             return DataRow(
-              color: MaterialStateProperty.all(_getRowColor(row.status)),
+              color: WidgetStateProperty.all(_getRowColor(row.status)),
               cells: [
                 DataCell(Text(row.rowNumber.toString())),
                 DataCell(_buildStatusChip(row.status, row.errorMessage)),
@@ -236,6 +236,7 @@ class _CsvImportPreviewScreenState<T> extends State<CsvImportPreviewScreen<T>> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        // ignore: deprecated_member_use
         backgroundColor: color.withOpacity(0.1),
         side: BorderSide(color: color, width: 1),
       ),
@@ -249,6 +250,7 @@ class _CsvImportPreviewScreenState<T> extends State<CsvImportPreviewScreen<T>> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, -2),
@@ -419,6 +421,7 @@ class _CsvImportPreviewScreenState<T> extends State<CsvImportPreviewScreen<T>> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color),
