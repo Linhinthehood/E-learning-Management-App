@@ -1,13 +1,14 @@
 name: Build Windows
 
 on:
-  push:
-    branches: [ main ]
-    tags:
-      - 'v*'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'lib/**'
+      - 'windows/**'
+      - 'pubspec.yaml'
   workflow_dispatch:
+
 
 jobs:
   build:
@@ -48,31 +49,3 @@ jobs:
           name: windows-app
           path: build/windows/x64/runner/e_learning_management_app-windows.zip
           retention-days: 30
-
-      - name: Create Release and Upload Windows EXE
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: build/windows/x64/runner/e_learning_management_app-windows.zip
-          body: |
-            ## Windows Release
-            
-            **Version:** ${{ github.ref_name }}
-            **Build:** ${{ github.run_number }}
-            **Commit:** ${{ github.sha }}
-            
-            ### Download
-            - Download the ZIP file below
-            - Extract to a folder
-            - Run `e_learning_management_app.exe`
-            
-            ### System Requirements
-            - Windows 10/11 (64-bit)
-            - .NET Framework (included in Windows 10/11)
-            
-            ### Installation
-            1. Download and extract the ZIP file
-            2. Run `e_learning_management_app.exe`
-            3. No installation required - portable application
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

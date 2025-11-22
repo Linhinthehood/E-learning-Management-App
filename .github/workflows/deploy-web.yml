@@ -3,6 +3,11 @@ name: Deploy Web to GitHub Pages
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'lib/**'
+      - 'web/**'
+      - 'pubspec.yaml'
+      - '.github/workflows/deploy-web.yml'
   workflow_dispatch:
 
 permissions:
@@ -37,8 +42,7 @@ jobs:
         run: flutter test
 
       - name: Build web
-        run: |
-          flutter build web --release --web-renderer html
+        run: flutter build web --release --base-href /E-learning-Management-App/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

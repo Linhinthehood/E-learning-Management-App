@@ -1,13 +1,16 @@
 name: Build Android
 
 on:
-  push:
-    branches: [ main ]
-    tags:
-      - 'v*'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'lib/**'
+      - 'android/**'
+      - 'pubspec.yaml'
   workflow_dispatch:
+
+permissions:
+  contents: write  # Cần để tạo GitHub Release
 
 jobs:
   build:
@@ -58,26 +61,3 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
-      - name: Deploy to Firebase App Distribution
-        if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID }}
-          token: ${{ secrets.FIREBASE_TOKEN }}
-          groups: testers
-          file: build/app/outputs/flutter-apk/app-release.apk
-          releaseNotes: |
-            Version: ${{ github.ref_name }}
-            Build: ${{ github.run_number }}
-            Commit: ${{ github.sha }}
-            Changes: See GitHub release notes
-
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
