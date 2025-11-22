@@ -6,6 +6,12 @@ on:
       - 'v*.*.*'
   workflow_dispatch:
 
+# Permissions cần thiết để tạo GitHub Release
+permissions:
+  contents: write  # Cần để tạo release và upload files
+  pages: write      # Cần để deploy GitHub Pages
+  id-token: write  # Cần cho GitHub Pages
+
 jobs:
   test:
     name: Run Tests
@@ -32,6 +38,8 @@ jobs:
     name: Create GitHub Release
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Cần để tạo release
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
       version: ${{ steps.get_version.outputs.version }}
@@ -39,6 +47,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history để có tags
 
       - name: Get version from tag
         id: get_version
@@ -53,8 +63,7 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build-android:
     name: Build Android APK
@@ -97,6 +106,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Deploy to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          token: ${{ secrets.FIREBASE_TOKEN }}
+          groups: testers
+          file: build/app/outputs/flutter-apk/e-learning-app-${{ needs.create-release.outputs.version }}-android-arm64.apk
+          releaseNotes: |
+            Release: ${{ needs.create-release.outputs.version }}
+            Build: ${{ github.run_number }}
+            Commit: ${{ github.sha }}
+            See GitHub release for full changelog
+
   build-windows:
     name: Build Windows EXE
     needs: [test, create-release]
@@ -131,6 +153,24 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: build/windows/x64/runner/e-learning-app-${{ needs.create-release.outputs.version }}-windows-x64.zip
+          body: |
+            ## Windows Release
+            
+            **Version:** ${{ needs.create-release.outputs.version }}
+            **Build:** ${{ github.run_number }}
+            **Commit:** ${{ github.sha }}
+            
+            ### Download Instructions
+            1. Download the ZIP file below
+            2. Extract to a folder
+            3. Run `e_learning_management_app.exe`
+            
+            ### System Requirements
+            - Windows 10/11 (64-bit)
+            - .NET Framework (included in Windows 10/11)
+            
+            ### Installation
+            No installation required - portable application
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
