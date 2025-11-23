@@ -111,7 +111,7 @@ jobs:
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           token: ${{ secrets.FIREBASE_TOKEN }}
-          groups: Group 1
+          groups: group-1
           file: build/app/outputs/flutter-apk/e-learning-app-${{ needs.create-release.outputs.version }}-android-arm64.apk
           releaseNotes: |
             Release: ${{ needs.create-release.outputs.version }}
