@@ -24,6 +24,9 @@ abstract class ForumReplyRemoteDataSource {
     String topicId,
     String replyToId,
   );
+
+  /// Listen to replies for a forum topic in real-time (returns stream)
+  Stream<List<ForumReplyModel>> listenToRepliesByTopic(String topicId);
 }
 
 /// Implementation of ForumReplyRemoteDataSource using Firestore
@@ -128,6 +131,24 @@ class ForumReplyRemoteDataSourceImpl implements ForumReplyRemoteDataSource {
       return replies;
     } catch (e) {
       throw Exception('Failed to get threaded replies: ${e.toString()}');
+    }
+  }
+
+  @override
+  Stream<List<ForumReplyModel>> listenToRepliesByTopic(String topicId) {
+    try {
+      return _firestore
+          .collection('forumReplies')
+          .where('topicId', isEqualTo: topicId)
+          .orderBy('createdAt', descending: false)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs
+                .map((doc) => ForumReplyModel.fromJson(doc.data(), doc.id))
+                .toList();
+          });
+    } catch (e) {
+      throw Exception('Failed to listen to forum replies: ${e.toString()}');
     }
   }
 }

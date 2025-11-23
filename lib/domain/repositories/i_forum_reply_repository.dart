@@ -23,4 +23,7 @@ abstract class IForumReplyRepository {
     String topicId,
     String replyToId,
   );
+
+  /// Listen to replies for a forum topic in real-time (returns stream)
+  Stream<List<ForumReplyEntity>> listenToRepliesByTopic(String topicId);
 }

@@ -76,4 +76,18 @@ class ForumReplyRepositoryImpl implements IForumReplyRepository {
       rethrow;
     }
   }
+
+  @override
+  Stream<List<ForumReplyEntity>> listenToRepliesByTopic(String topicId) {
+    try {
+      return remoteDataSource
+          .listenToRepliesByTopic(topicId)
+          .map(
+            (replyModels) =>
+                replyModels.map((model) => model.toEntity()).toList(),
+          );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -101,4 +101,29 @@ class ForumTopicRepositoryImpl implements IForumTopicRepository {
       rethrow;
     }
   }
+
+  @override
+  Stream<List<ForumTopicEntity>> listenToTopicsByCourse(String courseId) {
+    try {
+      return remoteDataSource
+          .listenToTopicsByCourse(courseId)
+          .map(
+            (topicModels) =>
+                topicModels.map((model) => model.toEntity()).toList(),
+          );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Stream<ForumTopicEntity?> listenToTopic(String topicId) {
+    try {
+      return remoteDataSource
+          .listenToTopic(topicId)
+          .map((model) => model?.toEntity());
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

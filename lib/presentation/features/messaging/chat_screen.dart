@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import '../../../domain/entities/message_entity.dart';
 import '../../providers/message_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/user_presence_provider.dart';
 import 'widgets/message_bubble.dart';
 
 /// Chat Screen - displays conversation with real-time messages
@@ -31,10 +33,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isInitialLoad = true;
+  bool _isTyping = false;
+  Timer? _typingTimer;
 
   @override
   void initState() {
     super.initState();
+    _messageController.addListener(_onTextChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final user = ref.read(authProvider).value;
@@ -50,9 +55,46 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   void dispose() {
+    _messageController.removeListener(_onTextChanged);
     _messageController.dispose();
     _scrollController.dispose();
+    _typingTimer?.cancel();
+    _stopTyping();
     super.dispose();
+  }
+
+  void _onTextChanged() {
+    if (_messageController.text.trim().isNotEmpty && !_isTyping) {
+      _startTyping();
+    }
+
+    // Reset timer on each keystroke
+    _typingTimer?.cancel();
+    _typingTimer = Timer(const Duration(seconds: 2), () {
+      _stopTyping();
+    });
+  }
+
+  void _startTyping() {
+    final user = ref.read(authProvider).value;
+    if (user != null) {
+      _isTyping = true;
+      ref
+          .read(userPresenceProvider.notifier)
+          .setTypingStatus(user.uid, widget.chatId, true);
+    }
+  }
+
+  void _stopTyping() {
+    if (!_isTyping) return;
+
+    final user = ref.read(authProvider).value;
+    if (user != null) {
+      _isTyping = false;
+      ref
+          .read(userPresenceProvider.notifier)
+          .setTypingStatus(user.uid, widget.chatId, false);
+    }
   }
 
   void _sendMessage() {
@@ -78,6 +120,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       timestamp: DateTime.now(),
       isRead: false,
     );
+
+    // Stop typing indicator immediately
+    _stopTyping();
 
     ref
         .read(messageProvider.notifier)
@@ -169,13 +214,97 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  Text(
-                    'Online', // Online status - can be enhanced with real-time presence
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final presenceAsync = ref.watch(
+                        userPresenceStreamProvider(widget.participantId),
+                      );
+
+                      return presenceAsync.when(
+                        data: (presence) {
+                          if (presence == null) {
+                            return Text(
+                              'Offline',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            );
+                          }
+
+                          String statusText;
+                          Color statusColor;
+
+                          switch (presence.status) {
+                            case 'online':
+                              statusText = 'Online';
+                              statusColor = Colors.green;
+                              break;
+                            case 'away':
+                              statusText = 'Away';
+                              statusColor = Colors.orange;
+                              break;
+                            case 'offline':
+                            default:
+                              if (presence.isRecentlyActive) {
+                                statusText = 'Active recently';
+                                statusColor = Colors.grey;
+                              } else {
+                                final lastSeen = _formatLastSeen(
+                                  presence.lastSeen,
+                                );
+                                statusText = 'Last seen $lastSeen';
+                                statusColor = AppColors.textSecondary;
+                              }
+                              break;
+                          }
+
+                          return Row(
+                            children: [
+                              if (presence.status == 'online' ||
+                                  presence.status == 'away')
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  margin: const EdgeInsets.only(right: 6),
+                                  decoration: BoxDecoration(
+                                    color: statusColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              Flexible(
+                                child: Text(
+                                  statusText,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    color:
+                                        presence.status == 'online' ||
+                                            presence.status == 'away'
+                                        ? statusColor
+                                        : AppColors.textSecondary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                        loading: () => Text(
+                          'Loading...',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        error: (_, __) => Text(
+                          'Offline',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -381,6 +510,57 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                 ),
+              ),
+              // Typing indicator
+              Consumer(
+                builder: (context, ref, child) {
+                  final typingAsync = ref.watch(
+                    typingStatusStreamProvider(widget.chatId),
+                  );
+
+                  return typingAsync.when(
+                    data: (typingUsers) {
+                      // Check if participant is typing (exclude current user)
+                      final isParticipantTyping =
+                          typingUsers.containsKey(widget.participantId) &&
+                          typingUsers[widget.participantId] == true;
+
+                      if (!isParticipantTyping) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              '${widget.participantName} is typing',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  );
+                },
               ),
               // Message input
               Container(
@@ -617,5 +797,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ],
       ),
     );
+  }
+
+  String _formatLastSeen(DateTime lastSeen) {
+    final now = DateTime.now();
+    final difference = now.difference(lastSeen);
+
+    if (difference.inMinutes < 1) {
+      return 'just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays == 1) {
+      return 'yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return '${lastSeen.day}/${lastSeen.month}/${lastSeen.year}';
+    }
   }
 }

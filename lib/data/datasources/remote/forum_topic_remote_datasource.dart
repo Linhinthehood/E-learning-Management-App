@@ -27,6 +27,12 @@ abstract class ForumTopicRemoteDataSource {
 
   /// Increment reply count for a topic
   Future<void> incrementReplyCount(String topicId);
+
+  /// Listen to forum topics for a course in real-time (returns stream)
+  Stream<List<ForumTopicModel>> listenToTopicsByCourse(String courseId);
+
+  /// Listen to a single forum topic in real-time (returns stream)
+  Stream<ForumTopicModel?> listenToTopic(String topicId);
 }
 
 /// Implementation of ForumTopicRemoteDataSource using Firestore
@@ -190,6 +196,40 @@ class ForumTopicRemoteDataSourceImpl implements ForumTopicRemoteDataSource {
       });
     } catch (e) {
       throw Exception('Failed to increment reply count: ${e.toString()}');
+    }
+  }
+
+  @override
+  Stream<List<ForumTopicModel>> listenToTopicsByCourse(String courseId) {
+    try {
+      return _firestore
+          .collection('forumTopics')
+          .where('courseId', isEqualTo: courseId)
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs
+                .map((doc) => ForumTopicModel.fromJson(doc.data(), doc.id))
+                .toList();
+          });
+    } catch (e) {
+      throw Exception('Failed to listen to forum topics: ${e.toString()}');
+    }
+  }
+
+  @override
+  Stream<ForumTopicModel?> listenToTopic(String topicId) {
+    try {
+      return _firestore.collection('forumTopics').doc(topicId).snapshots().map((
+        snapshot,
+      ) {
+        if (!snapshot.exists) {
+          return null;
+        }
+        return ForumTopicModel.fromJson(snapshot.data()!, snapshot.id);
+      });
+    } catch (e) {
+      throw Exception('Failed to listen to forum topic: ${e.toString()}');
     }
   }
 }

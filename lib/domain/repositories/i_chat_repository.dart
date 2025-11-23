@@ -27,4 +27,7 @@ abstract class IChatRepository {
 
   /// Get unread chat count for a user
   Future<int> getUnreadChatCount(String userId);
+
+  /// Listen to chats for a user in real-time (returns stream)
+  Stream<List<ChatEntity>> listenToChatsByUser(String userId);
 }
