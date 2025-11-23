@@ -126,3 +126,12 @@ final unreadChatCountProvider = FutureProvider.family<int, String>((
   final repository = ref.read(chatRepositoryProvider);
   return await repository.getUnreadChatCount(userId);
 });
+
+/// Provider for real-time chat list stream
+final chatsStreamProvider = StreamProvider.family<List<ChatEntity>, String>((
+  ref,
+  userId,
+) {
+  final repository = ref.read(chatRepositoryProvider);
+  return repository.listenToChatsByUser(userId);
+});

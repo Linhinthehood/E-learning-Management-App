@@ -122,3 +122,17 @@ final forumTopicByIdProvider = FutureProvider.family<ForumTopicEntity?, String>(
     return await repository.getTopicById(topicId);
   },
 );
+
+/// Provider for real-time forum topics stream
+final forumTopicsStreamProvider =
+    StreamProvider.family<List<ForumTopicEntity>, String>((ref, courseId) {
+      final repository = ref.read(forumTopicRepositoryProvider);
+      return repository.listenToTopicsByCourse(courseId);
+    });
+
+/// Provider for real-time single topic stream
+final forumTopicStreamProvider =
+    StreamProvider.family<ForumTopicEntity?, String>((ref, topicId) {
+      final repository = ref.read(forumTopicRepositoryProvider);
+      return repository.listenToTopic(topicId);
+    });

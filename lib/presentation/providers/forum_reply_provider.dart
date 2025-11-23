@@ -119,3 +119,10 @@ final forumReplyByIdProvider = FutureProvider.family<ForumReplyEntity?, String>(
     return await repository.getReplyById(replyId);
   },
 );
+
+/// Provider for real-time forum replies stream
+final forumRepliesStreamProvider =
+    StreamProvider.family<List<ForumReplyEntity>, String>((ref, topicId) {
+      final repository = ref.read(forumReplyRepositoryProvider);
+      return repository.listenToRepliesByTopic(topicId);
+    });

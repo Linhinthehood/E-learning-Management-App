@@ -28,6 +28,9 @@ abstract class ChatRemoteDataSource {
 
   /// Get unread chat count for a user
   Future<int> getUnreadChatCount(String userId);
+
+  /// Listen to chats for a user in real-time (returns stream)
+  Stream<List<ChatModel>> listenToChatsByUser(String userId);
 }
 
 /// Implementation of ChatRemoteDataSource using Firestore
@@ -187,6 +190,24 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       return unreadCount;
     } catch (e) {
       throw Exception('Failed to get unread chat count: ${e.toString()}');
+    }
+  }
+
+  @override
+  Stream<List<ChatModel>> listenToChatsByUser(String userId) {
+    try {
+      return _firestore
+          .collection('chats')
+          .where('participantIds', arrayContains: userId)
+          .orderBy('lastMessageTimestamp', descending: true)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs
+                .map((doc) => ChatModel.fromJson(doc.data(), doc.id))
+                .toList();
+          });
+    } catch (e) {
+      throw Exception('Failed to listen to chats: ${e.toString()}');
     }
   }
 }

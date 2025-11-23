@@ -26,4 +26,10 @@ abstract class IForumTopicRepository {
 
   /// Increment reply count for a topic
   Future<void> incrementReplyCount(String topicId);
+
+  /// Listen to forum topics for a course in real-time (returns stream)
+  Stream<List<ForumTopicEntity>> listenToTopicsByCourse(String courseId);
+
+  /// Listen to a single forum topic in real-time (returns stream)
+  Stream<ForumTopicEntity?> listenToTopic(String topicId);
 }

@@ -84,4 +84,18 @@ class ChatRepositoryImpl implements IChatRepository {
       rethrow;
     }
   }
+
+  @override
+  Stream<List<ChatEntity>> listenToChatsByUser(String userId) {
+    try {
+      return remoteDataSource
+          .listenToChatsByUser(userId)
+          .map(
+            (chatModels) =>
+                chatModels.map((model) => model.toEntity()).toList(),
+          );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
