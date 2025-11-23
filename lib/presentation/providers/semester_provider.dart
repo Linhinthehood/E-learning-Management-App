@@ -7,6 +7,7 @@ import '../../domain/usecases/semester/create_semester_usecase.dart';
 import '../../domain/usecases/semester/delete_semester_usecase.dart';
 import '../../domain/usecases/semester/get_all_semesters_usecase.dart';
 import '../../domain/usecases/semester/update_semester_usecase.dart';
+import 'course_provider.dart';
 
 /// Provider for remote data source
 final semesterRemoteDataSourceProvider = Provider<SemesterRemoteDataSource>((
@@ -47,7 +48,10 @@ final updateSemesterUseCaseProvider = Provider<UpdateSemesterUseCase>((ref) {
 
 /// Provider for delete semester use case
 final deleteSemesterUseCaseProvider = Provider<DeleteSemesterUseCase>((ref) {
-  return DeleteSemesterUseCase(ref.read(semesterRepositoryProvider));
+  return DeleteSemesterUseCase(
+    ref.read(semesterRepositoryProvider),
+    ref.read(courseRepositoryProvider),
+  );
 });
 
 /// Semester state notifier - manages semester state

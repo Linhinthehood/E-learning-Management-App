@@ -6,10 +6,6 @@ class HiveInitializer {
     // Initialize Hive
     await Hive.initFlutter();
 
-    // Register adapters (will add more as we create models)
-    // TODO: Register Hive adapters here
-    // Example: Hive.registerAdapter(UserModelAdapter());
-
     // Open boxes
     await Hive.openBox('userBox');
     await Hive.openBox('settingsBox');

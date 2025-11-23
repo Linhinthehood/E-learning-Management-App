@@ -353,13 +353,22 @@ class _StudentManagementScreenState
                           ),
                           leading: CircleAvatar(
                             backgroundColor: AppColors.buttonPrimary,
-                            child: Text(
-                              student.displayName[0].toUpperCase(),
-                              style: GoogleFonts.inter(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            backgroundImage:
+                                student.avatarUrl != null &&
+                                    student.avatarUrl!.isNotEmpty
+                                ? NetworkImage(student.avatarUrl!)
+                                : null,
+                            child:
+                                student.avatarUrl == null ||
+                                    student.avatarUrl!.isEmpty
+                                ? Text(
+                                    student.displayName[0].toUpperCase(),
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                : null,
                           ),
                           title: Text(
                             student.displayName,
@@ -561,6 +570,7 @@ class _StudentManagementScreenState
               chatId: chat.id,
               participantId: student.uid,
               participantName: student.displayName,
+              participantAvatarUrl: student.avatarUrl,
             ),
           ),
         );

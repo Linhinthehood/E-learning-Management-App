@@ -9,6 +9,9 @@ abstract class EnrollmentRemoteDataSource {
   /// Get all enrollments for a course
   Future<List<EnrollmentModel>> getEnrollmentsByCourse(String courseId);
 
+  /// Get all enrollments for a group
+  Future<List<EnrollmentModel>> getEnrollmentsByGroup(String groupId);
+
   /// Get all enrollments for a student in a semester
   Future<List<EnrollmentModel>> getEnrollmentsByStudent(
     String studentId,
@@ -63,6 +66,22 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
           .toList();
     } catch (e) {
       throw Exception('Failed to get enrollments: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<List<EnrollmentModel>> getEnrollmentsByGroup(String groupId) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('enrollments')
+          .where('groupId', isEqualTo: groupId)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => EnrollmentModel.fromJson(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get enrollments by group: ${e.toString()}');
     }
   }
 

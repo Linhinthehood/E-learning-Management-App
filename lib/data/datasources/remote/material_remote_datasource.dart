@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/material_model.dart';
 import '../../../domain/entities/material_entity.dart';
+import '../../../../services/file_upload_service.dart';
 
 /// Remote data source for materials
 /// Handles Firestore calls for course materials
@@ -165,18 +166,21 @@ class MaterialRemoteDataSourceImpl implements MaterialRemoteDataSource {
 
   @override
   Future<String> uploadFile(String filePath, String fileName) async {
-    // TODO: Implement Firebase Storage upload
-    // This is a placeholder - actual implementation would use Firebase Storage
     try {
-      // Example using Firebase Storage:
-      // final ref = FirebaseStorage.instance.ref().child('materials/$fileName');
-      // final uploadTask = await ref.putFile(File(filePath));
-      // final downloadUrl = await uploadTask.ref.getDownloadURL();
-      // return downloadUrl;
+      final fileUploadService = FileUploadService();
 
-      throw UnimplementedError(
-        'File upload not yet implemented - requires Firebase Storage setup',
+      // Upload file to Cloudinary using the file upload service
+      // Path format: courses/{courseId}/materials
+      // Note: courseId will be determined from context when this method is called
+      // For now, we use a generic path. The actual courseId should be passed if needed.
+      final downloadUrl = await fileUploadService.uploadFileFromPath(
+        filePath: filePath,
+        fileName: fileName,
+        path:
+            'courses/materials', // Default path, can be customized per use case
       );
+
+      return downloadUrl;
     } catch (e) {
       throw Exception('Failed to upload file: ${e.toString()}');
     }

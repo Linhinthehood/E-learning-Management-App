@@ -47,6 +47,21 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     return 'Unknown User';
   }
 
+  Future<String?> _getUserAvatarUrl(String userId) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        return userDoc.data()?['avatarUrl'] as String?;
+      }
+    } catch (e) {
+      // Error getting user avatar
+    }
+    return null;
+  }
+
   void _refreshChats() {
     final user = ref.read(authProvider).value;
     if (user != null) {
@@ -237,10 +252,14 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         ? chat.instructorId
         : chat.studentId;
 
-    return FutureBuilder<String?>(
-      future: _getUserName(otherParticipantId),
+    return FutureBuilder<Map<String, String?>>(
+      future: Future.wait([
+        _getUserName(otherParticipantId),
+        _getUserAvatarUrl(otherParticipantId),
+      ]).then((results) => {'name': results[0], 'avatarUrl': results[1]}),
       builder: (context, snapshot) {
-        final participantName = snapshot.data ?? 'Unknown User';
+        final participantName = snapshot.data?['name'] ?? 'Unknown User';
+        final participantAvatarUrl = snapshot.data?['avatarUrl'];
         final hasUnread = chat.hasUnreadFor(currentUserId);
         final unreadCount = currentUserId == chat.studentId
             ? chat.unreadCountStudent
@@ -266,6 +285,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                     chatId: chat.id,
                     participantId: otherParticipantId,
                     participantName: participantName,
+                    participantAvatarUrl: participantAvatarUrl,
                   ),
                 ),
               ).then((_) {
@@ -282,14 +302,23 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                   CircleAvatar(
                     radius: 24,
                     backgroundColor: AppColors.background,
-                    child: Text(
-                      participantName[0].toUpperCase(),
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
+                    backgroundImage:
+                        participantAvatarUrl != null &&
+                            participantAvatarUrl.isNotEmpty
+                        ? NetworkImage(participantAvatarUrl)
+                        : null,
+                    child:
+                        participantAvatarUrl == null ||
+                            participantAvatarUrl.isEmpty
+                        ? Text(
+                            participantName[0].toUpperCase(),
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 12),
                   // Chat info

@@ -7,6 +7,9 @@ abstract class IEnrollmentRepository {
   /// Get all enrollments for a course
   Future<List<EnrollmentEntity>> getEnrollmentsByCourse(String courseId);
 
+  /// Get all enrollments for a group
+  Future<List<EnrollmentEntity>> getEnrollmentsByGroup(String groupId);
+
   /// Get all enrollments for a student in a semester
   Future<List<EnrollmentEntity>> getEnrollmentsByStudent(
     String studentId,

@@ -281,6 +281,48 @@ class FileUploadService {
     return downloadUrls;
   }
 
+  /// Upload a file from file path (for use in repository layer)
+  /// This is a convenience method that converts file path to PlatformFile
+  /// Returns the download URL of the uploaded file
+  Future<String> uploadFileFromPath({
+    required String filePath,
+    required String fileName,
+    required String
+    path, // Folder path in Cloudinary (e.g., 'courses/materials')
+    Function(double)? onProgress,
+    int? maxSizeInMB,
+  }) async {
+    try {
+      // Read file to get bytes and size
+      final file = File(filePath);
+
+      if (!await file.exists()) {
+        throw Exception('File does not exist: $filePath');
+      }
+
+      final fileBytes = await file.readAsBytes();
+      final fileSize = await file.length();
+
+      // Create PlatformFile from file path
+      final platformFile = PlatformFile(
+        name: fileName,
+        path: filePath,
+        size: fileSize,
+        bytes: fileBytes,
+      );
+
+      // Use existing uploadFile method
+      return await uploadFile(
+        file: platformFile,
+        path: path,
+        onProgress: onProgress,
+        maxSizeInMB: maxSizeInMB,
+      );
+    } catch (e) {
+      throw Exception('Failed to upload file from path: ${e.toString()}');
+    }
+  }
+
   /// Delete a file from Cloudinary
   /// NOTE: Với unsigned upload preset, không thể delete được
   /// Để delete được, cần dùng signed upload với API key và secret

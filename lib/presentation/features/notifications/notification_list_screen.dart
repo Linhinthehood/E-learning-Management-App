@@ -189,6 +189,7 @@ class _NotificationListScreenState
             chatId: result.chatId,
             participantId: result.participantId,
             participantName: result.participantName,
+            participantAvatarUrl: result.participantAvatarUrl,
           ),
         ),
       );

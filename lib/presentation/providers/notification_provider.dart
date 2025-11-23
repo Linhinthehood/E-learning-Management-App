@@ -242,11 +242,13 @@ class MessageNavigationResult extends NotificationNavigationResult {
   final String chatId;
   final String participantId;
   final String participantName;
+  final String? participantAvatarUrl;
 
   MessageNavigationResult({
     required this.chatId,
     required this.participantId,
     required this.participantName,
+    this.participantAvatarUrl,
   });
 }
 
@@ -328,10 +330,12 @@ class NotificationNavigationService {
           chat.instructorId,
         );
         final participantName = instructorInfo?['displayName'] ?? 'Instructor';
+        final participantAvatarUrl = instructorInfo?['avatarUrl'];
         return MessageNavigationResult(
           chatId: chat.id,
           participantId: chat.instructorId,
           participantName: participantName,
+          participantAvatarUrl: participantAvatarUrl,
         );
 
       default:

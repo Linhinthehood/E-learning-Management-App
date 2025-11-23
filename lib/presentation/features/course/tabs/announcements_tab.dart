@@ -33,6 +33,7 @@ class AnnouncementsTab extends ConsumerStatefulWidget {
 
 class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   String _searchQuery = '';
   String _sortBy = 'Date (Newest)';
 
@@ -54,6 +55,7 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -103,329 +105,351 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
       data: (announcements) {
         final filteredAnnouncements = _applyFiltersAndSort(announcements);
 
-        return Column(
-          children: [
+        return CustomScrollView(
+          controller: _scrollController,
+          slivers: [
             // Forum access card
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-              child: Card(
-                color: AppColors.cardBackground,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: AppColors.border),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ForumListScreen(course: widget.course),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.forum,
-                          size: 24,
-                          color: AppColors.buttonPrimary,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                child: Card(
+                  color: AppColors.cardBackground,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: AppColors.border),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ForumListScreen(course: widget.course),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Forum',
-                                style: GoogleFonts.inter(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Discuss topics and ask questions',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.forum,
+                            size: 24,
+                            color: AppColors.buttonPrimary,
                           ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: 16,
-                          color: AppColors.textSecondary,
-                        ),
-                      ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Forum',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Discuss topics and ask questions',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: AppColors.textSecondary,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
             // Header with Add button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Text(
-                      'Announcements',
-                      style: GoogleFonts.inter(
-                        fontSize: MediaQuery.of(context).size.width < 600
-                            ? 18
-                            : 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Only show Add button for instructors
-                  if (!widget.isStudent)
-                    ElevatedButton.icon(
-                      onPressed: () =>
-                          _showAnnouncementDialog(context, ref, null),
-                      icon: const Icon(Icons.add, size: 18),
-                      label: Text(
-                        MediaQuery.of(context).size.width < 600
-                            ? 'Add'
-                            : 'Add Announcement',
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Announcements',
                         style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.buttonPrimary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          fontSize: MediaQuery.of(context).size.width < 600
+                              ? 18
+                              : 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ),
-                ],
+                    const SizedBox(width: 16),
+                    // Only show Add button for instructors
+                    if (!widget.isStudent)
+                      ElevatedButton.icon(
+                        onPressed: () =>
+                            _showAnnouncementDialog(context, ref, null),
+                        icon: const Icon(Icons.add, size: 18),
+                        label: Text(
+                          MediaQuery.of(context).size.width < 600
+                              ? 'Add'
+                              : 'Add Announcement',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.buttonPrimary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
 
             // Search bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: 'Search announcements by title or content...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _searchController.clear();
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: AppColors.cardBackground,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.border),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Search announcements by title or content...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: AppColors.cardBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SliverToBoxAdapter(child: const SizedBox(height: 16)),
 
             // Sort control
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: DropdownButtonFormField<String>(
-                // ignore: deprecated_member_use
-                value: _sortBy,
-                isDense: true,
-                decoration: InputDecoration(
-                  labelText: 'Sort',
-                  prefixIcon: MediaQuery.of(context).size.width < 600
-                      ? null
-                      : const Icon(Icons.sort, size: 20),
-                  filled: true,
-                  fillColor: AppColors.cardBackground,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.border),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: DropdownButtonFormField<String>(
+                  // ignore: deprecated_member_use
+                  value: _sortBy,
+                  isDense: true,
+                  decoration: InputDecoration(
+                    labelText: 'Sort',
+                    prefixIcon: MediaQuery.of(context).size.width < 600
+                        ? null
+                        : const Icon(Icons.sort, size: 20),
+                    filled: true,
+                    fillColor: AppColors.cardBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width < 600
+                          ? 8
+                          : 16,
+                      vertical: MediaQuery.of(context).size.width < 600
+                          ? 12
+                          : 16,
+                    ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width < 600
-                        ? 8
-                        : 16,
-                    vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
-                  ),
-                ),
-                selectedItemBuilder: MediaQuery.of(context).size.width < 600
-                    ? (BuildContext context) {
-                        return [
-                          'Date (Newest)',
-                          'Date (Oldest)',
-                          'Title (A-Z)',
-                          'Title (Z-A)',
-                        ].map((sortOption) {
-                          // Show abbreviated text on small screens
-                          String displayText;
-                          switch (sortOption) {
-                            case 'Date (Newest)':
-                              displayText = 'Date ↓';
-                              break;
-                            case 'Date (Oldest)':
-                              displayText = 'Date ↑';
-                              break;
-                            default:
-                              displayText = sortOption;
-                          }
-                          return Text(
-                            displayText,
-                            style: GoogleFonts.inter(fontSize: 12),
+                  selectedItemBuilder: MediaQuery.of(context).size.width < 600
+                      ? (BuildContext context) {
+                          return [
+                            'Date (Newest)',
+                            'Date (Oldest)',
+                            'Title (A-Z)',
+                            'Title (Z-A)',
+                          ].map((sortOption) {
+                            // Show abbreviated text on small screens
+                            String displayText;
+                            switch (sortOption) {
+                              case 'Date (Newest)':
+                                displayText = 'Date ↓';
+                                break;
+                              case 'Date (Oldest)':
+                                displayText = 'Date ↑';
+                                break;
+                              default:
+                                displayText = sortOption;
+                            }
+                            return Text(
+                              displayText,
+                              style: GoogleFonts.inter(fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                            );
+                          }).toList();
+                        }
+                      : null,
+                  items:
+                      [
+                        'Date (Newest)',
+                        'Date (Oldest)',
+                        'Title (A-Z)',
+                        'Title (Z-A)',
+                      ].map((sortOption) {
+                        return DropdownMenuItem(
+                          value: sortOption,
+                          child: Text(
+                            sortOption,
+                            style: GoogleFonts.inter(
+                              fontSize: MediaQuery.of(context).size.width < 600
+                                  ? 12
+                                  : 14,
+                            ),
                             overflow: TextOverflow.ellipsis,
-                          );
-                        }).toList();
-                      }
-                    : null,
-                items:
-                    [
-                      'Date (Newest)',
-                      'Date (Oldest)',
-                      'Title (A-Z)',
-                      'Title (Z-A)',
-                    ].map((sortOption) {
-                      return DropdownMenuItem(
-                        value: sortOption,
-                        child: Text(
-                          sortOption,
-                          style: GoogleFonts.inter(
-                            fontSize: MediaQuery.of(context).size.width < 600
-                                ? 12
-                                : 14,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _sortBy = value;
-                    });
-                  }
-                },
+                        );
+                      }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _sortBy = value;
+                      });
+                    }
+                  },
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+            SliverToBoxAdapter(child: const SizedBox(height: 16)),
 
             // Announcements list
-            Expanded(
-              child: announcements.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.announcement_outlined,
-                            size: 64,
-                            color: AppColors.textSecondary.withValues(
-                              alpha: 0.5,
+            ...(announcements.isEmpty
+                ? [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.announcement_outlined,
+                              size: 64,
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No announcements yet',
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
+                            const SizedBox(height: 16),
+                            Text(
+                              'No announcements yet',
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Click "Add Announcement" to create your first announcement',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: AppColors.textSecondary,
+                            const SizedBox(height: 8),
+                            Text(
+                              'Click "Add Announcement" to create your first announcement',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    )
-                  : filteredAnnouncements.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 64,
-                            color: AppColors.textSecondary.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No announcements found',
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Try adjusting your search',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      itemCount: filteredAnnouncements.length,
-                      itemBuilder: (context, index) {
-                        final announcement = filteredAnnouncements[index];
-                        return _buildAnnouncementCard(
-                          context,
-                          ref,
-                          announcement,
-                          groupsAsync,
-                        );
-                      },
                     ),
-            ),
+                  ]
+                : filteredAnnouncements.isEmpty
+                ? [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: 64,
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No announcements found',
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Try adjusting your search',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ]
+                : [
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final announcement = filteredAnnouncements[index];
+                          return _buildAnnouncementCard(
+                            context,
+                            ref,
+                            announcement,
+                            groupsAsync,
+                          );
+                        }, childCount: filteredAnnouncements.length),
+                      ),
+                    ),
+                  ]),
           ],
         );
       },

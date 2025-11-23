@@ -28,7 +28,10 @@ final createGroupUseCaseProvider = Provider<CreateGroupUseCase>((ref) {
 
 /// Provider for delete group use case
 final deleteGroupUseCaseProvider = Provider<DeleteGroupUseCase>((ref) {
-  return DeleteGroupUseCase(ref.read(groupRepositoryProvider));
+  return DeleteGroupUseCase(
+    ref.read(groupRepositoryProvider),
+    ref.read(enrollmentRepositoryProvider),
+  );
 });
 
 /// Provider for get groups by course use case

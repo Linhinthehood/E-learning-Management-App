@@ -23,6 +23,18 @@ class EnrollmentRepositoryImpl implements IEnrollmentRepository {
   }
 
   @override
+  Future<List<EnrollmentEntity>> getEnrollmentsByGroup(String groupId) async {
+    try {
+      final enrollmentModels = await remoteDataSource.getEnrollmentsByGroup(
+        groupId,
+      );
+      return enrollmentModels.map((model) => model.toEntity()).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<List<EnrollmentEntity>> getEnrollmentsByStudent(
     String studentId,
     String semesterId,

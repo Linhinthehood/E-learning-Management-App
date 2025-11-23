@@ -209,7 +209,18 @@ final studentDashboardProvider =
       }).toList()..sort((a, b) => a.deadline.compareTo(b.deadline));
 
       // Filter upcoming quizzes (opens within next 7 days or closes within next 7 days)
+      // Exclude quizzes that student has already completed
+      final completedQuizIds = allAttempts
+          .where((attempt) => attempt.isCompleted)
+          .map((attempt) => attempt.quizId)
+          .toSet();
+
       final upcomingQuizzes = allQuizzes.where((quiz) {
+        // Exclude if student has already completed this quiz
+        if (completedQuizIds.contains(quiz.id)) {
+          return false;
+        }
+
         final opensSoon =
             quiz.timeOpen.isAfter(now) &&
             quiz.timeOpen.isBefore(sevenDaysFromNow);

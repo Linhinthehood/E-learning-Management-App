@@ -13,12 +13,14 @@ class ChatScreen extends ConsumerStatefulWidget {
   final String chatId;
   final String participantId;
   final String participantName;
+  final String? participantAvatarUrl;
 
   const ChatScreen({
     super.key,
     required this.chatId,
     required this.participantId,
     required this.participantName,
+    this.participantAvatarUrl,
   });
 
   @override
@@ -136,14 +138,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             CircleAvatar(
               radius: 18,
               backgroundColor: AppColors.background,
-              child: Text(
-                widget.participantName[0].toUpperCase(),
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
+              backgroundImage:
+                  widget.participantAvatarUrl != null &&
+                      widget.participantAvatarUrl!.isNotEmpty
+                  ? NetworkImage(widget.participantAvatarUrl!)
+                  : null,
+              child:
+                  widget.participantAvatarUrl == null ||
+                      widget.participantAvatarUrl!.isEmpty
+                  ? Text(
+                      widget.participantName[0].toUpperCase(),
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    )
+                  : null,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -159,10 +170,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   Text(
-                    'Online', // TODO: Implement online status
+                    'Online', // Online status - can be enhanced with real-time presence
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -171,11 +183,50 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ],
         ),
         actions: [
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: AppColors.textPrimary),
-            onPressed: () {
-              // TODO: Show more options (e.g., view profile, clear chat)
+            onSelected: (value) {
+              switch (value) {
+                case 'view_profile':
+                  _showProfileDialog();
+                  break;
+                case 'clear_chat':
+                  _showClearChatDialog();
+                  break;
+              }
             },
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<String>(
+                value: 'view_profile',
+                child: Row(
+                  children: [
+                    const Icon(Icons.person, size: 20),
+                    const SizedBox(width: 12),
+                    Text(
+                      'View Profile',
+                      style: GoogleFonts.inter(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'clear_chat',
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.delete_outline,
+                      size: 20,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Clear Chat',
+                      style: GoogleFonts.inter(fontSize: 14, color: Colors.red),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -292,6 +343,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               participantName: isSent
                                   ? null
                                   : widget.participantName,
+                              participantAvatarUrl: isSent
+                                  ? null
+                                  : widget.participantAvatarUrl,
                             ),
                           ],
                         );
@@ -418,5 +472,150 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
+  }
+
+  void _showProfileDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.cardBackground,
+        title: Text(
+          widget.participantName,
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: AppColors.buttonPrimary.withValues(
+                    alpha: 0.1,
+                  ),
+                  backgroundImage:
+                      widget.participantAvatarUrl != null &&
+                          widget.participantAvatarUrl!.isNotEmpty
+                      ? NetworkImage(widget.participantAvatarUrl!)
+                      : null,
+                  child:
+                      widget.participantAvatarUrl == null ||
+                          widget.participantAvatarUrl!.isEmpty
+                      ? Text(
+                          widget.participantName[0].toUpperCase(),
+                          style: GoogleFonts.inter(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.buttonPrimary,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.participantName,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Instructor',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Participant ID: ${widget.participantId}',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Close',
+              style: GoogleFonts.inter(color: AppColors.buttonPrimary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearChatDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.cardBackground,
+        title: Text(
+          'Clear Chat',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to clear all messages in this chat? This action cannot be undone.',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.inter(color: AppColors.textPrimary),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Clear chat feature is not yet implemented',
+                    style: GoogleFonts.inter(fontSize: 14),
+                  ),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            },
+            child: Text(
+              'Clear',
+              style: GoogleFonts.inter(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

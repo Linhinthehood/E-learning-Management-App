@@ -27,6 +27,7 @@ class PeopleTab extends ConsumerStatefulWidget {
 
 class _PeopleTabState extends ConsumerState<PeopleTab> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   String _searchQuery = '';
 
   @override
@@ -44,6 +45,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -69,191 +71,273 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
     final userAsync = ref.watch(authProvider);
     final isInstructor = userAsync.value?.role == UserRole.instructor;
 
-    return Column(
-      children: [
-        // Header
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text(
-                  'People',
-                  style: GoogleFonts.inter(
-                    fontSize: MediaQuery.of(context).size.width < 600 ? 16 : 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              if (isInstructor)
-                Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (MediaQuery.of(context).size.width >= 600)
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            // Navigate to CSV import screen and wait for result
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const GroupCsvImportScreen(),
+    return groupsAsync.when(
+      data: (groups) => enrollmentsAsync.when(
+        data: (enrollments) => studentsAsync.when(
+          data: (students) {
+            return CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                // Header
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxWidth < 600) {
+                          // Wrap layout for small screens
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'People',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
-                            );
-
-                            // Refresh groups and enrollments after import
-                            ref
-                                .read(groupProvider.notifier)
-                                .loadGroups(widget.course.id);
-                            ref
-                                .read(enrollmentProvider.notifier)
-                                .loadEnrollments(widget.course.id);
-                          },
-                          icon: const Icon(Icons.upload_file, size: 20),
-                          label: Text(
-                            'Import CSV',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.buttonPrimary,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            side: BorderSide(color: AppColors.buttonPrimary),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      if (MediaQuery.of(context).size.width >= 600)
-                        const SizedBox(width: 12),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => EnrollmentManagementDialog(
-                              course: widget.course,
-                              semesterId: widget.course.semesterId,
-                            ),
+                              if (isInstructor) ...[
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) =>
+                                              EnrollmentManagementDialog(
+                                                course: widget.course,
+                                                semesterId:
+                                                    widget.course.semesterId,
+                                              ),
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.group_add,
+                                        size: 18,
+                                      ),
+                                      label: const Text('Manage'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            AppColors.buttonPrimary,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 12,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
                           );
-                        },
-                        icon: const Icon(Icons.group_add, size: 18),
-                        label: Text(
-                          MediaQuery.of(context).size.width < 600
-                              ? 'Manage'
-                              : 'Manage Students',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.buttonPrimary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ],
+                        }
+                        // Row layout for larger screens
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                'People',
+                                style: GoogleFonts.inter(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            if (isInstructor)
+                              Flexible(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    OutlinedButton.icon(
+                                      onPressed: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const GroupCsvImportScreen(),
+                                          ),
+                                        );
+                                        ref
+                                            .read(groupProvider.notifier)
+                                            .loadGroups(widget.course.id);
+                                        ref
+                                            .read(enrollmentProvider.notifier)
+                                            .loadEnrollments(widget.course.id);
+                                      },
+                                      icon: const Icon(
+                                        Icons.upload_file,
+                                        size: 20,
+                                      ),
+                                      label: Text(
+                                        'Import CSV',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor:
+                                            AppColors.buttonPrimary,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
+                                        side: BorderSide(
+                                          color: AppColors.buttonPrimary,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) =>
+                                              EnrollmentManagementDialog(
+                                                course: widget.course,
+                                                semesterId:
+                                                    widget.course.semesterId,
+                                              ),
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.group_add,
+                                        size: 18,
+                                      ),
+                                      label: const Text('Manage Students'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            AppColors.buttonPrimary,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 24,
+                                          vertical: 16,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
-            ],
-          ),
-        ),
 
-        // Instructor Section
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _buildInstructorSection(),
-        ),
-        const SizedBox(height: 24),
-
-        // Divider
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Divider(color: AppColors.border),
-        ),
-        const SizedBox(height: 16),
-
-        // Groups and Students Section Header
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              const Icon(Icons.group, size: 20, color: AppColors.textPrimary),
-              const SizedBox(width: 8),
-              Text(
-                'Groups & Students',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                // Instructor Section
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _buildInstructorSection(),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
+                SliverToBoxAdapter(child: const SizedBox(height: 24)),
 
-        // Search bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(
-            controller: _searchController,
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
-            },
-            decoration: InputDecoration(
-              hintText: 'Search students by name or email...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
+                // Divider
+                SliverToBoxAdapter(
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Divider(color: AppColors.border),
+                  ),
+                ),
+                SliverToBoxAdapter(child: const SizedBox(height: 16)),
+
+                // Groups and Students Section Header
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.group,
+                          size: 20,
+                          color: AppColors.textPrimary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Groups & Students',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(child: const SizedBox(height: 16)),
+
+                // Search bar
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
                         setState(() {
-                          _searchController.clear();
-                          _searchQuery = '';
+                          _searchQuery = value;
                         });
                       },
-                    )
-                  : null,
-              filled: true,
-              fillColor: AppColors.cardBackground,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
+                      decoration: InputDecoration(
+                        hintText: 'Search students by name or email...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  setState(() {
+                                    _searchController.clear();
+                                    _searchQuery = '';
+                                  });
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: AppColors.cardBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(child: const SizedBox(height: 16)),
 
-        // Groups List
-        Expanded(
-          child: groupsAsync.when(
-            data: (groups) => enrollmentsAsync.when(
-              data: (enrollments) => studentsAsync.when(
-                data: (students) {
-                  if (groups.isEmpty) {
-                    return Center(
+                // Groups List
+                if (groups.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -285,14 +369,12 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                           ],
                         ],
                       ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: groups.length,
-                    itemBuilder: (context, index) {
-                      final group = groups[index];
+                    ),
+                  )
+                else ...[
+                  // Filter groups based on search
+                  ...(() {
+                    final filteredGroups = groups.where((group) {
                       final groupEnrollments = enrollments
                           .where((e) => e.groupId == group.id)
                           .toList();
@@ -303,44 +385,96 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                             ),
                           )
                           .toList();
-
-                      // Apply search filter to group students
                       final filteredGroupStudents = _filterStudents(
                         groupStudents,
                       );
+                      return _searchQuery.isEmpty ||
+                          filteredGroupStudents.isNotEmpty;
+                    }).toList();
 
-                      // Skip groups with no matching students if search is active
-                      if (_searchQuery.isNotEmpty &&
-                          filteredGroupStudents.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
+                    return [
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final group = filteredGroups[index];
+                            final groupEnrollments = enrollments
+                                .where((e) => e.groupId == group.id)
+                                .toList();
+                            final groupStudents = students
+                                .where(
+                                  (student) => groupEnrollments.any(
+                                    (e) => e.studentId == student.uid,
+                                  ),
+                                )
+                                .toList();
 
-                      return _buildGroupCard(
-                        group,
-                        filteredGroupStudents,
-                        groupEnrollments.length,
-                      );
-                    },
-                  );
-                },
-                loading: () => const SkeletonPeopleTab(),
-                error: (error, _) => Center(
+                            final filteredGroupStudents = _filterStudents(
+                              groupStudents,
+                            );
+
+                            return _buildGroupCard(
+                              group,
+                              filteredGroupStudents,
+                              groupEnrollments.length,
+                            );
+                          }, childCount: filteredGroups.length),
+                        ),
+                      ),
+                    ];
+                  })(),
+                ],
+              ],
+            );
+          },
+          loading: () => const CustomScrollView(
+            slivers: [SliverToBoxAdapter(child: SkeletonPeopleTab())],
+          ),
+          error: (error, _) => CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
                   child: Text(
                     'Error loading students',
                     style: GoogleFonts.inter(color: Colors.red),
                   ),
                 ),
               ),
-              loading: () => const SkeletonPeopleTab(),
-              error: (error, _) => Center(
+            ],
+          ),
+        ),
+        loading: () => const CustomScrollView(
+          slivers: [SliverToBoxAdapter(child: SkeletonPeopleTab())],
+        ),
+        error: (error, _) => CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
                 child: Text(
                   'Error loading enrollments',
                   style: GoogleFonts.inter(color: Colors.red),
                 ),
               ),
             ),
-            loading: () => const SkeletonPeopleTab(),
-            error: (error, _) => Center(
+          ],
+        ),
+      ),
+      loading: () => const CustomScrollView(
+        slivers: [SliverToBoxAdapter(child: SkeletonPeopleTab())],
+      ),
+      error: (error, _) => CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -366,8 +500,8 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -384,6 +518,21 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
       // Error getting instructor name
     }
     return 'Instructor';
+  }
+
+  Future<String?> _getInstructorAvatarUrl(String instructorId) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(instructorId)
+          .get();
+      if (userDoc.exists) {
+        return userDoc.data()?['avatarUrl'] as String?;
+      }
+    } catch (e) {
+      // Error getting instructor avatar
+    }
+    return null;
   }
 
   Future<void> _startChatWithInstructor(BuildContext context) async {
@@ -410,8 +559,11 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
           .read(chatProvider.notifier)
           .getOrCreateChat(user.uid, widget.course.instructorId);
 
-      // Get instructor name
+      // Get instructor name and avatar
       final instructorName = await _getInstructorName(
+        widget.course.instructorId,
+      );
+      final instructorAvatarUrl = await _getInstructorAvatarUrl(
         widget.course.instructorId,
       );
 
@@ -429,6 +581,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               chatId: chat.id,
               participantId: widget.course.instructorId,
               participantName: instructorName ?? 'Instructor',
+              participantAvatarUrl: instructorAvatarUrl,
             ),
           ),
         );
@@ -491,6 +644,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               chatId: chat.id,
               participantId: student.uid,
               participantName: student.displayName,
+              participantAvatarUrl: student.avatarUrl,
             ),
           ),
         );

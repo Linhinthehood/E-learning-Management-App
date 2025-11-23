@@ -27,18 +27,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
         final dashboardAsync = ref.watch(instructorDashboardProvider(user.uid));
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildGreeting(user.displayName),
-              const SizedBox(height: 30),
-              // Dashboard Data
-              dashboardAsync.when(
-                data: (data) => _buildDashboardContent(data),
-                loading: () => const SkeletonDashboardContent(),
-                error: (error, stack) => Container(
+        return dashboardAsync.when(
+          data: (data) => SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildGreeting(user.displayName),
+                const SizedBox(height: 30),
+                _buildDashboardContent(data),
+              ],
+            ),
+          ),
+          loading: () => const SkeletonDashboardContent(),
+          error: (error, stack) => SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildGreeting(user.displayName),
+                const SizedBox(height: 30),
+                Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.red.withValues(alpha: 0.1),
@@ -75,8 +84,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

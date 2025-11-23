@@ -9,6 +9,7 @@ class MessageBubble extends StatelessWidget {
   final bool isSent;
   final bool showAvatar;
   final String? participantName;
+  final String? participantAvatarUrl;
 
   const MessageBubble({
     super.key,
@@ -16,6 +17,7 @@ class MessageBubble extends StatelessWidget {
     required this.isSent,
     this.showAvatar = false,
     this.participantName,
+    this.participantAvatarUrl,
   });
 
   @override
@@ -32,16 +34,24 @@ class MessageBubble extends StatelessWidget {
             CircleAvatar(
               radius: 14,
               backgroundColor: AppColors.background,
-              child: Text(
-                participantName != null
-                    ? participantName![0].toUpperCase()
-                    : 'U',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
+              backgroundImage:
+                  participantAvatarUrl != null &&
+                      participantAvatarUrl!.isNotEmpty
+                  ? NetworkImage(participantAvatarUrl!)
+                  : null,
+              child:
+                  participantAvatarUrl == null || participantAvatarUrl!.isEmpty
+                  ? Text(
+                      participantName != null
+                          ? participantName![0].toUpperCase()
+                          : 'U',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    )
+                  : null,
             ),
             const SizedBox(width: 8),
           ] else if (!isSent) ...[
