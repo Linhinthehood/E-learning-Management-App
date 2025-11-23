@@ -99,7 +99,7 @@ flutter run -d chrome
 
 #### Android APK
 1. **Download from Firebase App Distribution** (recommended):
-   - Click the link: [https://appdistribution.firebase.dev/i/e000c11646b8d18f](https://appdistribution.firebase.dev/i/e000c11646b8d18f)
+   - Click the link: [https://appdistribution.firebase.dev/i/6599204490cc2f08](https://appdistribution.firebase.dev/i/6599204490cc2f08)
    - Follow the instructions to install on your Android device
    - Enable "Install from Unknown Sources" if prompted
 
