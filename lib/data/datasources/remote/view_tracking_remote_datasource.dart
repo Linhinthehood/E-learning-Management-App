@@ -63,16 +63,25 @@ class ViewTrackingRemoteDataSource {
     String contentType,
   ) async {
     try {
+      // Get tracking data without orderBy to avoid index requirement
       final snapshot = await _firestore
           .collection('viewTracking')
           .where('contentId', isEqualTo: contentId)
           .where('contentType', isEqualTo: contentType)
-          .orderBy('timestamp', descending: true)
           .get();
 
-      return snapshot.docs
+      final trackingList = snapshot.docs
           .map((doc) => ViewTrackingModel.fromFirestore(doc))
           .toList();
+
+      // Sort in memory by timestamp (descending)
+      trackingList.sort((a, b) {
+        final aTime = a.timestamp.toDate();
+        final bTime = b.timestamp.toDate();
+        return bTime.compareTo(aTime);
+      });
+
+      return trackingList;
     } catch (e) {
       throw Exception('Failed to load tracking data: $e');
     }
@@ -83,15 +92,24 @@ class ViewTrackingRemoteDataSource {
     String studentId,
   ) async {
     try {
+      // Get tracking data without orderBy to avoid index requirement
       final snapshot = await _firestore
           .collection('viewTracking')
           .where('studentId', isEqualTo: studentId)
-          .orderBy('timestamp', descending: true)
           .get();
 
-      return snapshot.docs
+      final trackingList = snapshot.docs
           .map((doc) => ViewTrackingModel.fromFirestore(doc))
           .toList();
+
+      // Sort in memory by timestamp (descending)
+      trackingList.sort((a, b) {
+        final aTime = a.timestamp.toDate();
+        final bTime = b.timestamp.toDate();
+        return bTime.compareTo(aTime);
+      });
+
+      return trackingList;
     } catch (e) {
       throw Exception('Failed to load tracking data: $e');
     }

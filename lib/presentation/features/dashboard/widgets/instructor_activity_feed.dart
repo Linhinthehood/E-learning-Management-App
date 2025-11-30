@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../common/styles/colors.dart';
 import '../../../providers/instructor_dashboard_provider.dart';
 import '../../instructor/course_detail_screen.dart';
 import '../../../../domain/entities/course_entity.dart';
+import '../../tracking/assignment_tracking_screen.dart';
+import '../../tracking/quiz_tracking_screen.dart';
+import '../../forum/forum_topic_detail_screen.dart';
 
 /// Activity Feed Widget for Instructor Dashboard
-class InstructorActivityFeed extends StatelessWidget {
+class InstructorActivityFeed extends ConsumerWidget {
   final List<RecentActivity> activities;
   final Map<String, CourseEntity> courseMap;
 
@@ -17,7 +21,7 @@ class InstructorActivityFeed extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (activities.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(40),
@@ -66,8 +70,11 @@ class InstructorActivityFeed extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ...activities.map(
-            (activity) =>
-                _ActivityItem(activity: activity, courseMap: courseMap),
+            (activity) => _ActivityItem(
+              activity: activity,
+              courseMap: courseMap,
+              navigationService: ref.read(activityNavigationServiceProvider),
+            ),
           ),
         ],
       ),
@@ -78,8 +85,13 @@ class InstructorActivityFeed extends StatelessWidget {
 class _ActivityItem extends StatelessWidget {
   final RecentActivity activity;
   final Map<String, CourseEntity> courseMap;
+  final ActivityNavigationService navigationService;
 
-  const _ActivityItem({required this.activity, required this.courseMap});
+  const _ActivityItem({
+    required this.activity,
+    required this.courseMap,
+    required this.navigationService,
+  });
 
   IconData _getIcon() {
     switch (activity.type) {
@@ -135,6 +147,71 @@ class _ActivityItem extends StatelessWidget {
     }
   }
 
+  Future<void> _handleActivityTap(BuildContext context) async {
+    try {
+      final result = await navigationService.resolve(activity, courseMap);
+      if (result == null) {
+        // Fallback to course detail if navigation fails
+        final course = courseMap[activity.courseId];
+        if (course != null) {
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InstructorCourseDetailScreen(
+                  course: course,
+                  initialTabIndex: _getTabIndex(),
+                ),
+              ),
+            );
+          }
+        }
+        return;
+      }
+
+      if (!context.mounted) return;
+
+      if (result is AssignmentActivityNavigationResult) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AssignmentTrackingScreen(
+              course: result.course,
+              assignment: result.assignment,
+            ),
+          ),
+        );
+      } else if (result is QuizActivityNavigationResult) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                QuizTrackingScreen(course: result.course, quiz: result.quiz),
+          ),
+        );
+      } else if (result is ForumActivityNavigationResult) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ForumTopicDetailScreen(
+              course: result.course,
+              topicId: result.topicId,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error navigating: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   int _getTabIndex() {
     // Tab indexes: 0=Stream, 1=Assignments, 2=Quizzes, 3=Questions, 4=Materials, 5=Forum, 6=People
     switch (activity.type) {
@@ -155,20 +232,8 @@ class _ActivityItem extends StatelessWidget {
     final timeAgo = _getTimeAgo(activity.timestamp);
 
     return InkWell(
-      onTap: () {
-        // Navigate to course detail with the appropriate tab
-        final course = courseMap[activity.courseId];
-        if (course != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => InstructorCourseDetailScreen(
-                course: course,
-                initialTabIndex: _getTabIndex(),
-              ),
-            ),
-          );
-        }
+      onTap: () async {
+        await _handleActivityTap(context);
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(

@@ -461,3 +461,99 @@ final instructorDashboardProvider =
         quizScoreChartData: topQuizData,
       );
     });
+
+/// Navigation result base class for activity items
+abstract class ActivityNavigationResult {}
+
+class AssignmentActivityNavigationResult extends ActivityNavigationResult {
+  final CourseEntity course;
+  final AssignmentEntity assignment;
+
+  AssignmentActivityNavigationResult({
+    required this.course,
+    required this.assignment,
+  });
+}
+
+class QuizActivityNavigationResult extends ActivityNavigationResult {
+  final CourseEntity course;
+  final QuizEntity quiz;
+
+  QuizActivityNavigationResult({required this.course, required this.quiz});
+}
+
+class ForumActivityNavigationResult extends ActivityNavigationResult {
+  final CourseEntity course;
+  final String topicId;
+
+  ForumActivityNavigationResult({required this.course, required this.topicId});
+}
+
+/// Service that converts RecentActivity to navigation targets
+class ActivityNavigationService {
+  ActivityNavigationService({
+    required IAssignmentRepository assignmentRepository,
+    required IQuizRepository quizRepository,
+    required IForumTopicRepository forumTopicRepository,
+  }) : _assignmentRepository = assignmentRepository,
+       _quizRepository = quizRepository,
+       _forumTopicRepository = forumTopicRepository;
+
+  final IAssignmentRepository _assignmentRepository;
+  final IQuizRepository _quizRepository;
+  final IForumTopicRepository _forumTopicRepository;
+
+  Future<ActivityNavigationResult?> resolve(
+    RecentActivity activity,
+    Map<String, CourseEntity> courseMap,
+  ) async {
+    final course = courseMap[activity.courseId];
+    if (course == null) return null;
+
+    switch (activity.type) {
+      case 'submission':
+        final assignment = await _assignmentRepository.getAssignmentById(
+          activity.relatedId,
+        );
+        if (assignment == null) return null;
+        return AssignmentActivityNavigationResult(
+          course: course,
+          assignment: assignment,
+        );
+
+      case 'quiz':
+        final quiz = await _quizRepository.getQuizById(activity.relatedId);
+        if (quiz == null) return null;
+        return QuizActivityNavigationResult(course: course, quiz: quiz);
+
+      case 'forum':
+        // Verify topic exists
+        final topic = await _forumTopicRepository.getTopicById(
+          activity.relatedId,
+        );
+        if (topic == null) return null;
+        return ForumActivityNavigationResult(
+          course: course,
+          topicId: activity.relatedId,
+        );
+
+      default:
+        return null;
+    }
+  }
+}
+
+/// Provider exposing navigation resolver for activities
+final activityNavigationServiceProvider = Provider<ActivityNavigationService>((
+  ref,
+) {
+  return ActivityNavigationService(
+    assignmentRepository: ref.read(
+      assignmentRepositoryForInstructorDashboardProvider,
+    ),
+    quizRepository: ref.read(quizRepositoryForInstructorDashboardProvider),
+    forumTopicRepository: ref.read(
+      forumTopicRepositoryForInstructorDashboardProvider,
+    ),
+  );
+});

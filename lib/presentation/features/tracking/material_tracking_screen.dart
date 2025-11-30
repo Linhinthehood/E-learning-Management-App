@@ -38,6 +38,7 @@ class _MaterialTrackingScreenState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(enrollmentProvider.notifier).loadEnrollments(widget.course.id);
+      ref.read(studentsProvider.notifier).loadStudents();
       ref
           .read(
             viewTrackingByContentProvider((
@@ -144,10 +145,35 @@ class _MaterialTrackingScreenState
                               'Error loading tracking data',
                               style: GoogleFonts.inter(
                                 color: AppColors.textSecondary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32,
+                              ),
+                              child: Text(
+                                error.toString(),
+                                style: GoogleFonts.inter(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                             ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red.withValues(
+                                  alpha: 0.1,
+                                ),
+                                foregroundColor: Colors.red,
+                                side: const BorderSide(color: Colors.red),
+                              ),
                               onPressed: () {
                                 ref
                                     .read(

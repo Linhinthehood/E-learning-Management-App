@@ -32,7 +32,7 @@ The application uses **Firebase** for backend services (Firestore, Authenticatio
 ## Quick Links
 
 - **GitHub Repository**: [https://github.com/Linhinthehood/E-learning-Management-App](https://github.com/Linhinthehood/E-learning-Management-App)
-- **Android APK (Firebase App Distribution)**: [https://appdistribution.firebase.dev/i/e000c11646b8d18f](https://appdistribution.firebase.dev/i/e000c11646b8d18f)
+- **Android APK (Firebase App Distribution)**: [https://appdistribution.firebase.dev/i/6599204490cc2f08](https://appdistribution.firebase.dev/i/6599204490cc2f08)
 - **Web Application (GitHub Pages)**: [https://linhinthehood.github.io/E-learning-Management-App/](https://linhinthehood.github.io/E-learning-Management-App/) 
 - **Windows EXE & Other Artifacts**: Available in [GitHub Actions](https://github.com/Linhinthehood/E-learning-Management-App/actions) or [GitHub Releases](https://github.com/Linhinthehood/E-learning-Management-App/releases)
 
@@ -98,10 +98,12 @@ flutter run -d chrome
 ### Running Pre-built Applications
 
 #### Android APK
-1. **Download from Firebase App Distribution** (recommended):
+1. **Download from Firebase App Distribution (Tester Group)** (recommended):
    - Click the link: [https://appdistribution.firebase.dev/i/6599204490cc2f08](https://appdistribution.firebase.dev/i/6599204490cc2f08)
-   - Follow the instructions to install on your Android device
-   - Enable "Install from Unknown Sources" if prompted
+   - Enter your email to the form
+   - Wait for me (the author) accept your invitation
+   - You will receive an email for testing our app
+   - Enjoy :33
 
 2. **Or download from GitHub Actions**:
    - Go to [GitHub Actions](https://github.com/Linhinthehood/E-learning-Management-App/actions)
